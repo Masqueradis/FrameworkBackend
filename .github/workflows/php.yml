@@ -1,4 +1,4 @@
-name: PHP Composer
+name: Laravel CI
 
 on:
   push:
@@ -7,22 +7,37 @@ on:
     branches: [ "master" ]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  build:
-
+  build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: testing_db
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
           coverage: xdebug
-          extensions: mbstring, xml, ctype, iconv, intl
+          extensions: pdo_pgsql, pgsql, mbstring, xml, ctype, iconv, intl
 
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
@@ -37,7 +52,19 @@ jobs:
             ${{ runner.os }}-php-
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Prepare Laravel Environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
 
       - name: Run test suite
-        run: sail artisan test --coverage
+        run: php artisan test --coverage
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: testing_db
+          DB_USERNAME: root
+          DB_PASSWORD: password
