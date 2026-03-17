@@ -17,11 +17,11 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: testing_db
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: password
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         ports:
-          - 5432:5432
+          - ${{ secrets.DB_PORT }}:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -35,7 +35,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5'
+          php-version: '8.3'
           coverage: xdebug
           extensions: pdo_pgsql, pgsql, mbstring, xml, ctype, iconv, intl
 
@@ -54,17 +54,11 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Prepare Laravel Environment
+      - name: Create .env file from secret
         run: |
-          cp .env.example .env
-          php artisan key:generate
+          cat <<EOF > .env
+          ${{ secrets.ENV_FILE }}
+          EOF
 
       - name: Run test suite
         run: php artisan test --coverage
-        env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 5432
-          DB_DATABASE: testing_db
-          DB_USERNAME: root
-          DB_PASSWORD: password

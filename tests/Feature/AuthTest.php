@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Test;
+use Laravel\Passport\Passport;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -28,7 +29,7 @@ class AuthTest extends TestCase
     }
 
     #[Test]
-    public function user_can_register(): void
+    public function userCanRegister(): void
     {
         $response = $this->postJson('/api/register', [
             'name' => 'Test User',
@@ -48,7 +49,7 @@ class AuthTest extends TestCase
     }
 
     #[Test]
-    public function user_can_login(): void
+    public function userCanLogin(): void
     {
         $user = User::factory()->create([
             'email' => 'test@email.com',
@@ -66,11 +67,11 @@ class AuthTest extends TestCase
     }
 
     #[Test]
-    public function user_can_logout(): void
+    public function userCanLogout(): void
     {
         $user = User::factory()->create();
 
-        \Laravel\Passport\Passport::actingAs($user);
+        Passport::actingAs($user);
 
         $response = $this->postJson('/api/logout');
 
@@ -80,7 +81,7 @@ class AuthTest extends TestCase
     }
 
     #[Test]
-    public function user_wrong_login(): void
+    public function userWrongLogin(): void
     {
         $user = User::factory()->create([
             'email' => 'test@email.com',
