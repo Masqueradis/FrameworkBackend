@@ -62,3 +62,5 @@ jobs:
 
       - name: Run test suite
         run: php artisan test --coverage
+        env:
+          DB_HOST: 127.0.0.1
