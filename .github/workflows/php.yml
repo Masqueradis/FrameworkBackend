@@ -64,3 +64,7 @@ jobs:
         run: php artisan test --coverage
         env:
           DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: testing_db
+          DB_USERNAME: root
+          DB_PASSWORD: password
