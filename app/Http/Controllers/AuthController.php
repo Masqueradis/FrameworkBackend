@@ -4,65 +4,59 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginUserRequest;
+use App\Http\Requests\RegisterUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
-class AuthController extends Controller
+class AuthController extends ApiController
 {
-    public function register(Request $request): JsonResponse
+    public function __construct(
+        private readonly AuthService $authService
+    ) {}
+
+    public function register(RegisterUserRequest $request): JsonResponse
     {
-        $validateData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|confirmed|min:8',
-        ]);
+        $resultDTO = $this->authService->register($request->toDTO());
 
-        $user = User::create([
-            'name' => $validateData['name'],
-            'email' => $validateData['email'],
-            'password' => Hash::make($validateData['password']),
-        ]);
-
-        $token = $user->createToken('auth_token')->accessToken;
-
-        return response()->json([
-            'user' => $user,
-            'access_token' => $token,
-        ], 201);
+        return $this->respondSuccess(
+            data: [
+                'user' => new UserResource($resultDTO->user),
+                'token' => $resultDTO->accessToken,
+            ],
+            message: 'Registered successfully.',
+            code: Response::HTTP_CREATED,
+        );
     }
 
-    public function login(Request $request): JsonResponse
+    public function login(LoginUserRequest $request): JsonResponse
     {
-        $loginData = $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
+        $loginDTO = $request->toDTO();
+        $resultDTO = $this->authService->login($loginDTO);
 
-        if (!Auth::attempt($loginData)) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        $user = Auth::user();
-        $token = $user->createToken('auth_token')->accessToken;
-
-        return response()->json([
-            'user' => $user,
-            'access_token' => $token,
-        ]);
+        return $this->respondSuccess(
+            data: [
+                'user' => new UserResource($resultDTO->user),
+                'token' => $resultDTO->accessToken,
+            ],
+            message: 'Login successfully.',
+        );
     }
 
     public function logout(Request $request): JsonResponse
     {
-        /** @var \Laravel\Passport\Token $token */
-        $token = $request->user()->token();
+        $user = $request->user();
 
-        $token->revoke();
+        $this->authService->logout($user);
 
-        return response()->json([
-            'message' => 'Successfully logged out',
-        ]);
+        return $this->respondSuccess(
+            message: 'Logged out successfully.',
+        );
     }
 }

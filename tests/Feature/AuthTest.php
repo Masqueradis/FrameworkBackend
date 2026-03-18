@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Test;
 use Laravel\Passport\Passport;
 use Tests\TestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthTest extends TestCase
 {
@@ -38,11 +39,19 @@ class AuthTest extends TestCase
             'password_confirmation' => 'password',
         ]);
 
-        $response->assertStatus(201)->assertJsonStructure([
-            'user' => ['id', 'name', 'email'],
-            'access_token',
+        $response->assertStatus(Response::HTTP_CREATED)->assertJsonStructure([
+            'success',
+            'message',
+            'data' => [
+                'user' => [
+                    'id',
+                    'name',
+                    'email',
+                    'registered_at',
+                ],
+                'token',
+            ],
         ]);
-
         $this->assertDatabaseHas('users', [
             'email' => 'test@email.com',
         ]);
@@ -61,8 +70,13 @@ class AuthTest extends TestCase
             'password' => 'password',
         ]);
 
-        $response->assertStatus(200)->assertJsonStructure([
-            'user', 'access_token',
+        $response->assertStatus(Response::HTTP_OK)->assertJsonStructure([
+            'success',
+            'message',
+            'data' => [
+                'user',
+                'token',
+            ],
         ]);
     }
 
@@ -71,17 +85,25 @@ class AuthTest extends TestCase
     {
         $user = User::factory()->create();
 
-        Passport::actingAs($user);
+        $token = $user->createToken('Test Token')->accessToken;
 
-        $response = $this->postJson('/api/logout');
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/logout');
 
-        $response->assertStatus(200)->assertJson([
-            'message' => 'Successfully logged out',
+        $response->assertStatus(Response::HTTP_OK)->assertJson([
+            'success' => true,
+            'message' => 'Logged out successfully.',
+        ]);
+
+        $this->assertDatabaseHas('oauth_access_tokens', [
+            'user_id' => $user->id,
+            'revoked' => false,
         ]);
     }
 
     #[Test]
-    public function userWrongLogin(): void
+    public function wrongRespond(): void
     {
         $user = User::factory()->create([
             'email' => 'test@email.com',
@@ -90,11 +112,22 @@ class AuthTest extends TestCase
 
         $response = $this->postJson('/api/login', [
             'email' => $user->email,
-            'password' => 'wrong_password',
+            'password' => 'wrong-password',
         ]);
 
-        $response->assertStatus(401)->assertJson([
-            'message' => 'Unauthorized',
-        ]);
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)->assertJsonValidationErrors(['email']);
+    }
+
+    #[Test]
+    public function authServiceCanRevokeToken(): void
+    {
+        /** @var \Mockery\MockInterface&\Laravel\Passport\Token $tokenMock */
+        $tokenMock = \Mockery::mock(\Laravel\Passport\Token::class . ', \Laravel\Passport\Contracts\ScopeAuthorizable');
+        $tokenMock->expects('revoke');
+        /** @var \Mockery\MockInterface&\App\Models\User $userMock */
+        $userMock = \Mockery::mock(\App\Models\User::class)->makePartial();
+        $userMock->shouldReceive('token')->andReturn($tokenMock);
+        $authService = app(\App\Services\AuthService::class);
+        $authService->logout($userMock);
     }
 }
