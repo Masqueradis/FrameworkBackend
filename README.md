@@ -11,3 +11,4 @@ Store App is a web-based e-commerce platform for computer components built with 
 - **Mail Testing**: Mailhog – captures and displays emails sent by the application in a local web interface.
 - **Environment**: Runs in Docker containers, ensuring consistent development and production environments.
 - **Additional Tools**: Composer for PHP dependency management, NPM for frontend assets, and Laravel Mix for asset compilation.
+[README.md](README.md)
