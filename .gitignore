@@ -1,6 +1,7 @@
 *.log
 .DS_Store
 src/.env
+docker/.env
 .env.backup
 .env.production
 .phpactor.json
@@ -23,5 +24,4 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 var
-/docker/.env
-
+docker/postgresql
