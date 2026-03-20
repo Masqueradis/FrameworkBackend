@@ -62,12 +62,8 @@ jobs:
           ${{ secrets.ENV_FILE }}
           EOF
 
-      - name: Generate app key
-        run: php artisan key:generate
-        working-directory: ./src
-
-      - name: Generate Passport keys
-        run: php artisan passport:keys
+      - name: Set correct permissions for Passport keys
+        run: chmod 600 storage/oauth-*.key
         working-directory: ./src
 
       - name: Run test suite
