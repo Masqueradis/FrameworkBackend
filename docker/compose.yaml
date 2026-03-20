@@ -1,0 +1,73 @@
+services:
+    app:
+        build:
+            context: ../
+            dockerfile: ./docker/php/Dockerfile
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        volumes:
+            - '../src:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - pgsql
+        container_name: ${APP_NAME}_app
+
+    pgsql:
+        image: 'postgres:18-alpine'
+        ports:
+            - '${FORWARD_DB_PORT:-5432}:5432'
+        environment:
+            POSTGRES_DB: '${DB_DATABASE}'
+            POSTGRES_USER: '${DB_USERNAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+        volumes:
+            - sail-pgsql:/var/lib/postgresql/18/docker
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - pg_isready
+                - '-q'
+                - '-d'
+                - '${DB_DATABASE}'
+                - '-U'
+                - '${DB_USERNAME}'
+            retries: 3
+            timeout: 5s
+        container_name: ${APP_NAME}_postgresql
+
+    mailhog:
+        image: 'mailhog/mailhog'
+        ports:
+            -   '${MAIL_PORT}:1025'
+            -   '${MAIL_UI}:8025'
+        container_name: ${APP_NAME}_mailhog
+
+    nginx:
+        build:
+            context: .
+            dockerfile: nginx/Dockerfile
+        container_name: ${APP_NAME}_nginx
+        ports:
+            - '${APP_PORT:-80}:80'
+        volumes:
+            -   ../src:/var/www/html
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+        networks:
+            - sail
+
+networks:
+    sail:
+        driver: bridge
+volumes:
+    sail-pgsql:
+        driver: local
