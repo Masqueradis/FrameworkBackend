@@ -7,7 +7,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Symfony\Component\HttpFoundation\Response;
+use OpenApi\Attributes as OA;
 
+#[OA\Info(
+    version: '1.0',
+    description: 'Get API documentation.',
+    title: 'API'
+)]
+#[OA\Server(
+    url: 'http://localhost',
+    description: 'Localhost'
+)]
 abstract class ApiController extends Controller
 {
     protected function respondSuccess(mixed $data = null, string $message = 'Success', int $code = Response::HTTP_OK): JsonResponse

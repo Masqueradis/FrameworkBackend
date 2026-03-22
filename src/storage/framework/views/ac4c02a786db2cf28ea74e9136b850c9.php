@@ -1,4 +1,4 @@
-<?php $attributes ??= new \Illuminate\View\ComponentAttributeBag;
+<?php $attributes ??= new \Illuminate\View\ComponentAttributeBag();
 
 $__newAttributes = [];
 $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
@@ -12,7 +12,7 @@ $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
 
 foreach ($attributes->all() as $__key => $__value) {
     if (in_array($__key, $__propNames)) {
-        $$__key = $$__key ?? $__value;
+        $$__key ??= $__value;
     } else {
         $__newAttributes[$__key] = $__value;
     }
@@ -31,13 +31,15 @@ foreach (array_filter(([
     'highlightedLine' => null,
     'truncate' => false,
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
-    $$__key = $$__key ?? $__value;
+    $$__key ??= $__value;
 }
 
 $__defined_vars = get_defined_vars();
 
 foreach ($attributes->all() as $__key => $__value) {
-    if (array_key_exists($__key, $__defined_vars)) unset($$__key);
+    if (array_key_exists($__key, $__defined_vars)) {
+        unset($$__key);
+    }
 }
 
 unset($__defined_vars, $__key, $__value); ?>
@@ -45,32 +47,32 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php
     $fallback = $truncate ? '<pre class="truncate"><code>' : '<pre><code>';
 
-    if ($editor) {
-        $lines = explode("\n", $code);
+if ($editor) {
+    $lines = explode("\n", $code);
 
-        foreach ($lines as $index => $line) {
-            $lineNumber = $startingLine + $index;
-            $highlight = $highlightedLine === $index;
-            $lineClass = implode(' ', [
-                'block px-4 py-1 h-7 even:bg-white odd:bg-white/2 even:dark:bg-white/2 odd:dark:bg-white/4',
-                $highlight ? 'bg-rose-200! dark:bg-rose-900!' : '',
-            ]);
-            $lineNumberClass = implode(' ', [
-                'mr-6 text-neutral-500! dark:text-neutral-600!',
-                $highlight ? 'dark:text-white!' : '',
-            ]);
+    foreach ($lines as $index => $line) {
+        $lineNumber = $startingLine + $index;
+        $highlight = $highlightedLine === $index;
+        $lineClass = implode(' ', [
+            'block px-4 py-1 h-7 even:bg-white odd:bg-white/2 even:dark:bg-white/2 odd:dark:bg-white/4',
+            $highlight ? 'bg-rose-200! dark:bg-rose-900!' : '',
+        ]);
+        $lineNumberClass = implode(' ', [
+            'mr-6 text-neutral-500! dark:text-neutral-600!',
+            $highlight ? 'dark:text-white!' : '',
+        ]);
 
-            $fallback .= '<span class="' . $lineClass . '">';
-            $fallback .= '<span class="' . $lineNumberClass . '">' . $lineNumber . '</span>';
-            $fallback .= htmlspecialchars($line);
-            $fallback .= '</span>';
-        }
-
-    } else {
-        $fallback .= htmlspecialchars($code);
+        $fallback .= '<span class="' . $lineClass . '">';
+        $fallback .= '<span class="' . $lineNumberClass . '">' . $lineNumber . '</span>';
+        $fallback .= htmlspecialchars($line);
+        $fallback .= '</span>';
     }
 
-    $fallback .= '</code></pre>';
+} else {
+    $fallback .= htmlspecialchars($code);
+}
+
+$fallback .= '</code></pre>';
 ?>
 
 <div

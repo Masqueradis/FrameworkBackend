@@ -9,7 +9,8 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.5",
+        "darkaonline/l5-swagger": "^11.0",
         "doctrine/annotations": "^2.0",
         "jaschilz/php-coverage-badger": "^2.0",
         "laravel/framework": "^12.0",

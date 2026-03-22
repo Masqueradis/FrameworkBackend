@@ -10,26 +10,36 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 - php - <?php echo e(PHP_MAJOR_VERSION); ?>.<?php echo e(PHP_MINOR_VERSION); ?>
 
-<?php $__currentLoopData = app(\Laravel\Roster\Roster::class)->packages()->unique(fn ($package) => $package->rawName()); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $package): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<?php $__currentLoopData = app(\Laravel\Roster\Roster::class)->packages()->unique(fn($package) => $package->rawName());
+$__env->addLoop($__currentLoopData);
+foreach ($__currentLoopData as $package): $__env->incrementLoopIndices();
+    $loop = $__env->getLastLoop(); ?>
 - <?php echo e($package->rawName()); ?> (<?php echo e($package->name()); ?>) - v<?php echo e($package->majorVersion()); ?>
 
-<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+<?php endforeach;
+$__env->popLoop();
+$loop = $__env->getLastLoop(); ?>
 
-<?php if(! empty(config('boost.purpose'))): ?>
+<?php if (! empty(config('boost.purpose'))): ?>
 Application purpose: <?php echo config('boost.purpose'); ?>
 
 
 <?php endif; ?>
 
-<?php if($assist->hasSkillsEnabled() && $assist->skills()->isNotEmpty()): ?>
+<?php if ($assist->hasSkillsEnabled() && $assist->skills()->isNotEmpty()): ?>
 ## Skills Activation
 
 This project has domain-specific skills available. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
 
-<?php $__currentLoopData = $assist->skills(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $skill): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<?php $__currentLoopData = $assist->skills();
+    $__env->addLoop($__currentLoopData);
+    foreach ($__currentLoopData as $skill): $__env->incrementLoopIndices();
+        $loop = $__env->getLastLoop(); ?>
 - ___SINGLE_BACKTICK___<?php echo e($skill->name); ?>___SINGLE_BACKTICK___ — <?php echo e($skill->description); ?>
 
-<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+<?php endforeach;
+    $__env->popLoop();
+    $loop = $__env->getLastLoop(); ?>
 <?php endif; ?>
 
 ## Conventions
