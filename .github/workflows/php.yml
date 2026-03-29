@@ -62,10 +62,6 @@ jobs:
           ${{ secrets.ENV_FILE }}
           EOF
 
-      - name: Set correct permissions for Passport keys
-        run: chmod 600 storage/oauth-*.key
-        working-directory: ./src
-
       - name: Run test suite
         run: php artisan test --coverage
         working-directory: ./src
