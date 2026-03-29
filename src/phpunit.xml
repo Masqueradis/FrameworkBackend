@@ -17,7 +17,7 @@
             <directory>app</directory>
         </include>
         <exclude>
-            <directory>app/commands</directory>
+            <directory>app/Console</directory>
         </exclude>
     </source>
     <php>
