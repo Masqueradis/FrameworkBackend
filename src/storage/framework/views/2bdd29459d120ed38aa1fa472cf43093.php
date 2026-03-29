@@ -16,7 +16,7 @@
 - To inspect routes, run ___SINGLE_BACKTICK___<?php echo e($assist->artisanCommand('route:list')); ?>___SINGLE_BACKTICK___ directly.
 - To check environment variables, read the ___SINGLE_BACKTICK___.env___SINGLE_BACKTICK___ file directly.
 
-<?php if(config('boost.browser_logs', false) !== false || config('boost.browser_logs_watcher', true) !== false): ?>
+<?php if (config('boost.browser_logs', false) !== false || config('boost.browser_logs_watcher', true) !== false): ?>
 ## Reading Browser Logs With the ___SINGLE_BACKTICK___browser-logs___SINGLE_BACKTICK___ Tool
 - You can read browser logs, errors, and exceptions using the ___SINGLE_BACKTICK___browser-logs___SINGLE_BACKTICK___ tool from Boost.
 - Only recent browser logs will be useful - ignore old logs.

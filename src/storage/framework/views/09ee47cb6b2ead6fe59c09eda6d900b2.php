@@ -1,11 +1,11 @@
-<?php $attributes ??= new \Illuminate\View\ComponentAttributeBag;
+<?php $attributes ??= new \Illuminate\View\ComponentAttributeBag();
 
 $__newAttributes = [];
 $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames((['exception']));
 
 foreach ($attributes->all() as $__key => $__value) {
     if (in_array($__key, $__propNames)) {
-        $$__key = $$__key ?? $__value;
+        $$__key ??= $__value;
     } else {
         $__newAttributes[$__key] = $__value;
     }
@@ -17,13 +17,15 @@ unset($__propNames);
 unset($__newAttributes);
 
 foreach (array_filter((['exception']), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
-    $$__key = $$__key ?? $__value;
+    $$__key ??= $__value;
 }
 
 $__defined_vars = get_defined_vars();
 
 foreach ($attributes->all() as $__key => $__value) {
-    if (array_key_exists($__key, $__defined_vars)) unset($$__key);
+    if (array_key_exists($__key, $__defined_vars)) {
+        unset($$__key);
+    }
 }
 
 unset($__defined_vars, $__key, $__value); ?>
@@ -31,8 +33,12 @@ unset($__defined_vars, $__key, $__value); ?>
 <div class="flex flex-col pt-8 sm:pt-16 overflow-x-auto">
     <div class="flex flex-col gap-5 mb-8">
         <h1 class="text-3xl font-semibold text-neutral-950 dark:text-white"><?php echo e($exception->class()); ?></h1>
-        <?php if (isset($component)) { $__componentOriginalfe2bc8d0a6d110d41fdc8740012cee8d = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfe2bc8d0a6d110d41fdc8740012cee8d = $attributes; } ?>
+        <?php if (isset($component)) {
+            $__componentOriginalfe2bc8d0a6d110d41fdc8740012cee8d = $component;
+        } ?>
+<?php if (isset($attributes)) {
+            $__attributesOriginalfe2bc8d0a6d110d41fdc8740012cee8d = $attributes;
+        } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.file-with-line','data' => ['frame' => $exception->frames()->first(),'class' => '-mt-3 text-xs']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::file-with-line'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -68,8 +74,12 @@ unset($__defined_vars, $__key, $__value); ?>
                 <span class="text-neutral-500 dark:text-neutral-300"><?php echo e(PHP_VERSION); ?></span>
             </div>
         </div>
-        <?php if (isset($component)) { $__componentOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $attributes; } ?>
+        <?php if (isset($component)) {
+            $__componentOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $component;
+        } ?>
+<?php if (isset($attributes)) {
+            $__attributesOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $attributes;
+        } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.badge','data' => ['type' => 'error']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::badge'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -78,8 +88,12 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['type' => 'error']); ?>
-            <?php if (isset($component)) { $__componentOriginalebc8ec9a834a8051f56913d6745a7050 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalebc8ec9a834a8051f56913d6745a7050 = $attributes; } ?>
+            <?php if (isset($component)) {
+                $__componentOriginalebc8ec9a834a8051f56913d6745a7050 = $component;
+            } ?>
+<?php if (isset($attributes)) {
+                $__attributesOriginalebc8ec9a834a8051f56913d6745a7050 = $attributes;
+            } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.icons.alert','data' => ['class' => 'w-2.5 h-2.5']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::icons.alert'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -109,8 +123,12 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php $component = $__componentOriginal0bc865510ef3ecddbe48edc4e8cc9ddb; ?>
 <?php unset($__componentOriginal0bc865510ef3ecddbe48edc4e8cc9ddb); ?>
 <?php endif; ?>
-        <?php if (isset($component)) { $__componentOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $attributes; } ?>
+        <?php if (isset($component)) {
+            $__componentOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $component;
+        } ?>
+<?php if (isset($attributes)) {
+            $__attributesOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $attributes;
+        } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.badge','data' => ['type' => 'error','variant' => 'solid']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::badge'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -133,8 +151,12 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php endif; ?>
     </div>
 
-    <?php if (isset($component)) { $__componentOriginalb581a7e3a55d371fae986833ecafa668 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalb581a7e3a55d371fae986833ecafa668 = $attributes; } ?>
+    <?php if (isset($component)) {
+        $__componentOriginalb581a7e3a55d371fae986833ecafa668 = $component;
+    } ?>
+<?php if (isset($attributes)) {
+        $__attributesOriginalb581a7e3a55d371fae986833ecafa668 = $attributes;
+    } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.request-url','data' => ['exception' => $exception,'request' => $exception->request(),'class' => 'relative z-50']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::request-url'); ?>
 <?php if ($component->shouldRender()): ?>

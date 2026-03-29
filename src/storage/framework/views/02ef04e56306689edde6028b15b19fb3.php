@@ -3,7 +3,7 @@
 ?>
 # Laravel Pint Code Formatter
 
-<?php if($assist->supportsPintAgentFormatter()): ?>
+<?php if ($assist->supportsPintAgentFormatter()): ?>
 - If you have modified any PHP files, you must run ___SINGLE_BACKTICK___<?php echo e($assist->binCommand('pint')); ?> --dirty --format agent___SINGLE_BACKTICK___ before finalizing changes to ensure your code matches the project's expected style.
 - Do not run ___SINGLE_BACKTICK___<?php echo e($assist->binCommand('pint')); ?> --test --format agent___SINGLE_BACKTICK___, simply run ___SINGLE_BACKTICK___<?php echo e($assist->binCommand('pint')); ?> --format agent___SINGLE_BACKTICK___ to fix any formatting issues.
 <?php else: ?>

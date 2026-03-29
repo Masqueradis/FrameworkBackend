@@ -16,8 +16,12 @@
                 spotlight.y +
                 'px, black 0%, transparent ' + (isDark ? '600px' : '400px') + ');'
         ">
-        <?php if (isset($component)) { $__componentOriginal2a45ee13943eadc15ee63d255f492356 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal2a45ee13943eadc15ee63d255f492356 = $attributes; } ?>
+        <?php if (isset($component)) {
+            $__componentOriginal2a45ee13943eadc15ee63d255f492356 = $component;
+        } ?>
+<?php if (isset($attributes)) {
+            $__attributesOriginal2a45ee13943eadc15ee63d255f492356 = $attributes;
+        } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.icons.laravel-ascii','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::icons.laravel-ascii'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -37,8 +41,12 @@
 <?php unset($__componentOriginal2a45ee13943eadc15ee63d255f492356); ?>
 <?php endif; ?>
     </div>
-    <?php if (isset($component)) { $__componentOriginal2a45ee13943eadc15ee63d255f492356 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal2a45ee13943eadc15ee63d255f492356 = $attributes; } ?>
+    <?php if (isset($component)) {
+        $__componentOriginal2a45ee13943eadc15ee63d255f492356 = $component;
+    } ?>
+<?php if (isset($attributes)) {
+        $__attributesOriginal2a45ee13943eadc15ee63d255f492356 = $attributes;
+    } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.icons.laravel-ascii','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::icons.laravel-ascii'); ?>
 <?php if ($component->shouldRender()): ?>

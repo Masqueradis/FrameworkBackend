@@ -1,7 +1,7 @@
 # Laravel 12
 
 - CRITICAL: ALWAYS use ___SINGLE_BACKTICK___search-docs___SINGLE_BACKTICK___ tool for version-specific Laravel documentation and updated code examples.
-<?php if(file_exists(app_path('Http/Kernel.php'))): ?>
+<?php if (file_exists(app_path('Http/Kernel.php'))): ?>
 - This project upgraded from Laravel 10 without migrating to the new streamlined Laravel file structure.
 - This is perfectly fine and recommended by Laravel. Follow the existing structure from Laravel 10. We do not need to migrate to the new Laravel structure unless the user explicitly requests it.
 

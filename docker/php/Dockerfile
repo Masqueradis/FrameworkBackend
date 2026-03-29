@@ -38,6 +38,10 @@ COPY docker/php/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 COPY --from=composer/composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www/html
+ARG UID=1000
+ARG GID=1000
+RUN groupadd -g ${GID} app && useradd -u ${UID} -g app app
 
-COPY ./../../src /var/www/html
+USER app
+
+WORKDIR /var/www/html

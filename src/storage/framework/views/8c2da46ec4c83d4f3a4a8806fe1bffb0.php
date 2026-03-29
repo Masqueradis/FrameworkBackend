@@ -1,11 +1,11 @@
-<?php $attributes ??= new \Illuminate\View\ComponentAttributeBag;
+<?php $attributes ??= new \Illuminate\View\ComponentAttributeBag();
 
 $__newAttributes = [];
 $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames((['exception', 'request']));
 
 foreach ($attributes->all() as $__key => $__value) {
     if (in_array($__key, $__propNames)) {
-        $$__key = $$__key ?? $__value;
+        $$__key ??= $__value;
     } else {
         $__newAttributes[$__key] = $__value;
     }
@@ -17,13 +17,15 @@ unset($__propNames);
 unset($__newAttributes);
 
 foreach (array_filter((['exception', 'request']), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
-    $$__key = $$__key ?? $__value;
+    $$__key ??= $__value;
 }
 
 $__defined_vars = get_defined_vars();
 
 foreach ($attributes->all() as $__key => $__value) {
-    if (array_key_exists($__key, $__defined_vars)) unset($$__key);
+    if (array_key_exists($__key, $__defined_vars)) {
+        unset($$__key);
+    }
 }
 
 unset($__defined_vars, $__key, $__value); ?>
@@ -45,8 +47,12 @@ unset($__defined_vars, $__key, $__value); ?>
 
 >
     <div class="flex items-center gap-3 w-full">
-        <?php if (isset($component)) { $__componentOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $attributes; } ?>
+        <?php if (isset($component)) {
+            $__componentOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $component;
+        } ?>
+<?php if (isset($attributes)) {
+            $__attributesOriginal0bc865510ef3ecddbe48edc4e8cc9ddb = $attributes;
+        } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.badge','data' => ['type' => 'error','variant' => 'solid']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::badge'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -55,8 +61,12 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['type' => 'error','variant' => 'solid']); ?>
-            <?php if (isset($component)) { $__componentOriginalebc8ec9a834a8051f56913d6745a7050 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalebc8ec9a834a8051f56913d6745a7050 = $attributes; } ?>
+            <?php if (isset($component)) {
+                $__componentOriginalebc8ec9a834a8051f56913d6745a7050 = $component;
+            } ?>
+<?php if (isset($attributes)) {
+                $__attributesOriginalebc8ec9a834a8051f56913d6745a7050 = $attributes;
+            } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.icons.alert','data' => ['class' => 'w-2.5 h-2.5']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::icons.alert'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -87,16 +97,20 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php $component = $__componentOriginal0bc865510ef3ecddbe48edc4e8cc9ddb; ?>
 <?php unset($__componentOriginal0bc865510ef3ecddbe48edc4e8cc9ddb); ?>
 <?php endif; ?>
-        <?php if (isset($component)) { $__componentOriginal5131cdd8ffd44ce9fe7ed2c3030dd413 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal5131cdd8ffd44ce9fe7ed2c3030dd413 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.http-method','data' => ['method' => ''.e($request->method()).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+        <?php if (isset($component)) {
+            $__componentOriginal5131cdd8ffd44ce9fe7ed2c3030dd413 = $component;
+        } ?>
+<?php if (isset($attributes)) {
+            $__attributesOriginal5131cdd8ffd44ce9fe7ed2c3030dd413 = $attributes;
+        } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.http-method','data' => ['method' => '' . e($request->method()) . '']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::http-method'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['method' => ''.e($request->method()).'']); ?>
+<?php $component->withAttributes(['method' => '' . e($request->method()) . '']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal5131cdd8ffd44ce9fe7ed2c3030dd413)): ?>
@@ -121,8 +135,12 @@ unset($__defined_vars, $__key, $__value); ?>
                 "bg-white/5 border-neutral-200 hover:bg-neutral-100 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10",
             ]); ?>"
         >
-            <?php if (isset($component)) { $__componentOriginal8894ff2e6e6bd543865d608162806b35 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal8894ff2e6e6bd543865d608162806b35 = $attributes; } ?>
+            <?php if (isset($component)) {
+                $__componentOriginal8894ff2e6e6bd543865d608162806b35 = $component;
+            } ?>
+<?php if (isset($attributes)) {
+                $__attributesOriginal8894ff2e6e6bd543865d608162806b35 = $attributes;
+            } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.icons.copy','data' => ['class' => 'w-3 h-3 text-neutral-400','xShow' => '!copied']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::icons.copy'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -141,8 +159,12 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php $component = $__componentOriginal8894ff2e6e6bd543865d608162806b35; ?>
 <?php unset($__componentOriginal8894ff2e6e6bd543865d608162806b35); ?>
 <?php endif; ?>
-            <?php if (isset($component)) { $__componentOriginal394a4f59b8774713925fcf456ba90b57 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal394a4f59b8774713925fcf456ba90b57 = $attributes; } ?>
+            <?php if (isset($component)) {
+                $__componentOriginal394a4f59b8774713925fcf456ba90b57 = $component;
+            } ?>
+<?php if (isset($attributes)) {
+                $__attributesOriginal394a4f59b8774713925fcf456ba90b57 = $attributes;
+            } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'laravel-exceptions-renderer::components.icons.check','data' => ['class' => 'w-3 h-3 text-emerald-500','xShow' => 'copied']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('laravel-exceptions-renderer::icons.check'); ?>
 <?php if ($component->shouldRender()): ?>

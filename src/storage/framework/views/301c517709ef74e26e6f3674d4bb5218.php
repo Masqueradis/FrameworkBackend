@@ -3,7 +3,7 @@
 <?php
 /** @var \Laravel\Boost\Install\GuidelineAssist $assist */
 ?>
-<?php if($assist->shouldEnforceStrictTypes()): ?>
+<?php if ($assist->shouldEnforceStrictTypes()): ?>
 - Always use strict typing at the head of a ___SINGLE_BACKTICK___.php___SINGLE_BACKTICK___ file: ___SINGLE_BACKTICK___declare(strict_types=1);___SINGLE_BACKTICK___.
 <?php endif; ?>
 - Always use curly braces for control structures, even for single-line bodies.
@@ -26,7 +26,7 @@ protected function isAccessible(User $user, ?string $path = null): bool
 ___SINGLE_BACKTICK______SINGLE_BACKTICK______SINGLE_BACKTICK___
 
 ## Enums
-<?php if(empty($assist->enums()) || preg_match('/[A-Z]{3,8}/', $assist->enumContents())): ?>
+<?php if (empty($assist->enums()) || preg_match('/[A-Z]{3,8}/', $assist->enumContents())): ?>
 - Typically, keys in an Enum should be TitleCase. For example: ___SINGLE_BACKTICK___FavoritePerson___SINGLE_BACKTICK___, ___SINGLE_BACKTICK___BestLake___SINGLE_BACKTICK___, ___SINGLE_BACKTICK___Monthly___SINGLE_BACKTICK___.
 <?php else: ?>
 - That being said, keys in an Enum should follow existing application Enum conventions.
