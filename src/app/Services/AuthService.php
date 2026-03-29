@@ -10,6 +10,7 @@ use App\DTO\AuthResultDTO;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Events\Registered;
 use App\Models\User;
 
 class AuthService
@@ -27,6 +28,9 @@ class AuthService
         ];
 
         $user = $this->userRepository->create($userData);
+
+        event(new Registered($user));
+
         $token = $user->createToken('ApiAccess')->accessToken;
 
         return new AuthResultDTO($user, $token);
