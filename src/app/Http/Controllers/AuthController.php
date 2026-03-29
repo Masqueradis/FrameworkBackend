@@ -10,6 +10,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -118,7 +119,6 @@ class AuthController extends ApiController
     {
         $loginDTO = $request->toDTO();
         $resultDTO = $this->authService->login($loginDTO);
-
         return $this->respondSuccess(
             data: [
                 'user' => new UserResource($resultDTO->user),
@@ -151,7 +151,6 @@ class AuthController extends ApiController
         $user = $request->user();
 
         $this->authService->logout($user);
-
         return $this->respondSuccess(
             message: 'Logged out successfully.',
         );
