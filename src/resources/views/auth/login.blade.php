@@ -25,5 +25,6 @@
         </div>
         <button type="submit">Войти</button>
     </form>
+    <p>No account? <a href="/register">Register</a></p>
 </body>
 </html>

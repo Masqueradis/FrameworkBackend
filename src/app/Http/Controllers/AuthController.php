@@ -62,18 +62,25 @@ class AuthController extends ApiController
             ),
         ]
     )]
-    public function register(RegisterUserRequest $request): JsonResponse
+    public function register(RegisterUserRequest $request): JsonResponse|RedirectResponse
     {
         $resultDTO = $this->authService->register($request->toDTO());
 
-        return $this->respondSuccess(
-            data: [
-                'user' => new UserResource($resultDTO->user),
-                'token' => $resultDTO->accessToken,
-            ],
-            message: 'Registered successfully.',
-            code: Response::HTTP_CREATED,
-        );
+        if($request->expectsJson()) {
+            return $this->respondSuccess(
+                data: [
+                    'user' => new UserResource($resultDTO->user),
+                    'token' => $resultDTO->accessToken,
+                ],
+                message: 'Registered successfully.',
+                code: Response::HTTP_CREATED,
+            );
+        }
+
+        Auth::login($resultDTO->user);
+        $request->session()->regenerate();
+
+        return redirect()->intended('/dashboard');
     }
 
     #[OA\Post(
@@ -115,17 +122,25 @@ class AuthController extends ApiController
             ),
         ]
     )]
-    public function login(LoginUserRequest $request): JsonResponse
+    public function login(LoginUserRequest $request): JsonResponse|RedirectResponse
     {
         $loginDTO = $request->toDTO();
         $resultDTO = $this->authService->login($loginDTO);
-        return $this->respondSuccess(
-            data: [
-                'user' => new UserResource($resultDTO->user),
-                'token' => $resultDTO->accessToken,
-            ],
-            message: 'Login successfully.',
-        );
+
+        if($request->expectsJson()) {
+            return $this->respondSuccess(
+                data: [
+                    'user' => new UserResource($resultDTO->user),
+                    'token' => $resultDTO->accessToken,
+                ],
+                message: 'Login successfully.',
+            );
+        }
+
+        Auth::login($resultDTO->user);
+        $request->session()->regenerate();
+
+        return redirect()->intended('/dashboard');
     }
 
     #[OA\Post(
@@ -146,13 +161,21 @@ class AuthController extends ApiController
             ),
         ]
     )]
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request): JsonResponse|RedirectResponse
     {
         $user = $request->user();
 
         $this->authService->logout($user);
-        return $this->respondSuccess(
-            message: 'Logged out successfully.',
-        );
+        if($request->expectsJson()) {
+            return $this->respondSuccess(
+                message: 'Logged out successfully.',
+            );
+        }
+
+        auth()->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/');
     }
 }
