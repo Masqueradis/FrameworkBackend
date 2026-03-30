@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CatalogController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,8 @@ Route::get('email/verify/{id}/{hash}', function (EmailVerificationRequest $reque
     $request->fulfill();
     return redirect('/dashboard');
 })->middleware(['auth'])->name('verification.verify');
+
+Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth');

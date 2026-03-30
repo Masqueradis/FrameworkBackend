@@ -1,31 +1,32 @@
 ENV_FILE := $(if $(wildcard docker/.env),docker/.env,docker/.env.example)
 DOCKER_COMPOSE=docker compose -f docker/compose.yaml --env-file ${ENV_FILE}
 
-.PHONY: up down ps restart bash build
+.PHONY: up down ps restart bash build init
 
 init:
-	@if [ ! -f "./src/.env" ]; then\
-	cp ./src/.env.example ./src/.env; \
-	fi    @if [ ! -f "./docker/.env" ]; then\
-	cp ./docker/.env.example ./docker/.env; \
+	@if [ ! -f "./src/.env" ]; then \
+		cp ./src/.env.example ./src/.env; \
+	fi
+	@if [ ! -f "./docker/.env" ]; then \
+		cp ./docker/.env.example ./docker/.env; \
 	fi
 
-up:
-	init ${DOCKER_COMPOSE} up -d
-
-down:
-	init ${DOCKER_COMPOSE} down
-
-ps:
-	init ${DOCKER_COMPOSE} ps
-
-restart:
-	init ${DOCKER_COMPOSE} down
+up: init
 	${DOCKER_COMPOSE} up -d
 
-bash:
-	init ${DOCKER_COMPOSE} exec app bash
+down: init
+	${DOCKER_COMPOSE} down
 
-build:
-	init ${DOCKER_COMPOSE} build
+ps: init
+	${DOCKER_COMPOSE} ps
+
+restart: init
+	${DOCKER_COMPOSE} down
+	${DOCKER_COMPOSE} up -d
+
+bash: init
+	${DOCKER_COMPOSE} exec app bash
+
+build: init
+	${DOCKER_COMPOSE} build
 
