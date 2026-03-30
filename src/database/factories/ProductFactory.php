@@ -27,6 +27,12 @@ class ProductFactory extends Factory
             'price' => fake()->randomFloat(2, 100, 15000),
             'stock' => fake()->numberBetween(0, 100),
             'available' => fake()->boolean(70),
+            'attributes' => [
+                'Brand' => fake()->randomElement(['Palit', 'MSI', 'Kingstone', 'Chieftec', 'Deepcool', 'Intel', 'AMD']),
+                'Socket' => fake()->randomElement(['AM4', 'AM5', 'LGA1700', 'LGA1200']),
+                'Memory Type' => fake()->randomElement(['DDR4', 'DDR5', 'GDDR6']),
+                'Form Factor' => fake()->randomElement(['ATX', 'Micro-ATX', 'Mini-ITX']),
+            ],
         ];
     }
 }
