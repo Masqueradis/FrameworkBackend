@@ -44,7 +44,7 @@ class CategoryController extends ApiController
                         ),
                     ]
                 )
-            )
+            ),
         ]
     )]
     public function index(): JsonResponse
