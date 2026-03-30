@@ -58,41 +58,17 @@
 
             <section class="col-md-9">
                 <h1 class="h3 fw-bold mb-4">Products Catalog</h1>
-
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-                    @forelse($products as $product)
-                        <div class="col">
-                            <div class="card h-100 shadow-sm border-0">
-                                <div class="bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center text-muted" style="height: 200px;">
-                                    [Image {{ $product->sku }}]
-                                </div>
-
-                                <div class="card-body d-flex flex-column">
-                                    <small class="text-primary text-uppercase fw-semibold mb-1" style="font-size: 0.75rem;">
-                                        {{ $product->category->name ?? 'Uncategorized' }}
-                                    </small>
-                                    <h5 class="card-title fw-bold text-dark flex-grow-1 fs-6">
-                                        {{ $product->name }}
-                                    </h5>
-
-                                    <div class="d-flex align-items-center justify-content-between mt-3">
-                                        <span class="fs-5 fw-bolder text-dark">
-                                            ${{ number_format($product->price, 2, '.', ',') }}
-                                        </span>
-                                        <button class="btn btn-outline-primary btn-sm">
-                                            Add to Cart
-                                        </button>
-                                    </div>
-                                </div>
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+                        @forelse($products as $product)
+                            <div class="col">
+                                <x-product-card :product="$product" />
                             </div>
-                        </div>
-                    @empty
-                        <div class="col-12 text-center py-5 text-muted bg-white rounded shadow-sm w-100">
-                            Sorry, no products found.
-                        </div>
-                    @endforelse
-                </div>
-
+                        @empty
+                            <div class="col-12 text-center py-5 text-muted bg-white rounded shadow-sm w-100">
+                                Sorry, no products found.
+                            </div>
+                        @endforelse
+                    </div>
                 <div class="mt-4 d-flex justify-content-center">
                     {{ $products->links('pagination::bootstrap-5') }}
                 </div>
