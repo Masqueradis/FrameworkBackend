@@ -11,7 +11,6 @@ use Symfony\Component\HttpFoundation\Response;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-
 class ProductApiTest extends TestCase
 {
     use RefreshDatabase;
@@ -36,11 +35,11 @@ class ProductApiTest extends TestCase
                             'id',
                             'name',
                             'price',
-                            'category' => ['id', 'name']
-                        ]
+                            'category' => ['id', 'name'],
+                        ],
                     ],
                     'meta' => ['current_page', 'last_page', 'total'],
-                ]
+                ],
             ]);
         $this->assertCount(15, $response->json('data.data'));
     }
@@ -50,8 +49,8 @@ class ProductApiTest extends TestCase
     {
         $category = Category::factory()->create();
 
-        Product::factory()->create(['price'=>100, 'category_id' => $category->id, 'available' => true]);
-        Product::factory()->create(['price'=>5000, 'category_id' => $category->id, 'available' => true]);
+        Product::factory()->create(['price' => 100, 'category_id' => $category->id, 'available' => true]);
+        Product::factory()->create(['price' => 5000, 'category_id' => $category->id, 'available' => true]);
 
         $response = $this->getJson('/api/products?min_price=1000');
         $response->assertStatus(Response::HTTP_OK);

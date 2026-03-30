@@ -81,7 +81,7 @@ class ProductController extends ApiController
             new OA\Response(
                 response: 422,
                 description: 'Parameter validation error'
-            )
+            ),
         ]
     )]
     public function index(ProductIndexRequest $request): JsonResponse

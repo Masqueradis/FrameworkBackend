@@ -38,9 +38,19 @@
                         </a>
                         @foreach($categories as $category)
                             <a href="{{ route('catalog.index', ['category_id' => $category->id]) }}"
-                               class="list-group-item list-group-item-action {{ request('category_id') == $category->id ? 'active' : '' }}">
+                               class="list-group-item list-group-item-action fw-bold {{ request('category_id') == $category->id ? 'active' : '' }}">
                                 {{ $category->name }}
                             </a>
+
+                            @if($category->children->isNotEmpty())
+                                @foreach($category->children as $child)
+                                    <a href="{{ route('catalog.index', ['category_id' => $child->id]) }}"
+                                       class="list-group-item list-group-item-action border-0 py-1 ps-4 {{ request('category_id') == $child->id ? 'text-primary fw-bold' : 'text-secondary' }}"
+                                       style="font-size: 0.9rem;">
+                                        — {{ $child->name }}
+                                    </a>
+                                @endforeach
+                            @endif
                         @endforeach
                     </div>
                 </div>

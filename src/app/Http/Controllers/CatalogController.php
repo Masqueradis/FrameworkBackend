@@ -14,12 +14,21 @@ class CatalogController extends Controller
 {
     public function index(Request $request): View
     {
-        $categories = Category::orderBy('name')->get();
+
+        $categories = Category::whereNull('parent_id')
+            ->with('children')
+            ->orderBy('name')
+            ->get();
 
         $query = Product::with('category')->where('available', true);
 
         if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
+            $categoryId = $request->category_id;
+
+            $categoryIds = Category::where('id', $categoryId)
+                ->orWhere('parent_id', $categoryId)
+                ->pluck('id');
+            $query->whereIn('category_id', $categoryIds);
         }
 
         $products = $query->paginate(12)->withQueryString();
