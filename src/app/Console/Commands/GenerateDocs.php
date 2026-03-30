@@ -33,9 +33,8 @@ class GenerateDocs extends Command
         if ($exitCode === 0) {
             $this->info('Docs generated successfully');
             return Command::SUCCESS;
-        } else {
-            $this->error('Something went wrong');
-            return Command::FAILURE;
         }
+        $this->error('Something went wrong');
+        return Command::FAILURE;
     }
 }
