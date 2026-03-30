@@ -1,4 +1,5 @@
-DOCKER_COMPOSE=docker compose -f docker/compose.yaml --env-file docker/.env
+ENV_FILE := $(if $(wildcard docker/.env),docker/.env,docker/.env.example)
+DOCKER_COMPOSE=docker compose -f docker/compose.yaml --env-file ${ENV_FILE}
 
 .PHONY: up down ps restart bash build
 

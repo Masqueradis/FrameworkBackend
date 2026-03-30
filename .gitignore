@@ -17,7 +17,7 @@ src/.phpunit.result.cache
 /src/public/build
 /src/public/hot
 /src/public/storage
-/storage/*.key
+/src/storage/*.key
 /src/storage/pail
 */vendor
 Homestead.json
