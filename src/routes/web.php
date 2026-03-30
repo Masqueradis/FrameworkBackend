@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CatalogController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -11,19 +12,19 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('login', function() {
+Route::get('login', function () {
     return view('auth.login');
 })->name('login')->middleware('guest');
 
-Route::get('register', function() {
+Route::get('register', function () {
     return view('auth.register');
 })->name('register')->middleware('guest');
 
-Route::get('dashboard', function() {
+Route::get('dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified']);
 
-Route::get('email/verify', function() {
+Route::get('email/verify', function () {
     return view('auth.verify-email');
 })->middleware('auth')->name('verification.notice');
 
@@ -31,6 +32,8 @@ Route::get('email/verify/{id}/{hash}', function (EmailVerificationRequest $reque
     $request->fulfill();
     return redirect('/dashboard');
 })->middleware(['auth'])->name('verification.verify');
+
+Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth');

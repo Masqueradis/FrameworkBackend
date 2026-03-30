@@ -1,0 +1,45 @@
+@props(['product'])
+
+<div class="card h-100 shadow-sm border-0">
+    <div class="bg-light d-flex align-items-center justify-content-center text-secondary rounded-top" style="height: 180px; border-bottom: 1px solid #f8f9fa;">
+        <div class="text-center opacity-50">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-image mb-2" viewBox="0 0 16 16">
+                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+            </svg>
+            <div class="small">Photo coming soon</div>
+        </div>
+    </div>
+
+    <div class="card-body d-flex flex-column">
+        <small class="text-primary text-uppercase fw-semibold mb-2" style="font-size: 0.75rem;">
+            {{ $product->category->name ?? 'Uncategorized' }}
+        </small>
+
+        <h5 class="card-title fw-bold text-dark flex-grow-1 fs-6 mb-3">
+            {{ $product->name }}
+        </h5>
+
+        <div class="mb-3">
+            @if($product->available && $product->stock > 0)
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                    In Stock ({{ $product->stock }})
+                </span>
+            @else
+                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">
+                    Out of Stock
+                </span>
+            @endif
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mt-auto pt-3 border-top">
+            <span class="fs-5 fw-bolder text-dark mb-0">
+                ${{ number_format($product->price, 2, '.', ',') }}
+            </span>
+
+            <button class="btn btn-outline-primary btn-sm fw-medium" @disabled(!$product->available || $product->stock <= 0)>
+                Add to Cart
+            </button>
+        </div>
+    </div>
+</div>
