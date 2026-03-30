@@ -19,7 +19,15 @@
         <h5 class="card-title fw-bold text-dark flex-grow-1 fs-6 mb-3">
             {{ $product->name }}
         </h5>
-
+        @if($product->attributes)
+            <ul class="list-unstyled small text-muted mb-3 border-start border-2 border-primary ps-2">
+                @foreach(array_slice($product->attributes, 0, 3) as $key => $value)
+                    <li class="mb-1 text-truncate">
+                        <span class="fw-semibold">{{ $key }}:</span> {{ $value }}
+                    </li>
+                @endforeach
+            </ul>
+        @endif
         <div class="mb-3">
             @if($product->available && $product->stock > 0)
                 <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
