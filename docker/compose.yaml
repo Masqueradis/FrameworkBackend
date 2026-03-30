@@ -46,6 +46,8 @@ services:
             -   '${MAIL_PORT}:1025'
             -   '${MAIL_UI}:8025'
         container_name: ${APP_NAME}_mailhog
+        networks:
+            - sail
 
     nginx:
         build:
