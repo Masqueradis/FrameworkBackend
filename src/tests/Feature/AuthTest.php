@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Laravel\Passport\Passport;
 use Tests\TestCase;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Event;
 
 class AuthTest extends TestCase
 {
@@ -32,6 +33,8 @@ class AuthTest extends TestCase
     #[Test]
     public function userCanRegister(): void
     {
+        Event::fake();
+
         $response = $this->postJson('/api/register', [
             'name' => 'Test User',
             'email' => 'test@email.com',
