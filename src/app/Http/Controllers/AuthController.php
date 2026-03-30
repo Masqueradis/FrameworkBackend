@@ -66,7 +66,7 @@ class AuthController extends ApiController
     {
         $resultDTO = $this->authService->register($request->toDTO());
 
-        if($request->expectsJson()) {
+        if ($request->expectsJson()) {
             return $this->respondSuccess(
                 data: [
                     'user' => new UserResource($resultDTO->user),
@@ -127,7 +127,7 @@ class AuthController extends ApiController
         $loginDTO = $request->toDTO();
         $resultDTO = $this->authService->login($loginDTO);
 
-        if($request->expectsJson()) {
+        if ($request->expectsJson()) {
             return $this->respondSuccess(
                 data: [
                     'user' => new UserResource($resultDTO->user),
@@ -166,7 +166,7 @@ class AuthController extends ApiController
         $user = $request->user();
 
         $this->authService->logout($user);
-        if($request->expectsJson()) {
+        if ($request->expectsJson()) {
             return $this->respondSuccess(
                 message: 'Logged out successfully.',
             );
