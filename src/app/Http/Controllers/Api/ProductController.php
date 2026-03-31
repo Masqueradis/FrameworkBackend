@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\ProductIndexRequest;
+use App\Http\Requests\ProductSaveRequest;
 use App\Http\Resources\ProductResource;
+use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends ApiController
 {
@@ -29,7 +33,7 @@ class ProductController extends ApiController
         ],
         responses: [
             new OA\Response(
-                response: 200,
+                response: Response::HTTP_OK,
                 description: 'Successfully received product list',
                 content: new OA\JsonContent(
                     properties: [
@@ -79,7 +83,7 @@ class ProductController extends ApiController
                 )
             ),
             new OA\Response(
-                response: 422,
+                response: Response::HTTP_UNPROCESSABLE_ENTITY,
                 description: 'Parameter validation error'
             ),
         ]
@@ -92,5 +96,91 @@ class ProductController extends ApiController
             data: ProductResource::collection($products)->response()->getData(true),
             message: 'Products retrieved successfully'
         );
+    }
+
+    #[OA\Get(
+        path: '/api/products/{product}',
+        summary: 'Get a specific product',
+        tags: ['Catalog'],
+        parameters: [
+            new OA\Parameter(name: 'product', description: 'Product ID', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: Response::HTTP_OK, description: 'Product retrieved successfully'),
+            new OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Product not found'),
+        ]
+    )]
+    public function show(Product $product): JsonResponse
+    {
+        return $this->respondSuccess(
+            data: new ProductResource($product),
+            message: 'Product retrieved successfully'
+        );
+    }
+
+    #[OA\Post(
+        path: '/api/products',
+        summary: 'Create a new product (Managers and Admins only)',
+        security: [['bearerAuth' => []]],
+        tags: ['Catalog'],
+        responses: [
+            new OA\Response(response: Response::HTTP_CREATED, description: 'Product created successfully'),
+            new OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Forbidden - No permission'),
+            new OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors'),
+        ]
+    )]
+    public function store(Request $request): JsonResponse
+    {
+        $dto = $request->toDTO();
+        $product = $this->productService->createProduct($dto);
+
+        return $this->respondSuccess(
+            data: new ProductResource($product),
+            message: 'Product created successfully',
+        );
+    }
+
+    #[OA\Put(
+        path: '/api/products/{product}',
+        summary: 'Update a specific product (Managers and Admins only)',
+        security: [['bearerAuth' => []]],
+        tags: ['Catalog'],
+        parameters: [
+            new OA\Parameter(name: 'product', description: 'Product ID', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: Response::HTTP_OK, description: 'Product updated successfully'),
+            new OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Forbidden - No permission'),
+        ]
+    )]
+    public function update(ProductSaveRequest $request, Product $product): JsonResponse
+    {
+        $dto = $request->toDTO();
+        $updateProduct = $this->productService->updateProduct($product, $dto);
+
+        return $this->respondSuccess(
+            data: new ProductResource($updateProduct),
+            message: 'Product updated successfully',
+        );
+    }
+
+    #[OA\Delete(
+        path: '/api/products/{product}',
+        summary: 'Delete a specific product (Admins only)',
+        security: [['bearerAuth' => []]],
+        tags: ['Catalog'],
+        parameters: [
+            new OA\Parameter(name: 'product', description: 'Product ID', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            ],
+        responses: [
+            new OA\Response(response: Response::HTTP_NO_CONTENT, description: 'Product deleted successfully'),
+            new OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Forbidden - Admins only'),
+        ]
+    )]
+    public function destroy(Product $product): JsonResponse
+    {
+        $this->productService->deleteProduct($product);
+
+        return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }

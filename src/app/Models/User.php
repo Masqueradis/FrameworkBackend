@@ -64,4 +64,12 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
     {
         return $this->roles()->where('name', $role)->exists();
     }
+
+    public function hasPermission(string $permission): bool
+    {
+        return $this->roles()->whereHas('permissions', function ($query) use ($permission)
+        {
+            $query->where('name', $permission);
+        })->exists();
+    }
 }
