@@ -30,6 +30,17 @@ class ProductService
             $query->where('name', 'ilike', '%' . $dto->search . '%');
         }
 
+        if ($dto->attributes) {
+            foreach ($dto->attributes as $attribute => $value) {
+                if (is_array($value)) {
+                    $query->whereIn("attributes->$attribute", $value);
+                }
+                else {
+                    $query->where("attributes->$attribute", $value);
+                }
+            }
+        }
+
         return $query->paginate(15);
     }
 }
