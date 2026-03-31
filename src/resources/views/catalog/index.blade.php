@@ -83,12 +83,6 @@
                         </div>
                     @endforeach
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Apply Filters</button>
-                        <a href="{{ route('catalog.index', request()->has('category_id') ? ['category_id' => request('category_id')] : []) }}" class="btn btn-outline-secondary">
-                            Reset
-                        </a>
-                    </div>
                 </form>
             </aside>
 
@@ -112,5 +106,6 @@
 
         </div>
     </main>
+<script src="{{ asset('js/filters.js') }}"></script>
 </body>
 </html>
