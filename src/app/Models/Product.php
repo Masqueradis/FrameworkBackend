@@ -21,12 +21,14 @@ class Product extends Model
         'price',
         'stock',
         'available',
+        'attributes',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'stock' => 'integer',
         'available' => 'boolean',
+        'attributes' => 'array',
     ];
 
     public function category(): BelongsTo
