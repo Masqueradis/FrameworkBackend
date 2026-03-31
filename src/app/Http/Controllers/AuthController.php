@@ -23,6 +23,15 @@ class AuthController extends ApiController
         private readonly AuthService $authService
     ) {}
 
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
+
+    public function showRegisterForm()
+    {
+        return view('auth.register');
+    }
     #[OA\Post(
         path: '/api/register',
         description: 'Request email and password, return user-object and token',
