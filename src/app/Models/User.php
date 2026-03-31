@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Hoa\Iterator\Test\Unit\MyFilter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\Contracts\OAuthenticatable;
@@ -52,5 +53,15 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->roles()->where('name', $role)->exists();
     }
 }
