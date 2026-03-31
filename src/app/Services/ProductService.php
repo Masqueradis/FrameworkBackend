@@ -28,7 +28,11 @@ class ProductService
         }
 
         if ($dto->search) {
-            $query->where('name', 'ilike', '%' . $dto->search . '%');
+            $query->where(function ($q) use ($dto) {
+                $searchTerm ='%' . $dto->search . '%';
+                $q->where('name', 'ilike', $searchTerm)
+                    ->orWhere('description', 'ilike', $searchTerm);
+            });
         }
 
         if ($dto->attributes) {
