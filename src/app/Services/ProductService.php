@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Models\Product;
 use App\DTO\ProductFilterDTO;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Str;
+use App\DTO\ProductSaveDTO;
 
 class ProductService
 {
@@ -89,5 +91,46 @@ class ProductService
             'max_price' => $maxPrice,
             'attributes' => $attributes,
         ];
+    }
+
+    public function createProduct(ProductSaveDTO $dto): Product
+    {
+        return Product::create([
+            'category_id' => $dto->categoryId,
+            'name' => $dto->name,
+            'slug' => Str::slug($dto->name) . '-' . uniqid(),
+            'sku' => $dto->sku ?? 'SKU-' . strtoupper(Str::random(8)),
+            'description' => $dto->description,
+            'price' => $dto->price,
+            'stock' => $dto->stock,
+            'available' => $dto->available,
+            'attributes' => $dto->attributes,
+        ]);
+    }
+
+    public function updateProduct(Product $product, ProductSaveDTO $dto): Product
+    {
+        $data = [
+            'category_id' => $dto->categoryId,
+            'name' => $dto->name,
+            'description' => $dto->description,
+            'price' => $dto->price,
+            'stock' => $dto->stock,
+            'available' => $dto->available,
+            'attributes' => $dto->attributes,
+        ];
+
+        if($dto->sku){
+            $data['sku'] = $dto->sku;
+        }
+
+        $product->update($data);
+
+        return $product;
+    }
+
+    public function deleteProduct(Product $product): void
+    {
+        $product->delete();
     }
 }
