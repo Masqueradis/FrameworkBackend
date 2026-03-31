@@ -28,6 +28,9 @@ class CatalogController extends Controller
 
         $products = $this->productService->getFilteredProducts($dto);
         $products->withQueryString();
-        return view('catalog.index', compact('categories', 'products'));
+
+        $filtersData = $this->productService->getFilteredData($dto->categoryId);
+
+        return view('catalog.index', compact('categories', 'products', 'filtersData'));
     }
 }
