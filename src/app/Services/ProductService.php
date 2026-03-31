@@ -46,7 +46,7 @@ class ProductService
             }
         }
 
-        return $query->paginate(15);
+        return $query->paginate(9);
     }
 
     public function getFilteredData(?int $categoryId): array
