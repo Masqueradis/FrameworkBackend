@@ -3,6 +3,22 @@ document.addEventListener('DOMContentLoaded', function(){
 
     if(!filterForm) return;
 
+    function debounce(func, wait) {
+        let timeout;
+        return function() {
+            const context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait);
+        }
+    }
+
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(function () {
+            filterForm.submit();
+        }, 600));
+    }
+
     const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(box => {
         box.addEventListener('change', () => {
