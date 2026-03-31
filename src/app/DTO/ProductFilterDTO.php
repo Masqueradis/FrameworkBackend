@@ -11,5 +11,6 @@ readonly class ProductFilterDTO
         public ?float $minPrice = null,
         public ?float $maxPrice = null,
         public ?string $search = null,
+        public array $attributes = [],
     ) {}
 }

@@ -31,6 +31,7 @@ class ProductIndexRequest extends FormRequest
             'min_price' => ['nullable', 'numeric', 'min:0'],
             'max_price' => ['nullable', 'numeric', 'gte:min_price'],
             'search' => ['nullable', 'string', 'max:255'],
+            'attributes' => ['nullable', 'array'],
         ];
     }
 
@@ -41,6 +42,7 @@ class ProductIndexRequest extends FormRequest
             minPrice: $this->validated('min_price') ? (float) $this->validated('min_price') : null,
             maxPrice: $this->validated('max_price') ? (float) $this->validated('max_price') : null,
             search: $this->validated('search'),
+            attributes: $this->validated('attributes') ?? [],
         );
     }
 }

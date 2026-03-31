@@ -4,35 +4,30 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Services\ProductService;
 use App\Models\Category;
 use App\Models\Product;
+use App\Http\Requests\ProductIndexRequest;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 
 class CatalogController extends Controller
 {
-    public function index(Request $request): View
-    {
+    public function __construct(
+        private readonly ProductService $productService,
+    ) {}
 
+    public function index(ProductIndexRequest $request): View
+    {
         $categories = Category::whereNull('parent_id')
             ->with('children')
             ->orderBy('name')
             ->get();
 
-        $query = Product::with('category')->where('available', true);
+        $dto = $request->toDTO();
 
-        if ($request->has('category_id')) {
-            $categoryId = $request->category_id;
-
-            $categoryIds = Category::where('id', $categoryId)
-                ->orWhere('parent_id', $categoryId)
-                ->pluck('id');
-            $query->whereIn('category_id', $categoryIds);
-        }
-
-        $products = $query->paginate(12)->withQueryString();
-
+        $products = $this->productService->getFilteredProducts($dto);
+        $products->withQueryString();
         return view('catalog.index', compact('categories', 'products'));
     }
 }
