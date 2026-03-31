@@ -9,19 +9,49 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH", crossorigin="anonymous">
 </head>
 <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-        <div class="container">
-            <a href="{{ route('catalog.index') }}" class="navbar-brand fw-bold text-primary">PC-Store</a>
-            <div>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{{ route('catalog.index') }}">MyStore</a>
+
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+
+                @guest
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('login') }}">Log in</a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-primary btn-sm mt-1" href="{{ route('register') }}">Register</a>
+                    </li>
+                @endguest
+
                 @auth
-                    <a href="/dashboard" class="text-decoration-none text-secondary">Dashboard</a>
-                @else
-                    <a href="{{ route('login') }}" class="text-decoration-none text-secondary me-3">Login</a>
-                    <a href="{{ route('register') }}" class="btn btn-primary">Register</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle fw-bold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            Hello, {{ auth()->user()->name }}
+                            @if(auth()->user()->hasRole('admin'))
+                                <span class="badge bg-danger ms-1">Admin</span>
+                            @endif
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="/dashboard">My Dashboard</a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
                 @endauth
-            </div>
+
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <main class="container mb-5">
         <div class="row">

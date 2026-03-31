@@ -8,17 +8,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
-
-Route::get('login', function () {
-    return view('auth.login');
-})->name('login')->middleware('guest');
-
-Route::get('register', function () {
-    return view('auth.register');
-})->name('register')->middleware('guest');
+Route::redirect('/', '/catalog');
 
 Route::get('dashboard', function () {
     return view('dashboard');
@@ -37,9 +27,20 @@ Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth');
-Route::post('register', [AuthController::class, 'register']);
 
 Route::post('email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
