@@ -19,6 +19,7 @@
         <h5 class="card-title fw-bold text-dark flex-grow-1 fs-6 mb-3">
             {{ $product->name }}
         </h5>
+
         @if($product->attributes)
             <ul class="list-unstyled small text-muted mb-3 border-start border-2 border-primary ps-2">
                 @foreach(array_slice($product->attributes, 0, 3) as $key => $value)
@@ -28,6 +29,7 @@
                 @endforeach
             </ul>
         @endif
+
         <div class="mb-3">
             @if($product->available && $product->stock > 0)
                 <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
@@ -49,5 +51,25 @@
                 Add to Cart
             </button>
         </div>
+
+        @canany(['update', 'delete'], $product)
+            <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+                <span class="small text-muted fw-bold">Management:</span>
+                <div class="btn-group">
+                    @can('update', $product)
+                        <a href="{{ url('/products/'.$product->id.'/edit') }}" class="btn btn-outline-warning btn-sm">Edit</a>
+                    @endcan
+
+                    @can('delete', $product)
+                        <form action="{{ url('/products/'.$product->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger btn-sm border-start-0">Delete</button>
+                        </form>
+                    @endcan
+                </div>
+            </div>
+        @endcanany
+
     </div>
 </div>

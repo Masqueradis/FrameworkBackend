@@ -152,6 +152,11 @@
 
             <section class="col-md-9">
                 <h1 class="h3 fw-bold mb-4">Products Catalog</h1>
+                    @can('create', App\Models\Product::class)
+                        <a href="{{ url('/products/create') }}" class="btn btn-success shadow-sm">
+                            + Add New Product
+                        </a>
+                    @endcan
                     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
                         @forelse($products as $product)
                             <div class="col">
