@@ -9,6 +9,7 @@ use App\Http\Resources\CategoryResource;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response;
 
 class CategoryController extends ApiController
 {
@@ -23,7 +24,7 @@ class CategoryController extends ApiController
         tags: ['Catalog'],
         responses: [
             new OA\Response(
-                response: 200,
+                response: Response::HTTP_OK,
                 description: 'Successfully retrieved list',
                 content: new OA\JsonContent(
                     properties: [
