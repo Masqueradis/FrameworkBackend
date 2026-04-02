@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
-use App\DTO\ProductFilterDTO;
+use App\DTO\ProductIndexData;
 use App\Models\Product;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -35,9 +35,9 @@ class ProductIndexRequest extends FormRequest
         ];
     }
 
-    public function toDTO(): ProductFilterDTO
+    public function toDTO(): ProductIndexData
     {
-        return new ProductFilterDTO(
+        return new ProductIndexData(
             categoryId: $this->validated('category_id') ? (int) $this->validated('category_id') : null,
             minPrice: $this->validated('min_price') ? (float) $this->validated('min_price') : null,
             maxPrice: $this->validated('max_price') ? (float) $this->validated('max_price') : null,

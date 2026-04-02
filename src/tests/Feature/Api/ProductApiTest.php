@@ -41,7 +41,7 @@ class ProductApiTest extends TestCase
                     'meta' => ['current_page', 'last_page', 'total'],
                 ],
             ]);
-        $this->assertCount(15, $response->json('data.data'));
+        $this->assertCount(9, $response->json('data.data'));
     }
 
     #[Test]

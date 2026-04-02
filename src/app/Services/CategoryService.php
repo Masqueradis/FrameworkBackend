@@ -13,4 +13,12 @@ class CategoryService
     {
         return Category::orderBy('name')->get();
     }
+
+    public function getRootCategories(): Collection
+    {
+        return Category::whereNull('parent_id')
+            ->with('children')
+            ->orderBy('name')
+            ->get();
+    }
 }

@@ -4,16 +4,16 @@ declare (strict_types=1);
 
 namespace App\Services;
 
+use App\DTO\ProductIndexData;
 use App\Models\Category;
 use App\Models\Product;
-use App\DTO\ProductFilterDTO;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use App\DTO\ProductSaveDTO;
 
 class ProductService
 {
-    public function getFilteredProducts(ProductFilterDTO $dto): LengthAwarePaginator
+    public function getFilteredProducts(ProductIndexData $dto): LengthAwarePaginator
     {
         $query = Product::query()->with('category')->where('available', true);
 

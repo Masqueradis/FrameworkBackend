@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Services\CategoryService;
 use App\Services\ProductService;
 use App\Models\Category;
 use App\Models\Product;
-use App\Http\Requests\ProductIndexRequest;
+use App\DTO\ProductIndexData;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 
@@ -15,21 +16,17 @@ class CatalogController extends Controller
 {
     public function __construct(
         private readonly ProductService $productService,
+        private readonly CategoryService $categoryService,
     ) {}
 
-    public function index(ProductIndexRequest $request): View
+    public function index(ProductIndexData $data): View
     {
-        $categories = Category::whereNull('parent_id')
-            ->with('children')
-            ->orderBy('name')
-            ->get();
+        $categories = $this->categoryService->getRootCategories();
 
-        $dto = $request->toDTO();
-
-        $products = $this->productService->getFilteredProducts($dto);
+        $products = $this->productService->getFilteredProducts($data);
         $products->withQueryString();
 
-        $filtersData = $this->productService->getFilteredData($dto->categoryId);
+        $filtersData = $this->productService->getFilteredData($data->categoryId);
 
         return view('catalog.index', compact('categories', 'products', 'filtersData'));
     }
