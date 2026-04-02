@@ -133,4 +133,22 @@ class AuthTest extends TestCase
         $authService = app(\App\Services\AuthService::class);
         $authService->logout($userMock);
     }
+
+    #[Test]
+    public function testShowsLoginForm(): void
+    {
+        $response = $this->get('login');
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertViewIs('auth.login');
+    }
+
+    #[Test]
+    public function testShowsRegisterForm(): void
+    {
+        $response = $this->get('register');
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertViewIs('auth.register');
+    }
 }

@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Data\ProductIndexData;
+use App\Data\ProductSaveData;
 use App\Http\Controllers\ApiController;
-use App\Http\Requests\ProductIndexRequest;
-use App\Http\Requests\ProductSaveRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -88,10 +87,9 @@ class ProductController extends ApiController
             ),
         ]
     )]
-    public function index(ProductIndexRequest $request): JsonResponse
+    public function index(ProductIndexData $request): JsonResponse
     {
-        $dto = $request->toDTO();
-        $products = $this->productService->getFilteredProducts($dto);
+        $products = $this->productService->getFilteredProducts($request);
         return $this->respondSuccess(
             data: ProductResource::collection($products)->response()->getData(true),
             message: 'Products retrieved successfully'
@@ -129,14 +127,14 @@ class ProductController extends ApiController
             new OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors'),
         ]
     )]
-    public function store(Request $request): JsonResponse
+    public function store(ProductSaveData $request): JsonResponse
     {
-        $dto = $request->toDTO();
-        $product = $this->productService->createProduct($dto);
+        $product = $this->productService->createProduct($request);
 
         return $this->respondSuccess(
             data: new ProductResource($product),
             message: 'Product created successfully',
+            code: Response::HTTP_CREATED
         );
     }
 
@@ -153,10 +151,9 @@ class ProductController extends ApiController
             new OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Forbidden - No permission'),
         ]
     )]
-    public function update(ProductSaveRequest $request, Product $product): JsonResponse
+    public function update(ProductSaveData $request, Product $product): JsonResponse
     {
-        $dto = $request->toDTO();
-        $updateProduct = $this->productService->updateProduct($product, $dto);
+        $updateProduct = $this->productService->updateProduct($product, $request);
 
         return $this->respondSuccess(
             data: new ProductResource($updateProduct),
