@@ -4,16 +4,16 @@ declare (strict_types=1);
 
 namespace App\Services;
 
+use App\Data\ProductIndexData;
+use App\Data\ProductSaveData;
 use App\Models\Category;
 use App\Models\Product;
-use App\DTO\ProductFilterDTO;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
-use App\DTO\ProductSaveDTO;
 
 class ProductService
 {
-    public function getFilteredProducts(ProductFilterDTO $dto): LengthAwarePaginator
+    public function getFilteredProducts(ProductIndexData $dto): LengthAwarePaginator
     {
         $query = Product::query()->with('category')->where('available', true);
 
@@ -59,7 +59,7 @@ class ProductService
             $categoryIds = Category::where('id', $categoryId)
                 ->orWhere('parent_id', $categoryId)
                 ->pluck('id');
-            $query->whereIn('id', $categoryIds);
+            $query->whereIn('category_id', $categoryIds);
         }
 
         $minPrice = floor((float)($query->min('price') ?? 0));
@@ -93,7 +93,7 @@ class ProductService
         ];
     }
 
-    public function createProduct(ProductSaveDTO $dto): Product
+    public function createProduct(ProductSaveData $dto): Product
     {
         return Product::create([
             'category_id' => $dto->categoryId,
@@ -108,7 +108,7 @@ class ProductService
         ]);
     }
 
-    public function updateProduct(Product $product, ProductSaveDTO $dto): Product
+    public function updateProduct(Product $product, ProductSaveData $dto): Product
     {
         $data = [
             'category_id' => $dto->categoryId,

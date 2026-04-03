@@ -134,7 +134,7 @@
                                                            name="attributes[{{ $key }}][]"
                                                            value="{{ $value }}"
                                                            id="attr_{{ $collapseId }}_{{ $loop->index }}"
-                                                        @checked(in_array($value, request('attributes.'.$key, [])))>
+                                                        {{ in_array($value, request('attributes.'.$key, [])) ? 'checked' : '' }}>
                                                     <label class="form-check-label small" for="attr_{{ $collapseId }}_{{ $loop->index }}">
                                                         {{ $value }}
                                                     </label>

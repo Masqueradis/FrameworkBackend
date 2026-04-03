@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Data\LoginUserData;
+use App\Data\RegisterUserData;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\RegisterUserRequest;
 use App\Http\Resources\UserResource;
@@ -71,23 +73,23 @@ class AuthController extends ApiController
             ),
         ]
     )]
-    public function register(RegisterUserRequest $request): JsonResponse|RedirectResponse
+    public function register(RegisterUserData $request): JsonResponse|RedirectResponse
     {
-        $resultDTO = $this->authService->register($request->toDTO());
+        $resultData = $this->authService->register($request);
 
-        if ($request->expectsJson()) {
+        if (request()->expectsJson()) {
             return $this->respondSuccess(
                 data: [
-                    'user' => new UserResource($resultDTO->user),
-                    'token' => $resultDTO->accessToken,
+                    'user' => new UserResource($resultData->user),
+                    'token' => $resultData->accessToken,
                 ],
                 message: 'Registered successfully.',
                 code: Response::HTTP_CREATED,
             );
         }
 
-        Auth::login($resultDTO->user);
-        $request->session()->regenerate();
+        Auth::login($resultData->user);
+        request()->session()->regenerate();
 
         return redirect()->intended('/dashboard');
     }
@@ -131,23 +133,22 @@ class AuthController extends ApiController
             ),
         ]
     )]
-    public function login(LoginUserRequest $request): JsonResponse|RedirectResponse
+    public function login(LoginUserData $request): JsonResponse|RedirectResponse
     {
-        $loginDTO = $request->toDTO();
-        $resultDTO = $this->authService->login($loginDTO);
+        $resultData = $this->authService->login($request);
 
-        if ($request->expectsJson()) {
+        if (request()->expectsJson()) {
             return $this->respondSuccess(
                 data: [
-                    'user' => new UserResource($resultDTO->user),
-                    'token' => $resultDTO->accessToken,
+                    'user' => new UserResource($resultData->user),
+                    'token' => $resultData->accessToken,
                 ],
                 message: 'Login successfully.',
             );
         }
 
-        Auth::login($resultDTO->user);
-        $request->session()->regenerate();
+        Auth::login($resultData->user);
+        request()->session()->regenerate();
 
         return redirect()->intended('/dashboard');
     }

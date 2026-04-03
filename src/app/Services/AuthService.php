@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\DTO\RegisterUserDTO;
-use App\DTO\LoginUserDTO;
-use App\DTO\AuthResultDTO;
+use App\Data\AuthResultData;
+use App\Data\LoginUserData;
+use App\Data\RegisterUserData;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +19,7 @@ class AuthService
         private readonly UserRepository $userRepository
     ) {}
 
-    public function register(RegisterUserDTO $dto): AuthResultDTO
+    public function register(RegisterUserData $dto): AuthResultData
     {
         $userData = [
             'name' => $dto->name,
@@ -33,10 +33,10 @@ class AuthService
 
         $token = $user->createToken('ApiAccess')->accessToken;
 
-        return new AuthResultDTO($user, $token);
+        return new AuthResultData($user, $token);
     }
 
-    public function login(LoginUserDTO $dto): AuthResultDTO
+    public function login(LoginUserData $dto): AuthResultData
     {
         $user = $this->userRepository->findByEmail($dto->email);
 
@@ -47,7 +47,7 @@ class AuthService
         }
         $token = $user->createToken('ApiAccess')->accessToken;
 
-        return new AuthResultDTO($user, $token);
+        return new AuthResultData($user, $token);
     }
 
     public function logout(User $user): void
