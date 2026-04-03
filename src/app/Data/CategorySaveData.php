@@ -13,6 +13,6 @@ class CategorySaveData extends Data
 {
     public function __construct(
         public string $name,
-        public ?int $parentId = null,
+        public ?int $parent_id = null,
     ) {}
 }

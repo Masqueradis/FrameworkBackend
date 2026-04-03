@@ -39,13 +39,15 @@
             </li>
             <li class="nav-item mt-3 mb-1 px-2 text-uppercase text-secondary" style="font-size: 0.75rem;">Catalog</li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('admin.products.index') }}"
+                   class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
                     Products
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
-                    Categories
+                <a href="{{ route('admin.categories.index') }}"
+                   class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+                        Categories
                 </a>
             </li>
         </ul>
