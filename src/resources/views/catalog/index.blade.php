@@ -1,58 +1,8 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Hardware Store</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH", crossorigin="anonymous">
-</head>
-<body class="bg-light">
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container">
-        <a class="navbar-brand" href="{{ route('catalog.index') }}">MyStore</a>
+@extends('layouts.app')
 
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
+@section('title', 'Products Catalog')
 
-                @guest
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('login') }}">Log in</a>
-                    </li>
-                    <li class="nav-item ms-2">
-                        <a class="btn btn-primary btn-sm mt-1" href="{{ route('register') }}">Register</a>
-                    </li>
-                @endguest
-
-                @auth
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle fw-bold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            Hello, {{ auth()->user()->name }}
-                            @if(auth()->user()->hasRole('admin'))
-                                <span class="badge bg-danger ms-1">Admin</span>
-                            @endif
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="/dashboard">My Dashboard</a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form action="{{ route('logout') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item text-danger">Logout</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                @endauth
-
-            </ul>
-        </div>
-    </div>
-</nav>
-
+@section('content')
     <main class="container mb-5">
         <div class="row">
 
@@ -152,22 +102,22 @@
 
             <section class="col-md-9">
                 <h1 class="h3 fw-bold mb-4">Products Catalog</h1>
-                    @can('create', App\Models\Product::class)
-                        <a href="{{ url('/products/create') }}" class="btn btn-success shadow-sm">
-                            + Add New Product
-                        </a>
-                    @endcan
-                    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-                        @forelse($products as $product)
-                            <div class="col">
-                                <x-product-card :product="$product" />
-                            </div>
-                        @empty
-                            <div class="col-12 text-center py-5 text-muted bg-white rounded shadow-sm w-100">
-                                Sorry, no products found.
-                            </div>
-                        @endforelse
-                    </div>
+                @can('create', App\Models\Product::class)
+                    <a href="{{ url('/products/create') }}" class="btn btn-success shadow-sm">
+                        + Add New Product
+                    </a>
+                @endcan
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+                    @forelse($products as $product)
+                        <div class="col">
+                            <x-product-card :product="$product" />
+                        </div>
+                    @empty
+                        <div class="col-12 text-center py-5 text-muted bg-white rounded shadow-sm w-100">
+                            Sorry, no products found.
+                        </div>
+                    @endforelse
+                </div>
                 <div class="mt-4 d-flex justify-content-center">
                     {{ $products->links('pagination::bootstrap-5') }}
                 </div>
@@ -175,7 +125,8 @@
 
         </div>
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{{ asset('js/filters.js') }}"></script>
-</body>
-</html>
+@endsection
+
+@push('scripts')
+    <script src="{{ asset('js/filters.js') }}"></script>
+@endpush

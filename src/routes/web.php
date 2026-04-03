@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -10,17 +11,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/catalog');
 
-Route::get('dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified']);
-
 Route::get('email/verify', function () {
     return view('auth.verify-email');
 })->middleware('auth')->name('verification.notice');
 
 Route::get('email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
-    return redirect('/dashboard');
+    return redirect('/profile');
 })->middleware(['auth'])->name('verification.verify');
 
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
@@ -43,4 +40,12 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/profile', function () {
+        return view('dashboard');
+    })->name('profile');
+});
+
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
 });

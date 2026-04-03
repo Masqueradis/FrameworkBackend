@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Data\CategorySaveData;
 use App\Http\Controllers\ApiController;
 use App\Http\Resources\CategoryResource;
+use App\Models\Category;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
 use OpenApi\Attributes as OA;
@@ -56,5 +58,41 @@ class CategoryController extends ApiController
             data: CategoryResource::collection($categories),
             message: 'Categories retrieved successfully'
         );
+    }
+
+    public function store(CategorySaveData $request): JsonResponse
+    {
+        $category = $this->categoryService->createCategory($request);
+
+        return $this->respondSuccess(
+            data: new CategoryResource($category),
+            message: 'Category created successfully',
+            code: Response::HTTP_CREATED
+        );
+    }
+
+    public function show(Category $category): JsonResponse
+    {
+        return $this->respondSuccess(
+            data: new CategoryResource($category),
+            message: 'Category retrieved successfully'
+        );
+    }
+
+    public function update(Category $category, CategorySaveData $request): JsonResponse
+    {
+        $updatedCategory = $this->categoryService->updateCategory($category, $request);
+
+        return $this->respondSuccess(
+            data: new CategoryResource($updatedCategory),
+            message: 'Category updated successfully',
+        );
+    }
+
+    public function destroy(Category $category): JsonResponse
+    {
+        $this->categoryService->deleteCategory($category);
+
+        return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }
