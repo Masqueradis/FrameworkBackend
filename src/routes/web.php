@@ -2,17 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 
 Route::redirect('/', '/catalog');
-
-Route::get('dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified']);
 
 Route::get('email/verify', function () {
     return view('auth.verify-email');
@@ -20,7 +19,7 @@ Route::get('email/verify', function () {
 
 Route::get('email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
-    return redirect('/dashboard');
+    return redirect('/profile');
 })->middleware(['auth'])->name('verification.verify');
 
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
@@ -41,6 +40,18 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 });
 
+
+
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/profile', function () {
+        return view('dashboard');
+    })->name('profile');
+});
+
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::resource('categories', AdminCategoryController::class)->names('admin.categories')->except(['show']);
+    Route::resource('products', AdminProductController::class)->names('admin.products')->except(['show']);
 });
