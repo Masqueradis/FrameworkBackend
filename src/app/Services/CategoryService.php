@@ -12,11 +12,13 @@ use Illuminate\Support\Str;
 
 class CategoryService
 {
+    /** @return Collection<int, Category> */
     public function getAllCategories(): Collection
     {
         return Category::orderBy('name')->get();
     }
 
+    /** @return Collection<int, Category> */
     public function getRootCategories(): Collection
     {
         return Category::whereNull('parent_id')
@@ -38,7 +40,7 @@ class CategoryService
     {
         $category->update([
             'name' => $data->name,
-            'parent_id' => $data->parentId,
+            'parent_id' => $data->parent_id,
         ]);
 
         return $category;
@@ -49,16 +51,24 @@ class CategoryService
         $category->delete();
     }
 
+    /**
+     * @param int $perPage
+     * @return LengthAwarePaginator<int, Category>
+     */
     public function getPaginatedCategoriesWithParent(int $perPage = 15): LengthAwarePaginator
     {
         return Category::with('parent')->paginate($perPage);
     }
 
+    /**
+     * @param int|null $excludeId
+     * @return Collection<int, Category>
+     */
     public function getCategoriesForDropdown(?int $excludeId = null): Collection
     {
         $query = Category::query();
 
-        if($excludeId !== null){
+        if ($excludeId !== null) {
             $query->where('id', '!=', $excludeId);
         }
 

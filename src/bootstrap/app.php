@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            \Laravel\Passport\Http\Middleware\CreateFreshApiToken::class
+            \Laravel\Passport\Http\Middleware\CreateFreshApiToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

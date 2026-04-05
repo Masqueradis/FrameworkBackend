@@ -55,6 +55,7 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
         ];
     }
 
+    /** @return BelongsToMany<Role, $this> */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);
@@ -67,8 +68,7 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
 
     public function hasPermission(string $permission): bool
     {
-        return $this->roles()->whereHas('permissions', function ($query) use ($permission)
-        {
+        return $this->roles()->whereHas('permissions', function ($query) use ($permission) {
             $query->where('name', $permission);
         })->exists();
     }

@@ -12,6 +12,7 @@ use App\Http\Controllers\ApiController;
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
+Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -28,4 +29,8 @@ Route::middleware('auth:api')->group(function () {
         ->middleware('can:update,product');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])
         ->middleware('can:delete,product');
+
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::put('/categories/{category}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
 });
