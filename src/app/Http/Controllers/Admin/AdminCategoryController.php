@@ -11,7 +11,7 @@ use App\Services\CategoryService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Illuminate\View\View;
 
-class CategoryController extends ApiController
+class AdminCategoryController extends ApiController
 {
     public function __construct(
         private readonly CategoryService $categoryService

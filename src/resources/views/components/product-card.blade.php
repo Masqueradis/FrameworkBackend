@@ -57,11 +57,11 @@
                 <span class="small text-muted fw-bold">Management:</span>
                 <div class="btn-group">
                     @can('update', $product)
-                        <a href="{{ url('/products/'.$product->id.'/edit') }}" class="btn btn-outline-warning btn-sm">Edit</a>
+                        <a href="{{ url('/admin/products/'.$product->id.'/edit') }}" class="btn btn-outline-warning btn-sm">Edit</a>
                     @endcan
 
                     @can('delete', $product)
-                        <form action="{{ url('/products/'.$product->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                        <form action="{{ url('/admin/products/'.$product->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this product?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-outline-danger btn-sm border-start-0">Delete</button>

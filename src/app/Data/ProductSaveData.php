@@ -22,6 +22,7 @@ class ProductSaveData extends Data
         public bool $available = true,
         public ?string $description = null,
         public ?string $sku = null,
+        /** @var array<string, mixed> */
         public ?array $attributes = null,
     ) {}
 }

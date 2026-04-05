@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\Validation\Min;
 use Spatie\LaravelData\Attributes\MapInputName;
@@ -23,6 +22,7 @@ class ProductIndexData extends Data
         #[Min(0)]
         public ?float $maxPrice = null,
         public ?string $search = null,
+        /** @var array<string, mixed> */
         public ?array $attributes = null,
     ) {}
 }

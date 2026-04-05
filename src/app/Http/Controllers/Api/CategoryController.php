@@ -60,6 +60,37 @@ class CategoryController extends ApiController
         );
     }
 
+    #[OA\Post(
+        path: '/api/categories',
+        description: 'Creates a new category in the catalog. Requires admin privileges.',
+        summary: 'Create a new category',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'Processors'),
+                    new OA\Property(property: 'parent_id', type: 'integer', nullable: true, example: null),
+                ]
+            )
+        ),
+        tags: ['Catalog'],
+        responses: [
+            new OA\Response(
+                response: Response::HTTP_CREATED,
+                description: 'Category created successfully'
+            ),
+            new OA\Response(
+                response: Response::HTTP_UNPROCESSABLE_ENTITY,
+                description: 'Validation errors'
+            ),
+            new OA\Response(
+                response: Response::HTTP_UNAUTHORIZED,
+                description: 'Unauthenticated'
+            ),
+        ]
+    )]
     public function store(CategorySaveData $request): JsonResponse
     {
         $category = $this->categoryService->createCategory($request);
@@ -71,6 +102,31 @@ class CategoryController extends ApiController
         );
     }
 
+    #[OA\Get(
+        path: '/api/categories/{category}',
+        description: 'Returns the details of a single category.',
+        summary: 'Get a specific category',
+        tags: ['Catalog'],
+        parameters: [
+            new OA\Parameter(
+                name: 'category',
+                description: 'ID of the category',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: Response::HTTP_OK,
+                description: 'Category retrieved successfully'
+            ),
+            new OA\Response(
+                response: Response::HTTP_NOT_FOUND,
+                description: 'Category not found'
+            ),
+        ]
+    )]
     public function show(Category $category): JsonResponse
     {
         return $this->respondSuccess(
@@ -79,6 +135,46 @@ class CategoryController extends ApiController
         );
     }
 
+    #[OA\Put(
+        path: '/api/categories/{category}',
+        description: 'Updates an existing category. Requires admin privileges.',
+        summary: 'Update a specific category',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'Updated Processors'),
+                    new OA\Property(property: 'parent_id', type: 'integer', nullable: true, example: 1),
+                ]
+            )
+        ),
+        tags: ['Catalog'],
+        parameters: [
+            new OA\Parameter(
+                name: 'category',
+                description: 'ID of the category to update',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: Response::HTTP_OK,
+                description: 'Category updated successfully'
+            ),
+            new OA\Response(
+                response: Response::HTTP_NOT_FOUND,
+                description: 'Category not found'
+            ),
+            new OA\Response(
+                response: Response::HTTP_UNPROCESSABLE_ENTITY,
+                description: 'Validation errors'
+            ),
+        ]
+    )]
     public function update(Category $category, CategorySaveData $request): JsonResponse
     {
         $updatedCategory = $this->categoryService->updateCategory($category, $request);
@@ -89,6 +185,32 @@ class CategoryController extends ApiController
         );
     }
 
+    #[OA\Delete(
+        path: '/api/categories/{category}',
+        description: 'Deletes a specific category. Requires admin privileges.',
+        summary: 'Delete a category',
+        security: [['bearerAuth' => []]],
+        tags: ['Catalog'],
+        parameters: [
+            new OA\Parameter(
+                name: 'category',
+                description: 'ID of the category to delete',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: Response::HTTP_NO_CONTENT,
+                description: 'Category deleted successfully'
+            ),
+            new OA\Response(
+                response: Response::HTTP_NOT_FOUND,
+                description: 'Category not found'
+            ),
+        ]
+    )]
     public function destroy(Category $category): JsonResponse
     {
         $this->categoryService->deleteCategory($category);

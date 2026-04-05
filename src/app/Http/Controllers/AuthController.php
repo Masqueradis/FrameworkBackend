@@ -6,8 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Data\LoginUserData;
 use App\Data\RegisterUserData;
-use App\Http\Requests\LoginUserRequest;
-use App\Http\Requests\RegisterUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuthService;
@@ -16,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 use OpenApi\Attributes as OA;
 
@@ -25,12 +24,12 @@ class AuthController extends ApiController
         private readonly AuthService $authService
     ) {}
 
-    public function showLoginForm()
+    public function showLoginForm(): View
     {
         return view('auth.login');
     }
 
-    public function showRegisterForm()
+    public function showRegisterForm(): View
     {
         return view('auth.register');
     }
@@ -91,7 +90,7 @@ class AuthController extends ApiController
         Auth::login($resultData->user);
         request()->session()->regenerate();
 
-        return redirect()->intended('/dashboard');
+        return redirect()->intended('/profile');
     }
 
     #[OA\Post(
@@ -150,7 +149,7 @@ class AuthController extends ApiController
         Auth::login($resultData->user);
         request()->session()->regenerate();
 
-        return redirect()->intended('/dashboard');
+        return redirect()->intended('/profile');
     }
 
     #[OA\Post(

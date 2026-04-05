@@ -103,7 +103,7 @@
             <section class="col-md-9">
                 <h1 class="h3 fw-bold mb-4">Products Catalog</h1>
                 @can('create', App\Models\Product::class)
-                    <a href="{{ url('/products/create') }}" class="btn btn-success shadow-sm">
+                    <a href="{{ url('/admin/products/create') }}" class="btn btn-success shadow-sm">
                         + Add New Product
                     </a>
                 @endcan

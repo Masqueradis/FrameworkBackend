@@ -5,11 +5,12 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\Api\CategoryController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\AdminCategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\AdminProductController as AdminProductController;
 
 Route::redirect('/', '/catalog');
 
@@ -42,16 +43,19 @@ Route::middleware('guest')->group(function () {
 
 
 
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', function () {
         return view('dashboard');
     })->name('profile');
+
 });
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
-    Route::resource('categories', AdminCategoryController::class)->names('admin.categories')->except(['show']);
-    Route::resource('products', AdminProductController::class)->names('admin.products')->except(['show']);
+    Route::resource('categories', AdminCategoryController::class)
+        ->names('admin.categories')->except(['show']);
+    Route::resource('products', AdminProductController::class)
+        ->names('admin.products')->except(['show']);
 });

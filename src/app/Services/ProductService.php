@@ -13,36 +13,39 @@ use Illuminate\Support\Str;
 
 class ProductService
 {
-    public function getFilteredProducts(ProductIndexData $dto): LengthAwarePaginator
+    /**
+     * @param ProductIndexData $data
+     * @return LengthAwarePaginator<int, Product>
+     */
+    public function getFilteredProducts(ProductIndexData $data): LengthAwarePaginator
     {
         $query = Product::query()->with('category')->where('available', true);
 
-        if ($dto->categoryId) {
-            $query->where('category_id', $dto->categoryId);
+        if ($data->categoryId) {
+            $query->where('category_id', $data->categoryId);
         }
 
-        if ($dto->minPrice) {
-            $query->where('price', '>=', $dto->minPrice);
+        if ($data->minPrice) {
+            $query->where('price', '>=', $data->minPrice);
         }
 
-        if ($dto->maxPrice) {
-            $query->where('price', '<=', $dto->maxPrice);
+        if ($data->maxPrice) {
+            $query->where('price', '<=', $data->maxPrice);
         }
 
-        if ($dto->search) {
-            $query->where(function ($q) use ($dto) {
-                $searchTerm ='%' . $dto->search . '%';
+        if ($data->search) {
+            $query->where(function ($q) use ($data) {
+                $searchTerm = '%' . $data->search . '%';
                 $q->where('name', 'ilike', $searchTerm)
                     ->orWhere('description', 'ilike', $searchTerm);
             });
         }
 
-        if ($dto->attributes) {
-            foreach ($dto->attributes as $attribute => $value) {
+        if ($data->attributes) {
+            foreach ($data->attributes as $attribute => $value) {
                 if (is_array($value)) {
                     $query->whereIn("attributes->$attribute", $value);
-                }
-                else {
+                } else {
                     $query->where("attributes->$attribute", $value);
                 }
             }
@@ -51,6 +54,10 @@ class ProductService
         return $query->paginate(9);
     }
 
+    /**
+     * @param int|null $categoryId
+     * @return array<string, mixed>
+     */
     public function getFilteredData(?int $categoryId): array
     {
         $query = Product::where('available', true);
@@ -62,17 +69,19 @@ class ProductService
             $query->whereIn('category_id', $categoryIds);
         }
 
-        $minPrice = floor((float)($query->min('price') ?? 0));
-        $maxPrice = ceil((float)($query->max('price') ?? 0));
+        $minPrice = floor((float) ($query->min('price') ?? 0));
+        $maxPrice = ceil((float) ($query->max('price') ?? 0));
 
         $attributes = [];
         $products = $query->select('attributes')->get();
 
         foreach ($products as $product) {
-            if (!is_array($product->attributes)) continue;
+            if (!is_array($product->attributes)) {
+                continue;
+            }
 
             foreach ($product->attributes as $key => $value) {
-                if(!isset($attributes[$key])) {
+                if (!isset($attributes[$key])) {
                     $attributes[$key] = [];
                 }
 
@@ -93,38 +102,38 @@ class ProductService
         ];
     }
 
-    public function createProduct(ProductSaveData $dto): Product
+    public function createProduct(ProductSaveData $data): Product
     {
         return Product::create([
-            'category_id' => $dto->categoryId,
-            'name' => $dto->name,
-            'slug' => Str::slug($dto->name) . '-' . uniqid(),
-            'sku' => $dto->sku ?? 'SKU-' . strtoupper(Str::random(8)),
-            'description' => $dto->description,
-            'price' => $dto->price,
-            'stock' => $dto->stock,
-            'available' => $dto->available,
-            'attributes' => $dto->attributes,
+            'category_id' => $data->categoryId,
+            'name' => $data->name,
+            'slug' => Str::slug($data->name) . '-' . uniqid(),
+            'sku' => $data->sku ?? 'SKU-' . strtoupper(Str::random(8)),
+            'description' => $data->description,
+            'price' => $data->price,
+            'stock' => $data->stock,
+            'available' => $data->available,
+            'attributes' => $data->attributes,
         ]);
     }
 
-    public function updateProduct(Product $product, ProductSaveData $dto): Product
+    public function updateProduct(Product $product, ProductSaveData $data): Product
     {
-        $data = [
-            'category_id' => $dto->categoryId,
-            'name' => $dto->name,
-            'description' => $dto->description,
-            'price' => $dto->price,
-            'stock' => $dto->stock,
-            'available' => $dto->available,
-            'attributes' => $dto->attributes,
+        $updateData = [
+            'category_id' => $data->categoryId,
+            'name' => $data->name,
+            'description' => $data->description,
+            'price' => $data->price,
+            'stock' => $data->stock,
+            'available' => $data->available,
+            'attributes' => $data->attributes,
         ];
 
-        if($dto->sku){
-            $data['sku'] = $dto->sku;
+        if ($data->sku !== null) {
+            $updateData['sku'] = $data->sku;
         }
 
-        $product->update($data);
+        $product->update($updateData);
 
         return $product;
     }
@@ -134,6 +143,10 @@ class ProductService
         $product->delete();
     }
 
+    /**
+     * @param int $perPage
+     * @return LengthAwarePaginator<int, Product>
+     */
     public function getPaginatedProductsForAdmin(int $perPage = 15): LengthAwarePaginator
     {
         return Product::with('category')->latest()->paginate($perPage);

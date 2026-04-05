@@ -14,7 +14,7 @@ use App\Services\ProductService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Illuminate\View\View;
 
-class ProductController
+class AdminProductController
 {
     public function __construct(
         private readonly ProductService $productService,

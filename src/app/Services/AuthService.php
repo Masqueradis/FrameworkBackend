@@ -19,12 +19,12 @@ class AuthService
         private readonly UserRepository $userRepository
     ) {}
 
-    public function register(RegisterUserData $dto): AuthResultData
+    public function register(RegisterUserData $data): AuthResultData
     {
         $userData = [
-            'name' => $dto->name,
-            'email' => $dto->email,
-            'password' => Hash::make($dto->password),
+            'name' => $data->name,
+            'email' => $data->email,
+            'password' => Hash::make($data->password),
         ];
 
         $user = $this->userRepository->create($userData);
@@ -36,11 +36,11 @@ class AuthService
         return new AuthResultData($user, $token);
     }
 
-    public function login(LoginUserData $dto): AuthResultData
+    public function login(LoginUserData $data): AuthResultData
     {
-        $user = $this->userRepository->findByEmail($dto->email);
+        $user = $this->userRepository->findByEmail($data->email);
 
-        if (!Hash::check($dto->password, $user->password)) {
+        if (!Hash::check($data->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);

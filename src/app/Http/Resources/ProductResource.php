@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -15,12 +17,13 @@ class ProductResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'slug' => $this->slug,
-            'sku' => $this->sku,
-            'price' => (float) $this->price,
-            'stock' => $this->stock,
+            'id' => $this->resource->id,
+            'name' => $this->resource->name,
+            'slug' => $this->resource->slug,
+            'sku' => $this->resource->sku,
+            'description' => $this->resource->description,
+            'price' => (float) $this->resource->price,
+            'stock' => $this->resource->stock,
             'category' => new CategoryResource($this->whenLoaded('category')),
         ];
     }

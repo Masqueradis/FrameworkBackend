@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Data\ProductIndexData;
@@ -169,7 +171,7 @@ class ProductController extends ApiController
         tags: ['Catalog'],
         parameters: [
             new OA\Parameter(name: 'product', description: 'Product ID', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
-            ],
+        ],
         responses: [
             new OA\Response(response: Response::HTTP_NO_CONTENT, description: 'Product deleted successfully'),
             new OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Forbidden - Admins only'),

@@ -185,8 +185,23 @@ class ProductApiTest extends TestCase
 
         $response->assertStatus(Response::HTTP_NO_CONTENT);
 
-        $this->assertDatabaseMissing('products', [
+        $this->assertSoftDeleted('products', [
             'id' => $product->id,
         ]);
+    }
+
+    #[Test]
+    public function testCanGetSpecificProduct(): void
+    {
+        $product = Product::factory()->create([
+            'category_id' => $this->category->id,
+            'name' => 'RTX4090',
+        ]);
+
+        $response = $this->getJson("/api/products/{$product->id}");
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJsonPath('data.id', $product->id)
+            ->assertJsonPath('data.name', $product->name);
     }
 }

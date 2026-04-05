@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature;
+namespace Feature\Api;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Test;
-use Laravel\Passport\Passport;
-use Tests\TestCase;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Event;
+use Tests\TestCase;
 
-class AuthTest extends TestCase
+class AuthApiTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -150,5 +149,43 @@ class AuthTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK)
             ->assertViewIs('auth.register');
+    }
+
+    #[Test]
+    public function testRegisterWeb(): void
+    {
+        $response = $this->post('/register', [
+            'name' => 'Test User',
+            'email' => 'test@email.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertRedirect('/profile');
+        $this->assertAuthenticated();
+    }
+
+    #[Test]
+    public function testLoginWeb(): void
+    {
+        $user = User::factory()->create(['password' => bcrypt('password')]);
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/profile');
+        $this->assertAuthenticatedAs($user);
+    }
+
+    #[Test]
+    public function testLogoutWeb(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post('/logout');
+
+        $response->assertRedirect('/');
+        $this->assertGuest();
     }
 }
