@@ -7,6 +7,8 @@ namespace App\Services;
 use App\Data\CategorySaveData;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Str;
 
 class CategoryService
 {
@@ -45,5 +47,21 @@ class CategoryService
     public function deleteCategory(Category $category): void
     {
         $category->delete();
+    }
+
+    public function getPaginatedCategoriesWithParent(int $perPage = 15): LengthAwarePaginator
+    {
+        return Category::with('parent')->paginate($perPage);
+    }
+
+    public function getCategoriesForDropdown(?int $excludeId = null): Collection
+    {
+        $query = Category::query();
+
+        if($excludeId !== null){
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->get();
     }
 }

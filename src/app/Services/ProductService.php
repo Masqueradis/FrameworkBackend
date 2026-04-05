@@ -133,4 +133,9 @@ class ProductService
     {
         $product->delete();
     }
+
+    public function getPaginatedProductsForAdmin(int $perPage = 15): LengthAwarePaginator
+    {
+        return Product::with('category')->latest()->paginate($perPage);
+    }
 }
