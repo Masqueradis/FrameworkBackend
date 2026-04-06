@@ -34,7 +34,7 @@
                         </td>
                         <td class="fw-bold text-success">${{ number_format($product->price, 2) }}</td>
                         <td class="text-end pe-4">
-                            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-outline-warning btn-sm">Edit</a>
                             <form action="{{ route('admin.products.destroy', $product) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this product?');">
                                 @csrf
                                 @method('DELETE')

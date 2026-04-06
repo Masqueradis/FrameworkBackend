@@ -34,7 +34,7 @@
                         </td>
                         <td class="text-muted small">{{ $category->slug }}</td>
                         <td class="text-end pe-4">
-                            <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-outline-warning btn-sm">Edit</a>
                             <form action="{{ route('admin.categories.destroy', $category) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
                                 @csrf
                                 @method('DELETE')

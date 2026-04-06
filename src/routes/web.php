@@ -41,8 +41,6 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 });
 
-
-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', function () {
         return view('dashboard');
