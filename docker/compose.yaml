@@ -24,7 +24,7 @@ services:
             POSTGRES_USER: '${DB_USERNAME}'
             POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
         volumes:
-            - sail-pgsql:/var/lib/postgresql/18/docker
+            - sail-pgsql:/var/lib/postgresql/data
         networks:
             - sail
         healthcheck:

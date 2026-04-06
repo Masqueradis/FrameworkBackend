@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature\Api;
+namespace Tests\Feature\Api;
 
 use App\Models\Permission;
 use App\Models\Role;

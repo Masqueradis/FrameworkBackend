@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature\Policy;
+namespace Tests\Feature\Policy;
 
 use App\Models\Product;
 use App\Models\User;

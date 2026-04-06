@@ -76,11 +76,7 @@ class ProductService
         $products = $query->select('attributes')->get();
 
         foreach ($products as $product) {
-            if (!is_array($product->attributes)) {
-                continue;
-            }
-
-            foreach ($product->attributes as $key => $value) {
+            foreach ($product->attributes ?? [] as $key => $value) {
                 if (!isset($attributes[$key])) {
                     $attributes[$key] = [];
                 }

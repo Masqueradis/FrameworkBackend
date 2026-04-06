@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature\Services;
+namespace Tests\Feature\Services;
 
 use App\Data\ProductIndexData;
 use App\Data\ProductSaveData;

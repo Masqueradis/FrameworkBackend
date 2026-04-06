@@ -181,7 +181,7 @@ class ProductController extends ApiController
                     properties: [
                         new OA\Property(property: 'success', type: 'boolean', example: true),
                         new OA\Property(property: 'message', type: 'string', example: 'Product created successfully'),
-                        new OA\Property(property: 'data', type: 'object', example: ['id' => 1, 'name' => 'NVIDIA RTX 4090', 'price' => 1599.99])
+                        new OA\Property(property: 'data', type: 'object', example: ['id' => 1, 'name' => 'NVIDIA RTX 4090', 'price' => 1599.99]),
                     ]
                 )
             ),
@@ -233,7 +233,7 @@ class ProductController extends ApiController
                     properties: [
                         new OA\Property(property: 'success', type: 'boolean', example: true),
                         new OA\Property(property: 'message', type: 'string', example: 'Product updated successfully'),
-                        new OA\Property(property: 'data', type: 'object', example: ['id' => 1, 'name' => 'NVIDIA RTX 4090 (Updated)', 'price' => 1499.99])
+                        new OA\Property(property: 'data', type: 'object', example: ['id' => 1, 'name' => 'NVIDIA RTX 4090 (Updated)', 'price' => 1499.99]),
                     ]
                 )
             ),
