@@ -56,6 +56,17 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction
         working-directory: ./src
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install NPM dependencies and build
+        run: |
+          npm ci
+          npm run build
+        working-directory: ./src
+
       - name: Create .env file from secret
         run: |
           cat <<EOF > src/.env
