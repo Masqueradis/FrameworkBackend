@@ -38,9 +38,9 @@ class CategoryController extends ApiController
                             items: new OA\Items(
                                 properties: [
                                     new OA\Property(property: 'id', type: 'integer', example: 1),
-                                    new OA\Property(property: 'name', type: 'string', example: 'Видеокарты'),
+                                    new OA\Property(property: 'name', type: 'string', example: 'Videocards'),
                                     new OA\Property(property: 'slug', type: 'string', example: 'videocards'),
-                                    new OA\Property(property: 'description', type: 'string', example: 'Graphics processing components'),
+                                    new OA\Property(property: 'description', type: 'string', example: 'Graphics processing components', nullable: true),
                                 ],
                                 type: 'object'
                             )
@@ -71,7 +71,7 @@ class CategoryController extends ApiController
                 required: ['name'],
                 properties: [
                     new OA\Property(property: 'name', type: 'string', example: 'Processors'),
-                    new OA\Property(property: 'parent_id', type: 'integer', nullable: true, example: null),
+                    new OA\Property(property: 'parent_id', type: 'integer', example: null, nullable: true),
                 ]
             )
         ),
@@ -79,7 +79,23 @@ class CategoryController extends ApiController
         responses: [
             new OA\Response(
                 response: Response::HTTP_CREATED,
-                description: 'Category created successfully'
+                description: 'Category created successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Category created successfully'),
+                        new OA\Property(
+                            property: 'data',
+                            properties: [
+                                new OA\Property(property: 'id', type: 'integer', example: 2),
+                                new OA\Property(property: 'name', type: 'string', example: 'Processors'),
+                                new OA\Property(property: 'slug', type: 'string', example: 'processors-64b1f3c'),
+                                new OA\Property(property: 'description', type: 'string', nullable: true, example: null),
+                            ],
+                            type: 'object'
+                        ),
+                    ]
+                )
             ),
             new OA\Response(
                 response: Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -119,7 +135,23 @@ class CategoryController extends ApiController
         responses: [
             new OA\Response(
                 response: Response::HTTP_OK,
-                description: 'Category retrieved successfully'
+                description: 'Category retrieved successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Category retrieved successfully'),
+                        new OA\Property(
+                            property: 'data',
+                            properties: [
+                                new OA\Property(property: 'id', type: 'integer', example: 1),
+                                new OA\Property(property: 'name', type: 'string', example: 'Processors'),
+                                new OA\Property(property: 'slug', type: 'string', example: 'processors'),
+                                new OA\Property(property: 'description', type: 'string', example: 'CPU components', nullable: true),
+                            ],
+                            type: 'object'
+                        ),
+                    ]
+                )
             ),
             new OA\Response(
                 response: Response::HTTP_NOT_FOUND,
@@ -146,7 +178,7 @@ class CategoryController extends ApiController
                 required: ['name'],
                 properties: [
                     new OA\Property(property: 'name', type: 'string', example: 'Updated Processors'),
-                    new OA\Property(property: 'parent_id', type: 'integer', nullable: true, example: 1),
+                    new OA\Property(property: 'parent_id', type: 'integer', example: 1, nullable: true),
                 ]
             )
         ),
@@ -163,7 +195,23 @@ class CategoryController extends ApiController
         responses: [
             new OA\Response(
                 response: Response::HTTP_OK,
-                description: 'Category updated successfully'
+                description: 'Category updated successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Category updated successfully'),
+                        new OA\Property(
+                            property: 'data',
+                            properties: [
+                                new OA\Property(property: 'id', type: 'integer', example: 1),
+                                new OA\Property(property: 'name', type: 'string', example: 'Updated Processors'),
+                                new OA\Property(property: 'slug', type: 'string', example: 'updated-processors'),
+                                new OA\Property(property: 'description', type: 'string', example: 'Updated description', nullable: true),
+                            ],
+                            type: 'object'
+                        ),
+                    ]
+                )
             ),
             new OA\Response(
                 response: Response::HTTP_NOT_FOUND,

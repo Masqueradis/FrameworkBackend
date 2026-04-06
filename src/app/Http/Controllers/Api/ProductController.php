@@ -101,13 +101,45 @@ class ProductController extends ApiController
 
     #[OA\Get(
         path: '/api/products/{product}',
+        description: 'Returns detailed information about a single product.',
         summary: 'Get a specific product',
         tags: ['Catalog'],
         parameters: [
             new OA\Parameter(name: 'product', description: 'Product ID', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: Response::HTTP_OK, description: 'Product retrieved successfully'),
+            new OA\Response(
+                response: Response::HTTP_OK,
+                description: 'Product retrieved successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Product retrieved successfully'),
+                        new OA\Property(
+                            property: 'data',
+                            properties: [
+                                new OA\Property(property: 'id', type: 'integer', example: 1),
+                                new OA\Property(property: 'name', type: 'string', example: 'Video card RTX 4090'),
+                                new OA\Property(property: 'slug', type: 'string', example: 'rtx-4090'),
+                                new OA\Property(property: 'sku', type: 'string', example: 'SKU-1234-ABCD'),
+                                new OA\Property(property: 'description', type: 'string', example: 'High-end graphics processing unit.'),
+                                new OA\Property(property: 'price', type: 'number', format: 'float', example: 4500.00),
+                                new OA\Property(property: 'stock', type: 'integer', example: 5),
+                                new OA\Property(
+                                    property: 'category',
+                                    properties: [
+                                        new OA\Property(property: 'id', type: 'integer', example: 2),
+                                        new OA\Property(property: 'name', type: 'string', example: 'Video cards'),
+                                    ],
+                                    type: 'object',
+                                    nullable: true
+                                ),
+                            ],
+                            type: 'object'
+                        ),
+                    ]
+                )
+            ),
             new OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Product not found'),
         ]
     )]
@@ -121,11 +153,38 @@ class ProductController extends ApiController
 
     #[OA\Post(
         path: '/api/products',
+        description: 'Creates a new product in the catalog. Requires edit-catalog permissions.',
         summary: 'Create a new product (Managers and Admins only)',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['category_id', 'name', 'price', 'stock', 'available'],
+                properties: [
+                    new OA\Property(property: 'category_id', type: 'integer', example: 1),
+                    new OA\Property(property: 'name', type: 'string', example: 'NVIDIA RTX 4090'),
+                    new OA\Property(property: 'description', type: 'string', example: 'Ultimate gaming GPU', nullable: true),
+                    new OA\Property(property: 'price', type: 'number', format: 'float', example: 1599.99),
+                    new OA\Property(property: 'stock', type: 'integer', example: 15),
+                    new OA\Property(property: 'available', type: 'boolean', example: true),
+                    new OA\Property(property: 'sku', type: 'string', example: 'NV-4090-FE', nullable: true),
+                    new OA\Property(property: 'attributes', type: 'object', example: ['memory' => '24GB', 'color' => 'black'], nullable: true),
+                ]
+            )
+        ),
         tags: ['Catalog'],
         responses: [
-            new OA\Response(response: Response::HTTP_CREATED, description: 'Product created successfully'),
+            new OA\Response(
+                response: Response::HTTP_CREATED,
+                description: 'Product created successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Product created successfully'),
+                        new OA\Property(property: 'data', type: 'object', example: ['id' => 1, 'name' => 'NVIDIA RTX 4090', 'price' => 1599.99])
+                    ]
+                )
+            ),
             new OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Forbidden - No permission'),
             new OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors'),
         ]
@@ -143,15 +202,44 @@ class ProductController extends ApiController
 
     #[OA\Put(
         path: '/api/products/{product}',
+        description: 'Updates an existing product. Requires edit-catalog permissions.',
         summary: 'Update a specific product (Managers and Admins only)',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['category_id', 'name', 'price', 'stock', 'available'],
+                properties: [
+                    new OA\Property(property: 'category_id', type: 'integer', example: 1),
+                    new OA\Property(property: 'name', type: 'string', example: 'NVIDIA RTX 4090 (Updated)'),
+                    new OA\Property(property: 'description', type: 'string', example: 'Ultimate gaming GPU updated description', nullable: true),
+                    new OA\Property(property: 'price', type: 'number', format: 'float', example: 1499.99),
+                    new OA\Property(property: 'stock', type: 'integer', example: 10),
+                    new OA\Property(property: 'available', type: 'boolean', example: false),
+                    new OA\Property(property: 'sku', type: 'string', example: 'NV-4090-FE-V2', nullable: true),
+                    new OA\Property(property: 'attributes', type: 'object', example: ['memory' => '24GB'], nullable: true),
+                ]
+            )
+        ),
         tags: ['Catalog'],
         parameters: [
             new OA\Parameter(name: 'product', description: 'Product ID', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: Response::HTTP_OK, description: 'Product updated successfully'),
+            new OA\Response(
+                response: Response::HTTP_OK,
+                description: 'Product updated successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Product updated successfully'),
+                        new OA\Property(property: 'data', type: 'object', example: ['id' => 1, 'name' => 'NVIDIA RTX 4090 (Updated)', 'price' => 1499.99])
+                    ]
+                )
+            ),
+            new OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Product not found'),
             new OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Forbidden - No permission'),
+            new OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors'),
         ]
     )]
     public function update(ProductSaveData $request, Product $product): JsonResponse
@@ -166,6 +254,7 @@ class ProductController extends ApiController
 
     #[OA\Delete(
         path: '/api/products/{product}',
+        description: 'Permanently deletes or soft-deletes a product from the database.',
         summary: 'Delete a specific product (Admins only)',
         security: [['bearerAuth' => []]],
         tags: ['Catalog'],
@@ -174,6 +263,7 @@ class ProductController extends ApiController
         ],
         responses: [
             new OA\Response(response: Response::HTTP_NO_CONTENT, description: 'Product deleted successfully'),
+            new OA\Response(response: Response::HTTP_NOT_FOUND, description: 'Product not found'),
             new OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Forbidden - Admins only'),
         ]
     )]
