@@ -18,8 +18,3 @@ Store App is a web-based e-commerce platform for computer components built with 
 3. Done!
 
 Now you can access the website at http://localhost
-
-### Directory info
-#### Docker 
-- **nginx** – contains default configuration for nginx and a Dockerfile to copy this config
-- **php** – contains Xdebug configuration and a Dockerfile with settings necessary for the application
