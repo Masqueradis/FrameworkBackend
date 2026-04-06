@@ -73,6 +73,10 @@ jobs:
           ${{ secrets.ENV_FILE }}
           EOF
 
+      - name: Generate App Key
+        run: php artisan key:generate
+        working-directory: ./src
+
       - name: Run test suite
         run: php artisan test --coverage
         working-directory: ./src
