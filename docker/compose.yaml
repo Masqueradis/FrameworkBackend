@@ -1,8 +1,6 @@
 services:
     app:
-        build:
-            context: ../
-            dockerfile: ./docker/php/Dockerfile
+        image: masqueradisu/laravel-php:8.5-dev
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:

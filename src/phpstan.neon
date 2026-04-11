@@ -4,4 +4,4 @@ parameters:
     paths:
         - app/
         - tests/
-    level: 6
+    level: 8

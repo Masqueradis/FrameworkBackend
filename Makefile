@@ -39,3 +39,4 @@ setup: init build up
 	${DOCKER_COMPOSE} exec app php artisan storage:link
 	cd src && npm install
 	cd src && npm run build
+	echo "App now available on address: http://localhost"
