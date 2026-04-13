@@ -12,9 +12,9 @@ use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use OpenApi\Attributes as OA;
 
@@ -74,7 +74,31 @@ class AuthController extends ApiController
     )]
     public function register(RegisterUserData $request): JsonResponse|RedirectResponse
     {
-        $resultData = $this->authService->register($request);
+        $this->authService->register($request);
+
+        if(request()->expectsJson()) {
+            return $this->respondSuccess(
+                data: [],
+                message: 'Registration pending. Check your email to activate your account.',
+                code: Response::HTTP_ACCEPTED,
+            );
+        }
+
+        return redirect()->route('login')
+            ->with('status', 'A verification link has been sent to your email. It is valid for 30 minutes.');
+    }
+
+    public function verifyEmail(string $token): JsonResponse|RedirectResponse
+    {
+        try {
+            $resultData = $this->authService->verifyRegistration($token);
+        } catch (ValidationException $e) {
+            if (request()->expectsJson()) {
+                return $this->respondError($e->getMessage(), Response::HTTP_BAD_REQUEST);
+            }
+            return redirect()->route('register')
+                ->withErrors(['email' => 'The link is expired or invalid. Please register again.']);
+        }
 
         if (request()->expectsJson()) {
             return $this->respondSuccess(
@@ -82,15 +106,14 @@ class AuthController extends ApiController
                     'user' => new UserResource($resultData->user),
                     'token' => $resultData->accessToken,
                 ],
-                message: 'Registered successfully.',
-                code: Response::HTTP_CREATED,
+                message: 'Email verified and registered successfully.',
             );
         }
 
         Auth::login($resultData->user);
         request()->session()->regenerate();
 
-        return redirect()->intended('/profile');
+        return redirect()->intended('/profile')->with('status', 'Email verified. Welcome');
     }
 
     #[OA\Post(
@@ -174,6 +197,8 @@ class AuthController extends ApiController
     {
         $user = $request->user();
 
+        assert($user instanceof User);
+
         $this->authService->logout($user);
         if ($request->expectsJson()) {
             return $this->respondSuccess(
@@ -186,5 +211,24 @@ class AuthController extends ApiController
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    public function showVerificationNotice(): View
+    {
+        return view('auth.verify-email');
+    }
+
+    public function resendVerificationEmail(Request $request): JsonResponse|RedirectResponse
+    {
+        $user = $request->user();
+
+        $user?->sendEmailVerificationNotification();
+
+        return back()->with('message', 'Verification link sent!');
+    }
+
+    public function user(Request $request): JsonResponse|RedirectResponse
+    {
+        return response()->json($request->user());
     }
 }

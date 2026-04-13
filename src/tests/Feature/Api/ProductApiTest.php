@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\HttpFoundation\Response;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -26,20 +27,26 @@ class ProductApiTest extends TestCase
     {
         parent::setUp();
 
-        $adminRole = Role::factory()->create(['name' => 'admin']);
-        $customerRole = Role::factory()->create(['name' => 'customer']);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $editCatalogPermission = Permission::factory()->create(['name' => 'edit-catalog']);
+        $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'web']);
+        $customerRole = Role::create(['name' => 'customer', 'guard_name' => 'web']);
 
-        $adminRole->permissions()->attach($editCatalogPermission);
+        $editProductsPermission = Permission::create(['name' => 'manage all products', 'guard_name' => 'web']);
+        $editCatalogPermission = Permission::create(['name' => 'edit-catalog', 'guard_name' => 'web']);
+
+        $adminRole->givePermissionTo($editProductsPermission);
+        $adminRole->givePermissionTo($editCatalogPermission);
 
         $this->admin = User::factory()->create();
-        $this->admin->roles()->attach($adminRole);
+        $this->admin->assignRole($adminRole);
 
         $this->customer = User::factory()->create();
-        $this->customer->roles()->attach($customerRole);
+        $this->customer->assignRole($customerRole);
 
         $this->category = Category::factory()->create();
+
+
     }
 
     #[Test]
@@ -51,7 +58,7 @@ class ProductApiTest extends TestCase
             'available' => true,
         ]);
 
-        $response = $this->getJson('/api/products');
+        $response = $this->getJson('/api/v1/products');
 
         $response->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
@@ -80,7 +87,7 @@ class ProductApiTest extends TestCase
         Product::factory()->create(['price' => 100, 'category_id' => $category->id, 'available' => true]);
         Product::factory()->create(['price' => 5000, 'category_id' => $category->id, 'available' => true]);
 
-        $response = $this->getJson('/api/products?min_price=1000');
+        $response = $this->actingAs($this->admin, 'api')->getJson('/api/v1/products?min_price=1000');
         $response->assertStatus(Response::HTTP_OK);
 
         $this->assertCount(1, $response->json('data.data'));
@@ -99,7 +106,7 @@ class ProductApiTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin, 'api')
-            ->postJson('/api/products', $payload);
+            ->postJson('/api/v1/products', $payload);
 
         $response->assertStatus(Response::HTTP_CREATED)
             ->assertJsonStructure(['data']);
@@ -122,7 +129,7 @@ class ProductApiTest extends TestCase
         ];
 
         $response = $this->actingAs($this->customer, 'api')
-            ->postJson('/api/products', $payload);
+            ->postJson('/api/v1/products', $payload);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -139,14 +146,14 @@ class ProductApiTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin, 'api')
-            ->postJson('/api/products', $payload);
+            ->postJson('/api/v1/products', $payload);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrors(['name', 'price']);
     }
 
     #[Test]
-    public function testAdminCatUpdateProduct(): void
+    public function testAdminCanUpdateProduct(): void
     {
         $product = Product::factory()->create([
             'category_id' => $this->category->id,
@@ -162,7 +169,7 @@ class ProductApiTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin, 'api')
-            ->putJson("/api/products/{$product->id}", $payload);
+            ->putJson("/api/v1/products/{$product->id}", $payload);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -181,7 +188,7 @@ class ProductApiTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin, 'api')
-            ->deleteJson("/api/products/{$product->id}");
+            ->deleteJson("/api/v1/products/{$product->id}");
 
         $response->assertStatus(Response::HTTP_NO_CONTENT);
 
@@ -198,7 +205,7 @@ class ProductApiTest extends TestCase
             'name' => 'RTX4090',
         ]);
 
-        $response = $this->getJson("/api/products/{$product->id}");
+        $response = $this->getJson("/api/v1/products/{$product->id}");
 
         $response->assertStatus(Response::HTTP_OK)
             ->assertJsonPath('data.id', $product->id)

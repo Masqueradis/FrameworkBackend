@@ -8,6 +8,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -15,25 +16,20 @@ class RolePermissionTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[Test]
-    public function testRoleBelongsToManyUsers(): void
+    protected function setUp(): void
     {
-        $role = Role::factory()->create();
-        $user = User::factory()->create();
-
-        $role->users()->attach($user);
-
-        $this->assertTrue($role->users->contains('id', $user->id));
+        parent::setUp();
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 
     #[Test]
-    public function testPermissionBelongsToManyRoles(): void
+    public function testRoleBelongsToManyUsers(): void
     {
-        $permission = Permission::factory()->create();
-        $role = Role::factory()->create();
+        $role = Role::factory()->create(['name' => 'admin', 'guard_name' => 'web']);
+        $user = User::factory()->create();
 
-        $permission->roles()->attach($role);
+        $user->assignRole($role);
 
-        $this->assertTrue($permission->roles->contains('id', $role->id));
+        $this->assertTrue($user->hasRole('admin'));
     }
 }

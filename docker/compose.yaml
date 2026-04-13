@@ -21,6 +21,7 @@ services:
             POSTGRES_DB: '${DB_DATABASE}'
             POSTGRES_USER: '${DB_USERNAME}'
             POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+            PGDATA: '/var/lib/postgresql/data/pgdata'
         volumes:
             - sail-pgsql:/var/lib/postgresql/data
         networks:

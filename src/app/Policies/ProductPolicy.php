@@ -31,7 +31,7 @@ class ProductPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermission('edit-catalog');
+        return $user->hasPermissionTo('manage all products', 'web');
     }
 
     /**
@@ -39,7 +39,7 @@ class ProductPolicy
      */
     public function update(User $user, Product $product): bool
     {
-        return $user->hasPermission('edit-catalog');
+        return $user->hasPermissionTo('manage all products', 'web');
     }
 
     /**
@@ -47,7 +47,7 @@ class ProductPolicy
      */
     public function delete(User $user, Product $product): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasRole('admin', 'web');
     }
 
     /**

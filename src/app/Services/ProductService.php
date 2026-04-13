@@ -8,99 +8,52 @@ use App\Data\ProductIndexData;
 use App\Data\ProductSaveData;
 use App\Models\Category;
 use App\Models\Product;
+use App\Repositories\ProductRepository;
+use App\ValueObjects\CategoryId;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 
-class ProductService
+readonly class ProductService
 {
+    public function __construct(
+        private ProductRepository $productRepository,
+        private ProductAttributeService $attributeService,
+    ) {}
+
     /**
      * @param ProductIndexData $data
      * @return LengthAwarePaginator<int, Product>
      */
     public function getFilteredProducts(ProductIndexData $data): LengthAwarePaginator
     {
-        $query = Product::query()->with('category')->where('available', true);
-
-        if ($data->categoryId) {
-            $query->where('category_id', $data->categoryId);
-        }
-
-        if ($data->minPrice) {
-            $query->where('price', '>=', $data->minPrice);
-        }
-
-        if ($data->maxPrice) {
-            $query->where('price', '<=', $data->maxPrice);
-        }
-
-        if ($data->search) {
-            $query->where(function ($q) use ($data) {
-                $searchTerm = '%' . $data->search . '%';
-                $q->where('name', 'ilike', $searchTerm)
-                    ->orWhere('description', 'ilike', $searchTerm);
-            });
-        }
-
-        if ($data->attributes) {
-            foreach ($data->attributes as $attribute => $value) {
-                if (is_array($value)) {
-                    $query->whereIn("attributes->$attribute", $value);
-                } else {
-                    $query->where("attributes->$attribute", $value);
-                }
-            }
-        }
-
-        return $query->paginate(9);
+       return $this->productRepository->getFiltered([
+           'category_id' => $data->categoryId,
+           'min_price' => $data->minPrice,
+           'max_price' => $data->maxPrice,
+           'search' => $data->search,
+           'attributes' => $data->attributes,
+       ]);
     }
 
     /**
-     * @param int|null $categoryId
+     * @param CategoryId|null $categoryId
      * @return array<string, mixed>
      */
-    public function getFilteredData(?int $categoryId): array
+    public function getFilteredData(?CategoryId $categoryId): array
     {
-        $query = Product::where('available', true);
-
-        if ($categoryId) {
-            $categoryIds = Category::where('id', $categoryId)
-                ->orWhere('parent_id', $categoryId)
-                ->pluck('id');
-            $query->whereIn('category_id', $categoryIds);
-        }
-
-        $minPrice = floor((float) ($query->min('price') ?? 0));
-        $maxPrice = ceil((float) ($query->max('price') ?? 0));
-
-        $attributes = [];
-        $products = $query->select('attributes')->get();
-
-        foreach ($products as $product) {
-            foreach ($product->attributes ?? [] as $key => $value) {
-                if (!isset($attributes[$key])) {
-                    $attributes[$key] = [];
-                }
-
-                if (!in_array($value, $attributes[$key])) {
-                    $attributes[$key][] = $value;
-                }
-            }
-        }
-
-        foreach ($attributes as $key => $value) {
-            sort($attributes[$key]);
-        }
+        $products = $this->productRepository->getActiveProductsByCategory($categoryId);
 
         return [
-            'min_price' => $minPrice,
-            'max_price' => $maxPrice,
-            'attributes' => $attributes,
+            'min_price' => floor((float) ($products->min('price') ?? 0)),
+            'max_price' => ceil((float) ($products->max('price') ?? 0)),
+            'attributes' => $this->attributeService->extractUniqueAttributes($products),
         ];
     }
 
     public function createProduct(ProductSaveData $data): Product
     {
-        return Product::create([
+        return $this->productRepository->create([
+            'user_id' => auth()->id(),
             'category_id' => $data->categoryId,
             'name' => $data->name,
             'slug' => Str::slug($data->name) . '-' . uniqid(),
@@ -129,14 +82,12 @@ class ProductService
             $updateData['sku'] = $data->sku;
         }
 
-        $product->update($updateData);
-
-        return $product;
+        return $this->productRepository->update($product, $updateData);
     }
 
     public function deleteProduct(Product $product): void
     {
-        $product->delete();
+        $this->productRepository->delete($product);
     }
 
     /**
@@ -145,6 +96,6 @@ class ProductService
      */
     public function getPaginatedProductsForAdmin(int $perPage = 15): LengthAwarePaginator
     {
-        return Product::with('category')->latest()->paginate($perPage);
+        return $this->productRepository->getPaginatedForAdmin($perPage);
     }
 }
