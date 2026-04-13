@@ -24,13 +24,16 @@
 
                     <div class="accordion shadow-sm" id="filtersAccordion">
 
+                        @php
+                            $isCategoryActive = request()->has('category_id') || empty(request()->except('page'));
+                        @endphp
                         <div class="accordion-item border-0 border-bottom">
                             <h2 class="accordion-header" id="headingCategories">
-                                <button class="accordion-button bg-white text-dark fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCategories" aria-expanded="true" aria-controls="collapseCategories">
+                                <button class="accordion-button bg-white text-dark fw-bold {{ $isCategoryActive ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCategories" aria-expanded="{{ $isCategoryActive ? 'true' : 'false' }}" aria-controls="collapseCategories">
                                     Categories
                                 </button>
                             </h2>
-                            <div id="collapseCategories" class="accordion-collapse collapse show" aria-labelledby="headingCategories">
+                            <div id="collapseCategories" class="accordion-collapse collapse {{ $isCategoryActive ? 'show' : '' }}" aria-labelledby="headingCategories">
                                 <div class="accordion-body p-0">
                                     <div class="list-group list-group-flush">
                                         <a href="{{ route('catalog.index') }}" class="list-group-item list-group-item-action border-0 {{ !request('category_id') ? 'text-primary fw-bold' : '' }}">All Products</a>
@@ -47,13 +50,16 @@
                             </div>
                         </div>
 
+                        @php
+                            $isPriceActive = request()->hasAny(['min_price', 'max_price']) || empty(request()->except('page'));
+                        @endphp
                         <div class="accordion-item border-0 border-bottom">
                             <h2 class="accordion-header" id="headingPrice">
-                                <button class="accordion-button bg-white text-dark fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrice" aria-expanded="true" aria-controls="collapsePrice">
+                                <button class="accordion-button bg-white text-dark fw-bold {{ $isPriceActive ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrice" aria-expanded="{{ $isPriceActive ? 'true' : 'false' }}" aria-controls="collapsePrice">
                                     Price Range
                                 </button>
                             </h2>
-                            <div id="collapsePrice" class="accordion-collapse collapse show" aria-labelledby="headingPrice">
+                            <div id="collapsePrice" class="accordion-collapse collapse {{ $isPriceActive ? 'show' : '' }}" aria-labelledby="headingPrice">
                                 <div class="accordion-body">
                                     <div class="d-flex align-items-center gap-2">
                                         <input type="number" name="min_price" class="form-control form-control-sm" placeholder="From {{ $filtersData['min_price'] ?? 0 }}" value="{{ request('min_price') }}" min="0">
@@ -119,7 +125,7 @@
                     @endforelse
                 </div>
                 <div class="mt-4 d-flex justify-content-center">
-                    {{ $products->links('pagination::bootstrap-5') }}
+                    {{ $products->withQueryString()->links('pagination::bootstrap-5') }}
                 </div>
             </section>
 

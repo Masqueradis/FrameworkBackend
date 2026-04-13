@@ -23,7 +23,7 @@ class ProductServiceTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->productService = new ProductService();
+        $this->productService = app(ProductService::class);
     }
 
     public function testFilterProductsByMaxPrice(): void

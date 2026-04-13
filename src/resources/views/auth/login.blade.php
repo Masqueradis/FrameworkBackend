@@ -21,6 +21,12 @@
             <p class="text-muted">Please log in to your account</p>
         </div>
 
+        @if (session('status'))
+            <div class="alert alert-success py-2 text-center">
+                {{ session('status') }}
+            </div>
+        @endif
+
         @if ($errors->any())
             <div class="alert alert-danger py-2">
                 {{ $errors->first() }}

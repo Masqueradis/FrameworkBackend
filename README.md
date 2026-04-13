@@ -1,3 +1,5 @@
+![Coverage](/src/coverage.svg)
+
 # Store App
 
 ### Description
@@ -18,3 +20,5 @@ Store App is a web-based e-commerce platform for computer components built with 
 3. Done!
 
 Now you can access the website at http://localhost
+
+### Docs for [docker](/src/docs/schemas/Docker_README.md) and [src](/src/docs/schemas/PHP_README.md).

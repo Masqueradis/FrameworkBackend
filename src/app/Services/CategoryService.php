@@ -6,30 +6,33 @@ namespace App\Services;
 
 use App\Data\CategorySaveData;
 use App\Models\Category;
+use App\Repositories\CategoryRepository;
+use App\ValueObjects\CategoryId;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 
-class CategoryService
+readonly class CategoryService
 {
+    public function __construct(
+        private CategoryRepository $categoryRepository,
+    ) {}
+
     /** @return Collection<int, Category> */
     public function getAllCategories(): Collection
     {
-        return Category::orderBy('name')->get();
+        return $this->categoryRepository->getAll();
     }
 
     /** @return Collection<int, Category> */
     public function getRootCategories(): Collection
     {
-        return Category::whereNull('parent_id')
-            ->with('children')
-            ->orderBy('name')
-            ->get();
+        return $this->categoryRepository->getAll();
     }
 
     public function createCategory(CategorySaveData $data): Category
     {
-        return Category::create([
+        return $this->categoryRepository->create([
             'name' => $data->name,
             'slug' => Str::slug($data->name) . '-' . uniqid(),
             'parent_id' => $data->parent_id,
@@ -38,17 +41,15 @@ class CategoryService
 
     public function updateCategory(Category $category, CategorySaveData $data): Category
     {
-        $category->update([
+        return $this->categoryRepository->update($category, [
             'name' => $data->name,
             'parent_id' => $data->parent_id,
         ]);
-
-        return $category;
     }
 
     public function deleteCategory(Category $category): void
     {
-        $category->delete();
+        $this->categoryRepository->delete($category);
     }
 
     /**
@@ -57,21 +58,15 @@ class CategoryService
      */
     public function getPaginatedCategoriesWithParent(int $perPage = 15): LengthAwarePaginator
     {
-        return Category::with('parent')->paginate($perPage);
+        return $this->categoryRepository->getPaginatedWithParent($perPage);
     }
 
     /**
-     * @param int|null $excludeId
+     * @param CategoryId|null $excludeId
      * @return Collection<int, Category>
      */
-    public function getCategoriesForDropdown(?int $excludeId = null): Collection
+    public function getCategoriesForDropdown(?CategoryId $excludeId = null): Collection
     {
-        $query = Category::query();
-
-        if ($excludeId !== null) {
-            $query->where('id', '!=', $excludeId);
-        }
-
-        return $query->get();
+        return $this->categoryRepository->getForDropdown($excludeId);
     }
 }

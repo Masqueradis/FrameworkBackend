@@ -8,6 +8,7 @@ use App\Data\CategorySaveData;
 use App\Http\Controllers\ApiController;
 use App\Models\Category;
 use App\Services\CategoryService;
+use App\ValueObjects\CategoryId;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Illuminate\View\View;
 
@@ -41,7 +42,9 @@ class AdminCategoryController extends ApiController
 
     public function edit(Category $category): View
     {
-        $categories = $this->categoryService->getCategoriesForDropdown($category->id);
+        $categories = $this->categoryService->getCategoriesForDropdown(
+            $category->id ? new CategoryId($category->id) : null,
+        );
 
         return view('admin.categories.form', compact('category', 'categories'));
     }

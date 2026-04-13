@@ -6,7 +6,9 @@ namespace Tests\Feature\Services;
 
 use App\Data\CategorySaveData;
 use App\Models\Category;
+use App\Repositories\CategoryRepository;
 use App\Services\CategoryService;
+use App\ValueObjects\CategoryId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\TestCase;
@@ -21,7 +23,7 @@ class CategoryServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->categoryService = new CategoryService();
+        $this->categoryService = app(CategoryService::class);
     }
 
     #[Test]
@@ -89,12 +91,30 @@ class CategoryServiceTest extends TestCase
         $secondCategory = Category::factory()->create(['name' => 'Second Category']);
         $thirdCategory = Category::factory()->create(['name' => 'Third Category']);
 
-        $result = $this->categoryService->getCategoriesForDropdown(excludeId: $secondCategory->id);
+        $result = $this->categoryService->getCategoriesForDropdown(new CategoryId($secondCategory->id));
 
         $this->assertCount(2, $result);
         $this->assertTrue($result->contains('id', $firstCategory->id));
         $this->assertTrue($result->contains('id', $thirdCategory->id));
 
         $this->assertFalse($result->contains('id', $secondCategory->id));
+    }
+
+    #[Test]
+    public function testGetRootsReturnsOnlyCategoriesWithoutParents(): void
+    {
+        $repository = app(CategoryRepository::class);
+
+        $root1 = Category::factory()->create(['parent_id' => null, 'name' => 'Root1']);
+        $root2 = Category::factory()->create(['parent_id' => null, 'name' => 'Root2']);
+
+        $child = Category::factory()->create(['parent_id'=>$root1->id]);
+
+        $roots = $repository->getRoots();
+
+        $this->assertCount(2, $roots);
+        $this->assertTrue($roots->contains($root1));
+        $this->assertTrue($roots->contains($root2));
+        $this->assertFalse($roots->contains($child));
     }
 }

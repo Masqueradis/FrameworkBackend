@@ -7,7 +7,7 @@ namespace Tests\Feature\Api;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Foundation\Testing\WithFaker;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,18 +24,26 @@ class CategoryApiTest extends TestCase
     {
         parent::setUp();
 
-        $adminRole = Role::factory()->create(['name' => 'admin']);
-        $customerRole = Role::factory()->create(['name' => 'customer']);
+        $this->artisan('passport:client', [
+            '--personal' => true,
+            '--name' => 'Test Client',
+            '--provider' => 'users',
+        ]);
 
-        $editCatalogPermission = Permission::factory()->create(['name' => 'edit-catalog']);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $adminRole->permissions()->attach($editCatalogPermission);
+        $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'web']);
+        $customerRole = Role::create(['name' => 'customer', 'guard_name' => 'web']);
+
+        $manageCategoriesPermission = Permission::create(['name' => 'manage categories', 'guard_name' => 'web']);
+
+        $adminRole->givePermissionTo($manageCategoriesPermission);
 
         $this->admin = User::factory()->create();
-        $this->admin->roles()->attach($adminRole);
+        $this->admin->assignRole($adminRole);
 
         $this->customer = User::factory()->create();
-        $this->customer->roles()->attach($customerRole);
+        $this->customer->assignRole($customerRole);
     }
 
     #[Test]
@@ -43,7 +51,7 @@ class CategoryApiTest extends TestCase
     {
         Category::factory()->count(3)->create();
 
-        $response = $this->getJson('/api/categories');
+        $response = $this->getJson('/api/v1/categories');
 
         $response->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
@@ -62,7 +70,7 @@ class CategoryApiTest extends TestCase
     {
         $category = Category::factory()->create(['name' => 'Category']);
 
-        $response = $this->getJson("/api/categories/{$category->id}");
+        $response = $this->getJson("/api/v1/categories/{$category->id}");
 
         $response->assertStatus(Response::HTTP_OK)
             ->assertJsonPath('data.id', $category->id)
@@ -78,7 +86,7 @@ class CategoryApiTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin, 'api')
-            ->postJson('/api/categories', $payload);
+            ->postJson('/api/v1/categories', $payload);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $this->assertDatabaseHas('categories', $payload);
@@ -95,7 +103,7 @@ class CategoryApiTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin, 'api')
-            ->putJson("/api/categories/{$category->id}", $payload);
+            ->putJson("/api/v1/categories/{$category->id}", $payload);
 
         $response->assertStatus(Response::HTTP_OK);
         $this->assertDatabaseHas('categories', [
@@ -110,7 +118,7 @@ class CategoryApiTest extends TestCase
         $category = Category::factory()->create();
 
         $response = $this->actingAs($this->admin, 'api')
-            ->deleteJson("/api/categories/{$category->id}");
+            ->deleteJson("/api/v1/categories/{$category->id}");
 
         $response->assertStatus(Response::HTTP_NO_CONTENT);
         $this->assertSoftDeleted('categories', ['id' => $category->id]);

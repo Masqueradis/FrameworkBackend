@@ -1,5 +1,4 @@
-ENV_FILE := $(if $(wildcard docker/.env),docker/.env,docker/.env.example)
-DOCKER_COMPOSE=docker compose -f docker/compose.yaml --env-file ${ENV_FILE}
+DOCKER_COMPOSE=docker compose -f docker/compose.yaml --env-file docker/.env
 
 .PHONY: up down ps restart bash build init
 
@@ -40,3 +39,6 @@ setup: init build up
 	cd src && npm install
 	cd src && npm run build
 	echo "App now available on address: http://localhost"
+
+phpstan:
+	${DOCKER_COMPOSE} exec app ./vendor/bin/phpstan analyse --memory-limit=2G

@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Data\ProductIndexData;
 use App\Services\CategoryService;
 use App\Services\ProductService;
+use App\ValueObjects\CategoryId;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 
@@ -21,7 +22,9 @@ class CatalogController extends Controller
     {
         $products = $this->productService->getFilteredProducts($data);
 
-        $filtersData = $this->productService->getFilteredData($data->categoryId);
+        $categoryIdVO = $data->categoryId ? new CategoryId((int) $data->categoryId) : null;
+
+        $filtersData = $this->productService->getFilteredData($categoryIdVO);
 
         $categories = $this->categoryService->getRootCategories();
 

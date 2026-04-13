@@ -21,6 +21,7 @@ class RoleFactory extends Factory
     {
         return [
             'name' => fake()->unique()->word(),
+            'guard_name' => 'api',
         ];
     }
 }
