@@ -2,41 +2,52 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AdminCategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\AdminProductController as AdminProductController;
 
-Route::get('/', function () {
-    return redirect()->route('login');
+Route::redirect('/', '/catalog');
+
+Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
+
+Route::middleware('guest')->controller(AuthController::class)->group(function () {
+    Route::get('/login', 'showLoginForm')->name('login');
+    Route::post('/login', 'login')->name('login.post');
+    Route::get('/register', 'showRegisterForm')->name('register');
+    Route::post('/register', 'register')->name('register.post');
+    Route::get('/verify/{token}', 'verifyEmail')->name('verification.verify.custom');
 });
 
-Route::get('login', function() {
-    return view('auth.login');
-})->name('login')->middleware('guest');
+Route::middleware('auth')->controller(AuthController::class)->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('register', function() {
-    return view('auth.register');
-})->name('register')->middleware('guest');
+    Route::prefix('email')->group(function () {
+        Route::get('/verify', 'showVerificationNotice')->name('verification.notice');
 
-Route::get('dashboard', function() {
-    return view('dashboard');
-})->middleware(['auth', 'verified']);
+        Route::get('verify/{id}/{hash}', 'verifyEmail')
+            ->name('verification.verify');
 
-Route::get('email/verify', function() {
-    return view('auth.verify-email');
-})->middleware('auth')->name('verification.notice');
+        Route::post('verification-notification', 'resendVerificationEmail')
+            ->middleware('throttle:6,1')
+            ->name('verification.send');
+    });
 
-Route::get('email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
-    return redirect('/dashboard');
-})->middleware(['auth'])->name('verification.verify');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 
-Route::post('login', [AuthController::class, 'login']);
-Route::post('logout', [AuthController::class, 'logout'])->middleware('auth');
-Route::post('register', [AuthController::class, 'register']);
+    Route::prefix('admin')->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
 
-Route::post('email/verification-notification', function (Request $request) {
-    $request->user()->sendEmailVerificationNotification();
-    return back()->with('message', 'Verification link sent!');
-})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+        Route::resource('categories', AdminCategoryController::class)
+            ->names('admin.categories')->except(['show']);
+
+        Route::resource('products', AdminProductController::class)
+            ->names('admin.products')->except(['show']);
+    });
+});

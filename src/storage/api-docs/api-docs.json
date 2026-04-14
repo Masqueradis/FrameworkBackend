@@ -12,6 +12,862 @@
         }
     ],
     "paths": {
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "Catalog"
+                ],
+                "summary": "Get a list of categories",
+                "description": "Returns a flat list of all store categories, sorted alphabetically.",
+                "operationId": "ac9c4d978ea4e5b72915ca9728e5b8b1",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Categories retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Videocards"
+                                                    },
+                                                    "slug": {
+                                                        "type": "string",
+                                                        "example": "videocards"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Graphics processing components",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Catalog"
+                ],
+                "summary": "Create a new category",
+                "description": "Creates a new category in the catalog. Requires admin privileges.",
+                "operationId": "cca49a87d9b0ebb9a98ad7c154b71737",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Processors"
+                                    },
+                                    "parent_id": {
+                                        "type": "integer",
+                                        "example": null,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Category created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Processors"
+                                                },
+                                                "slug": {
+                                                    "type": "string",
+                                                    "example": "processors-64b1f3c"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/{category}": {
+            "get": {
+                "tags": [
+                    "Catalog"
+                ],
+                "summary": "Get a specific category",
+                "description": "Returns the details of a single category.",
+                "operationId": "ff3ab984d3fe877eb16da6009394d694",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "ID of the category",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Processors"
+                                                },
+                                                "slug": {
+                                                    "type": "string",
+                                                    "example": "processors"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "CPU components",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Catalog"
+                ],
+                "summary": "Update a specific category",
+                "description": "Updates an existing category. Requires admin privileges.",
+                "operationId": "3146e96866d62a90bd01a7070fd61470",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "ID of the category to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Processors"
+                                    },
+                                    "parent_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Category updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Updated Processors"
+                                                },
+                                                "slug": {
+                                                    "type": "string",
+                                                    "example": "updated-processors"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Updated description",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Catalog"
+                ],
+                "summary": "Delete a category",
+                "description": "Deletes a specific category. Requires admin privileges.",
+                "operationId": "88c22abd8149aea4b3bdcb280a0fddf7",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "ID of the category to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Category deleted successfully"
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/products": {
+            "get": {
+                "tags": [
+                    "Catalog"
+                ],
+                "summary": "Get a list of products (with filtering and pagination)",
+                "description": "Returns a list of only available products. Supports filtering by category, price range, and search by name.",
+                "operationId": "d97d1c3727cbac49708b85f7d11f7d58",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "Category ID to filter",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "min_price",
+                        "in": "query",
+                        "description": "Minimum price",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "max_price",
+                        "in": "query",
+                        "description": "Maximum price",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by product name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully received product list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Products retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Video card RTX 4090"
+                                                            },
+                                                            "slug": {
+                                                                "type": "string",
+                                                                "example": "rtx-4090"
+                                                            },
+                                                            "sku": {
+                                                                "type": "string",
+                                                                "example": "SKU-1234-ABCD"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 4500
+                                                            },
+                                                            "stock": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "category": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 2
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "Video cards"
+                                                                    }
+                                                                },
+                                                                "type": "object",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "meta": {
+                                                    "properties": {
+                                                        "current_page": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "last_page": {
+                                                            "type": "integer",
+                                                            "example": 4
+                                                        },
+                                                        "per_page": {
+                                                            "type": "integer",
+                                                            "example": 15
+                                                        },
+                                                        "total": {
+                                                            "type": "integer",
+                                                            "example": 50
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Parameter validation error"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Catalog"
+                ],
+                "summary": "Create a new product (Managers and Admins only)",
+                "description": "Creates a new product in the catalog. Requires edit-catalog permissions.",
+                "operationId": "785644b7d7dd38af4b51dafd0fbc1b6d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "category_id",
+                                    "name",
+                                    "price",
+                                    "stock",
+                                    "available"
+                                ],
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "NVIDIA RTX 4090"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Ultimate gaming GPU",
+                                        "nullable": true
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1599.99
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 15
+                                    },
+                                    "available": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "sku": {
+                                        "type": "string",
+                                        "example": "NV-4090-FE",
+                                        "nullable": true
+                                    },
+                                    "attributes": {
+                                        "type": "object",
+                                        "example": {
+                                            "memory": "24GB",
+                                            "color": "black"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Product created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Product created successfully"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "name": "NVIDIA RTX 4090",
+                                                "price": 1599.99
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - No permission"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/products/{product}": {
+            "get": {
+                "tags": [
+                    "Catalog"
+                ],
+                "summary": "Get a specific product",
+                "description": "Returns detailed information about a single product.",
+                "operationId": "db00b523e69d5dbc09c6edad76374bdc",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "Product ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Product retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Video card RTX 4090"
+                                                },
+                                                "slug": {
+                                                    "type": "string",
+                                                    "example": "rtx-4090"
+                                                },
+                                                "sku": {
+                                                    "type": "string",
+                                                    "example": "SKU-1234-ABCD"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "High-end graphics processing unit."
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 4500
+                                                },
+                                                "stock": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "category": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 2
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Video cards"
+                                                        }
+                                                    },
+                                                    "type": "object",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Catalog"
+                ],
+                "summary": "Update a specific product (Managers and Admins only)",
+                "description": "Updates an existing product. Requires edit-catalog permissions.",
+                "operationId": "f47cf55f4f3e0b134b5e7d9a8373725d",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "Product ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "category_id",
+                                    "name",
+                                    "price",
+                                    "stock",
+                                    "available"
+                                ],
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "NVIDIA RTX 4090 (Updated)"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Ultimate gaming GPU updated description",
+                                        "nullable": true
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1499.99
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "available": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "sku": {
+                                        "type": "string",
+                                        "example": "NV-4090-FE-V2",
+                                        "nullable": true
+                                    },
+                                    "attributes": {
+                                        "type": "object",
+                                        "example": {
+                                            "memory": "24GB"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Product updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Product updated successfully"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "name": "NVIDIA RTX 4090 (Updated)",
+                                                "price": 1499.99
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found"
+                    },
+                    "403": {
+                        "description": "Forbidden - No permission"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Catalog"
+                ],
+                "summary": "Delete a specific product (Admins only)",
+                "description": "Permanently deletes or soft-deletes a product from the database.",
+                "operationId": "ac878db81fdb1333b21fc79e574a5a17",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "Product ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Product deleted successfully"
+                    },
+                    "404": {
+                        "description": "Product not found"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admins only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/register": {
             "post": {
                 "tags": [
@@ -186,6 +1042,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Catalog",
+            "description": "Catalog"
+        },
         {
             "name": "Auth",
             "description": "Auth"

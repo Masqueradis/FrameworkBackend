@@ -1,8 +1,6 @@
 services:
     app:
-        build:
-            context: ../
-            dockerfile: ./docker/php/Dockerfile
+        image: masqueradisu/laravel-php:8.5-dev
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
@@ -23,8 +21,9 @@ services:
             POSTGRES_DB: '${DB_DATABASE}'
             POSTGRES_USER: '${DB_USERNAME}'
             POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+            PGDATA: '/var/lib/postgresql/data/pgdata'
         volumes:
-            - sail-pgsql:/var/lib/postgresql/18/docker
+            - sail-pgsql:/var/lib/postgresql/data
         networks:
             - sail
         healthcheck:
@@ -62,9 +61,46 @@ services:
         networks:
             - sail
 
+    loki:
+        image: grafana/loki:latest
+        ports:
+            - "3100:3100"
+        volumes:
+            - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+        command: -config.file=/etc/loki/local-config.yaml
+        networks:
+            - sail
+        container_name: ${APP_NAME}_loki
+
+    promtail:
+        image: grafana/promtail:latest
+        volumes:
+            - ./promtail/promtail-config.yaml:/etc/promtail/config.yml
+            - ../src/storage/logs:/var/log/laravel
+        command: -config.file=/etc/promtail/config.yml
+        networks:
+            - sail
+        depends_on:
+            - loki
+        container_name: ${APP_NAME}_promtail
+
+    grafana:
+        image: grafana/grafana:latest
+        ports:
+            - "3000:3000"
+        environment:
+            - GF_AUTH_ANONYMOUS_ENABLED=true
+            - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+        networks:
+            - sail
+        depends_on:
+            - loki
+        container_name: ${APP_NAME}_grafana
+
 networks:
     sail:
         driver: bridge
 volumes:
     sail-pgsql:
         driver: local
+

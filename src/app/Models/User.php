@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Hoa\Iterator\Test\Unit\MyFilter;
+use App\Casts\ValueObjectIdCast;
+use App\ValueObjects\UserId;
+use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -19,6 +21,9 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
     use HasFactory;
     use Notifiable;
     use HasApiTokens;
+    use HasRoles;
+
+    protected string $guard_name = 'web';
 
     /**
      * The attributes that are mass assignable.
@@ -29,6 +34,7 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
         'name',
         'email',
         'password',
+        'email_verified_at',
     ];
 
     /**

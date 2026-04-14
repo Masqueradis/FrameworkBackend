@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LoginUserRequest;
-use App\Http\Requests\RegisterUserRequest;
+use App\Data\LoginUserData;
+use App\Data\RegisterUserData;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use OpenApi\Attributes as OA;
 
@@ -23,6 +24,15 @@ class AuthController extends ApiController
         private readonly AuthService $authService
     ) {}
 
+    public function showLoginForm(): View
+    {
+        return view('auth.login');
+    }
+
+    public function showRegisterForm(): View
+    {
+        return view('auth.register');
+    }
     #[OA\Post(
         path: '/api/register',
         description: 'Request email and password, return user-object and token',
@@ -62,25 +72,48 @@ class AuthController extends ApiController
             ),
         ]
     )]
-    public function register(RegisterUserRequest $request): JsonResponse|RedirectResponse
+    public function register(RegisterUserData $request): JsonResponse|RedirectResponse
     {
-        $resultDTO = $this->authService->register($request->toDTO());
+        $this->authService->register($request);
 
-        if($request->expectsJson()) {
+        if(request()->expectsJson()) {
             return $this->respondSuccess(
-                data: [
-                    'user' => new UserResource($resultDTO->user),
-                    'token' => $resultDTO->accessToken,
-                ],
-                message: 'Registered successfully.',
-                code: Response::HTTP_CREATED,
+                data: [],
+                message: 'Registration pending. Check your email to activate your account.',
+                code: Response::HTTP_ACCEPTED,
             );
         }
 
-        Auth::login($resultDTO->user);
-        $request->session()->regenerate();
+        return redirect()->route('login')
+            ->with('status', 'A verification link has been sent to your email. It is valid for 30 minutes.');
+    }
 
-        return redirect()->intended('/dashboard');
+    public function verifyEmail(string $token): JsonResponse|RedirectResponse
+    {
+        try {
+            $resultData = $this->authService->verifyRegistration($token);
+        } catch (ValidationException $e) {
+            if (request()->expectsJson()) {
+                return $this->respondError($e->getMessage(), Response::HTTP_BAD_REQUEST);
+            }
+            return redirect()->route('register')
+                ->withErrors(['email' => 'The link is expired or invalid. Please register again.']);
+        }
+
+        if (request()->expectsJson()) {
+            return $this->respondSuccess(
+                data: [
+                    'user' => new UserResource($resultData->user),
+                    'token' => $resultData->accessToken,
+                ],
+                message: 'Email verified and registered successfully.',
+            );
+        }
+
+        Auth::login($resultData->user);
+        request()->session()->regenerate();
+
+        return redirect()->intended('/profile')->with('status', 'Email verified. Welcome');
     }
 
     #[OA\Post(
@@ -122,25 +155,24 @@ class AuthController extends ApiController
             ),
         ]
     )]
-    public function login(LoginUserRequest $request): JsonResponse|RedirectResponse
+    public function login(LoginUserData $request): JsonResponse|RedirectResponse
     {
-        $loginDTO = $request->toDTO();
-        $resultDTO = $this->authService->login($loginDTO);
+        $resultData = $this->authService->login($request);
 
-        if($request->expectsJson()) {
+        if (request()->expectsJson()) {
             return $this->respondSuccess(
                 data: [
-                    'user' => new UserResource($resultDTO->user),
-                    'token' => $resultDTO->accessToken,
+                    'user' => new UserResource($resultData->user),
+                    'token' => $resultData->accessToken,
                 ],
                 message: 'Login successfully.',
             );
         }
 
-        Auth::login($resultDTO->user);
-        $request->session()->regenerate();
+        Auth::login($resultData->user);
+        request()->session()->regenerate();
 
-        return redirect()->intended('/dashboard');
+        return redirect()->intended('/profile');
     }
 
     #[OA\Post(
@@ -165,8 +197,10 @@ class AuthController extends ApiController
     {
         $user = $request->user();
 
+        assert($user instanceof User);
+
         $this->authService->logout($user);
-        if($request->expectsJson()) {
+        if ($request->expectsJson()) {
             return $this->respondSuccess(
                 message: 'Logged out successfully.',
             );
@@ -177,5 +211,24 @@ class AuthController extends ApiController
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    public function showVerificationNotice(): View
+    {
+        return view('auth.verify-email');
+    }
+
+    public function resendVerificationEmail(Request $request): JsonResponse|RedirectResponse
+    {
+        $user = $request->user();
+
+        $user?->sendEmailVerificationNotification();
+
+        return back()->with('message', 'Verification link sent!');
+    }
+
+    public function user(Request $request): JsonResponse|RedirectResponse
+    {
+        return response()->json($request->user());
     }
 }

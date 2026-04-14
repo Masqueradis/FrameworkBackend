@@ -3,6 +3,7 @@ includes:
 parameters:
     paths:
         - app/
-        - tests/
-    level: 6
-    memoryLimitFile: 2G
+        - routes/
+        - database/
+    level: 8
+
