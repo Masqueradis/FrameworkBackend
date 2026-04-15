@@ -97,10 +97,27 @@ services:
             - loki
         container_name: ${APP_NAME}_grafana
 
+    minio:
+        image: 'minio/minio:latest'
+        ports:
+            - '${FORWARD_MINIO_PORT}:9010'
+            - '${FORWARD_MINIO_CONSOLE_PORT}:8900'
+        environment:
+            MINIO_ROOT_USER: '${MINIO_ROOT_USER}'
+            MINIO_ROOT_PASSWORD: '${MINIO_ROOT_PASSWORD}'
+        volumes:
+            -   'sail-minio:/data'
+        command: 'minio server /data --console-address ":8900"'
+        networks:
+            - sail
+        container_name: ${APP_NAME}-minio
+
 networks:
     sail:
         driver: bridge
 volumes:
     sail-pgsql:
+        driver: local
+    sail-minio:
         driver: local
 
