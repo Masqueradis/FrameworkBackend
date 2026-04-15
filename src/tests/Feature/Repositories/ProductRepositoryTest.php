@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature\Repositories;
+namespace Tests\Feature\Repositories;
 
 use App\Models\Product;
 use App\Repositories\ProductRepository;

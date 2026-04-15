@@ -17,6 +17,7 @@
         "laravel/passport": "^13.6",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
+        "league/flysystem-aws-s3-v3": "^3.32",
         "spatie/laravel-data": "^4.20",
         "spatie/laravel-permission": "^7.3",
         "zircote/swagger-php": "^6.0"
