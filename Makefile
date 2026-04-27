@@ -38,7 +38,11 @@ setup: init build up
 	${DOCKER_COMPOSE} exec app php artisan storage:link
 	cd src && npm install
 	cd src && npm run build
+	make setup-minio
 	echo "App now available on address: http://localhost"
 
 phpstan:
 	${DOCKER_COMPOSE} exec app ./vendor/bin/phpstan analyse --memory-limit=2G
+
+setup-minio:
+	${DOCKER_COMPOSE} exec -t minio mkdir -p /data/laravel-minio

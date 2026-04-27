@@ -27,7 +27,7 @@ class ProductRepository
     public function getFiltered(array $filters, int $perPage = 9): LengthAwarePaginator
     {
         return Product::query()
-            ->with('category')
+            ->with(['category', 'images'])
             ->where('available', true)
             ->filter(new ProductFilter($filters))
             ->paginate($perPage);

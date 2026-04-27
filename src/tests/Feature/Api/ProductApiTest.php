@@ -211,4 +211,38 @@ class ProductApiTest extends TestCase
             ->assertJsonPath('data.id', $product->id)
             ->assertJsonPath('data.name', $product->name);
     }
+
+    #[Test]
+    public function testProductResponseContainsImageWithFullUrl(): void
+    {
+        $product = Product::factory()->create();
+
+        $product->images()->create([
+            'path' => 'product/test-image.jpg',
+            'is_primary' => true,
+            'position' => 0,
+        ]);
+
+        $response = $this->getJson("/api/v1/products/{$product->id}");
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'description',
+                    'price',
+                    'images' => [
+                        '*' => [
+                            'id',
+                            'url',
+                            'is_primary',
+                            'position',
+                        ]
+                    ]
+                ]
+            ]);
+
+        $this->assertStringStartsWith('http', $response->json('data.images.0.url'));
+    }
 }
