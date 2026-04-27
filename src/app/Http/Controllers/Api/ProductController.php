@@ -146,6 +146,8 @@ class ProductController extends ApiController
     )]
     public function show(Product $product): JsonResponse
     {
+        $product->load('images');
+
         return $this->respondSuccess(
             data: new ProductResource($product),
             message: 'Product retrieved successfully'
