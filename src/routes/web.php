@@ -49,5 +49,8 @@ Route::middleware('auth')->controller(AuthController::class)->group(function () 
 
         Route::resource('products', AdminProductController::class)
             ->names('admin.products')->except(['show']);
+
+        Route::post('/products/{product}/images', [AdminProductController::class, 'uploadImage'])
+            ->name('admin.products.images.upload');
     });
 });
