@@ -32,7 +32,7 @@ build: init
 setup: init build up
 	${DOCKER_COMPOSE} exec app composer install
 	${DOCKER_COMPOSE} exec app php artisan key:generate
-	${DOCKER_COMPOSE} exec app php artisan migrate --seed
+	${DOCKER_COMPOSE} exec app php artisan migrate:fresh --seed
 	${DOCKER_COMPOSE} exec app php artisan passport:keys --force
 	${DOCKER_COMPOSE} exec app php artisan passport:client --personal --no-interaction
 	${DOCKER_COMPOSE} exec app php artisan storage:link

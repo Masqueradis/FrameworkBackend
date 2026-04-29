@@ -6,8 +6,11 @@ namespace App\Services;
 
 use App\Data\ProductIndexData;
 use App\Data\ProductSaveData;
+use App\Data\UploadImageData;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
+use App\Repositories\ProductImageRepository;
 use App\Repositories\ProductRepository;
 use App\ValueObjects\CategoryId;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -18,6 +21,7 @@ readonly class ProductService
     public function __construct(
         private ProductRepository $productRepository,
         private ProductAttributeService $attributeService,
+        private ProductImageRepository $productImageRepository,
     ) {}
 
     /**
@@ -64,6 +68,10 @@ readonly class ProductService
             'available' => $data->available,
             'attributes' => $data->attributes,
         ]);
+
+        $this->handleImages($product, $data->images);
+
+        return $product;
     }
 
     public function updateProduct(Product $product, ProductSaveData $data): Product
@@ -82,7 +90,12 @@ readonly class ProductService
             $updateData['sku'] = $data->sku;
         }
 
-        return $this->productRepository->update($product, $updateData);
+        $updatedProduct = $this->productRepository->update($product, $updateData);
+
+        $currentImagesCount = $product->images()->count();
+        $this->handleImages($product, $data->images, $currentImagesCount);
+
+        return $updatedProduct;
     }
 
     public function deleteProduct(Product $product): void
@@ -97,5 +110,34 @@ readonly class ProductService
     public function getPaginatedProductsForAdmin(int $perPage = 15): LengthAwarePaginator
     {
         return $this->productRepository->getPaginatedForAdmin($perPage);
+    }
+
+    public function addImage(Product $product, UploadImageData $data): ProductImage
+    {
+        $path = $data->image->store('products', 'minio');
+
+        return $this->productImageRepository->createForProduct(
+            $product,
+            $path,
+            $data->is_primary,
+            $data->position,
+        );
+    }
+
+    private function handleImages(Product $product, ?array $images, int $startPosition = 0): void
+    {
+        if(empty($images)) {
+            return;
+        }
+
+        foreach ($images as $index => $image) {
+            $imageData = new UploadImageData(
+                image: $image,
+                is_primary: $startPosition === 0 && $index === 0,
+                position: $startPosition + $index,
+            );
+
+            $this->addImage($product, $imageData);
+        }
     }
 }

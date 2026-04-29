@@ -71,6 +71,7 @@ return [
             'bucket' => Str::slug(Str::lower(env('APP_NAME'), '-')) . '-minio',
             'use_path_style_endpoint' => true,
             'region' => env('AWS_DEFAULT_REGION', 'eu-central-1'),
+            'url' => env('AWS_URL'),
         ]
 
     ],

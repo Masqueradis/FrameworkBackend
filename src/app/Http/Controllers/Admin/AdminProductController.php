@@ -6,19 +6,22 @@ namespace App\Http\Controllers\Admin;
 
 use App\Data\CategorySaveData;
 use App\Data\ProductSaveData;
+use App\Data\UploadImageData;
 use App\Http\Controllers\ApiController;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\CategoryService;
 use App\Services\ProductService;
+use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
-class AdminProductController
+readonly class AdminProductController
 {
     public function __construct(
-        private readonly ProductService $productService,
-        private readonly CategoryService $categoryService
+        private ProductService  $productService,
+        private CategoryService $categoryService
     ) {}
 
     public function index(): View
@@ -58,5 +61,15 @@ class AdminProductController
         $this->productService->deleteProduct($product);
         return redirect()->route('admin.products.index')
             ->with('success', 'Product deleted successfully.');
+    }
+
+    public function uploadImage(Product $product, UploadImageData $data): JsonResponse
+    {
+        $image = $this->productService->addImage($product, $data);
+
+        return response()->json([
+            'message' => 'Image added successfully.',
+            'image' => $image,
+        ], Response::HTTP_OK);
     }
 }
