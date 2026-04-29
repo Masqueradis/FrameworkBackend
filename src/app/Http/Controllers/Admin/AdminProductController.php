@@ -17,11 +17,11 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminProductController
+readonly class AdminProductController
 {
     public function __construct(
-        private readonly ProductService $productService,
-        private readonly CategoryService $categoryService
+        private ProductService  $productService,
+        private CategoryService $categoryService
     ) {}
 
     public function index(): View

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\Validation\Min;
 use Spatie\LaravelData\Attributes\MapInputName;
@@ -25,23 +26,36 @@ class ProductSaveData extends Data
         public ?string $sku = null,
         /** @var array<string, mixed> */
         public ?array $attributes = null,
+        /** @var array<int, UploadedFile|null> */
+        public ?array $images = null,
+        /** @var array<int, string>|null */
+        public ?array $attribute_keys = null,
+        /** @var array<int, string>|null */
+        public ?array $attribute_values = null,
     ) {}
 
     public static function prepareForPipeline(array $properties): array
     {
+        $attributes = [];
         $keys = $properties['attribute_keys'] ?? [];
         $values = $properties['attribute_values'] ?? [];
 
         if (is_array($keys) && is_array($values)) {
-            $attributes = [];
-
             foreach ($keys as $index => $key) {
                 if (!empty($key)) {
                     $attributes[$key] = $values[$index] ?? '';
                 }
             }
-            $properties['attributes'] = $attributes;
         }
+
+        $properties['attributes'] = $attributes;
+
+        unset($properties['attribute_keys'], $properties['attribute_values']);
+
+        if (!isset($properties['available'])) {
+            $properties['available'] = false;
+        }
+
         return $properties;
     }
 }

@@ -100,7 +100,7 @@ services:
     minio:
         image: 'minio/minio:latest'
         ports:
-            - '${FORWARD_MINIO_PORT}:9010'
+            - '${FORWARD_MINIO_PORT}:9000'
             - '${FORWARD_MINIO_CONSOLE_PORT}:8900'
         environment:
             MINIO_ROOT_USER: '${MINIO_ROOT_USER}'
@@ -112,6 +112,21 @@ services:
             - sail
         container_name: ${APP_NAME}-minio
 
+    minio-setup:
+        image: 'minio/mc:latest'
+        depends_on:
+            -   minio
+        networks:
+            - sail
+        entrypoint: >
+            /bin/sh -c "
+            sleep 5;
+            mc alias set myminio http://minio:9000 '${MINIO_ROOT_USER}' '${MINIO_ROOT_PASSWORD}';
+            mc mb myminio/laravel-minio --ignore-existing;
+            mc anonymous set download myminio/laravel-minio;
+            exit 0;
+            "
+
 networks:
     sail:
         driver: bridge
@@ -120,4 +135,3 @@ volumes:
         driver: local
     sail-minio:
         driver: local
-

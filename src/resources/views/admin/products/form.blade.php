@@ -11,7 +11,8 @@
         <div class="col-lg-{{ isset($product) ? '8' : '12' }} mb-4">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
-                    <form action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}" method="POST">
+
+                    <form action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @if(isset($product))
                             @method('PUT')
@@ -48,7 +49,7 @@
                         <div class="mb-3">
                             <label for="category_id" class="form-label fw-bold">Category <span class="text-danger">*</span></label>
                             <select name="category_id" id="category_id" class="form-select @error('category_id') is-invalid @enderror" required>
-                                <option value="">-- Select Category --</option>
+                                <option value="">Select Category</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}"
                                         {{ old('category_id', $product->category_id ?? '') == $category->id ? 'selected' : '' }}>
@@ -72,31 +73,50 @@
                             $currentAttributes = old('attribute_keys')
                                 ? array_combine(old('attribute_keys'), old('attribute_values'))
                                 : ($product->attributes ?? []);
+
+                            $emptyRows = 3;
                         @endphp
 
                         <div id="attributes-container">
                             @foreach($currentAttributes as $key => $value)
-                                <div class="row mb-2 attribute-row">
-                                    <div class="col-5">
-                                        <input type="text" name="attribute_keys[]" class="form-control" value="{{ $key }}" placeholder="Name " required>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <input type="text" name="attribute_keys[]" class="form-control" value="{{ $key }}" placeholder="Name (e.g. Color)">
                                     </div>
-                                    <div class="col-5">
-                                        <input type="text" name="attribute_values[]" class="form-control" value="{{ $value }}" placeholder="Value " required>
-                                    </div>
-                                    <div class="col-2">
-                                        <button type="button" class="btn btn-outline-danger w-100 remove-attribute">Delete</button>
+                                    <div class="col-6">
+                                        <input type="text" name="attribute_values[]" class="form-control" value="{{ $value }}" placeholder="Value (e.g. Red)">
                                     </div>
                                 </div>
                             @endforeach
+
+                            @for($i = 0; $i < $emptyRows; $i++)
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <input type="text" name="attribute_keys[]" class="form-control" placeholder="New attribute name">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="text" name="attribute_values[]" class="form-control" placeholder="New attribute value">
+                                    </div>
+                                </div>
+                            @endfor
+                        </div>
+                        <div class="form-text mb-4">
+                            Fill in the blank fields to add new attributes. Empty rows will be ignored. <strong>To delete an attribute, just clear its Name and Value.</strong>
+                        </div>
+                        <hr class="my-4">
+
+                        <h5 class="mb-3 text-primary">Upload Photos</h5>
+                        <div class="mb-4">
+                            <input class="form-control @error('images.*') is-invalid @enderror" type="file" name="images[]" id="images" multiple accept="image/png, image/jpeg, image/jpg">
+                            <div class="form-text">You can select multiple photos. Allowed formats: png, jpeg, jpg.</div>
+                            @error('images.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        <button type="button" id="add-attribute-btn" class="btn btn-sm btn-outline-secondary mt-2">
-                            + Add attribute
-                        </button>
-
-                        <button type="submit" class="btn btn-primary px-4">
-                            {{ isset($product) ? 'Update Product' : 'Save Product' }}
-                        </button>
+                        <div class="d-grid d-md-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary px-4">
+                                {{ isset($product) ? 'Update Product' : 'Save Product' }}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -106,18 +126,9 @@
             <div class="col-lg-4 mb-4">
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-4">
-                        <h5 class="mb-3 text-primary">Photo</h5>
+                        <h5 class="mb-3 text-primary">Existing Photos</h5>
 
-                        <div id="drop-zone" class="border rounded-3 p-4 text-center bg-light" style="border-style: dashed !important; border-width: 2px !important; cursor: pointer; transition: 0.2s;">
-                            <i class="bi bi-cloud-arrow-up display-6 text-secondary mb-2"></i>
-                            <p class="mb-1">Drug photo</p>
-                            <small class="text-muted">or click for selection</small>
-                            <input type="file" id="file-input" class="d-none" multiple accept="image/png, image/jpeg, image/jpg">
-                        </div>
-
-                        <div id="upload-status" class="mt-3 text-sm d-none"></div>
-
-                        <div id="image-gallery" class="mt-4 row g-2">
+                        <div id="image-gallery" class="row g-2">
                             @if($product->images && $product->images->count() > 0)
                                 @foreach($product->images as $image)
                                     <div class="col-6">
@@ -127,7 +138,7 @@
                                     </div>
                                 @endforeach
                             @else
-                                <div class="col-12 text-center text-muted small">No photo</div>
+                                <div class="col-12 text-center text-muted small">No photos uploaded yet</div>
                             @endif
                         </div>
                     </div>
@@ -136,120 +147,3 @@
         @endif
     </div>
 @endsection
-
-@if(isset($product))
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const dropZone = document.getElementById('drop-zone');
-                const fileInput = document.getElementById('file-input');
-                const uploadStatus = document.getElementById('upload-status');
-                const productId = {{ $product->id }};
-
-                dropZone.addEventListener('click', () => fileInput.click());
-
-                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                    dropZone.addEventListener(eventName, e => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }, false);
-                });
-
-                ['dragenter', 'dragover'].forEach(eventName => {
-                    dropZone.addEventListener(eventName, () => {
-                        dropZone.classList.replace('bg-light', 'bg-primary');
-                        dropZone.classList.add('bg-opacity-10', 'border-primary');
-                    }, false);
-                });
-
-                ['dragleave', 'drop'].forEach(eventName => {
-                    dropZone.addEventListener(eventName, () => {
-                        dropZone.classList.replace('bg-primary', 'bg-light');
-                        dropZone.classList.remove('bg-opacity-10', 'border-primary');
-                    }, false);
-                });
-
-                dropZone.addEventListener('drop', (e) => uploadFiles(e.dataTransfer.files));
-                fileInput.addEventListener('change', (e) => uploadFiles(e.target.files));
-
-                async function uploadFiles(files) {
-                    if (!files || files.length === 0) return;
-
-                    uploadStatus.innerHTML = '<span class="text-primary spinner-border spinner-border-sm me-2" role="status"></span>Download';
-                    uploadStatus.classList.remove('d-none');
-
-                    let hasErrors = false;
-
-                    for (let i = 0; i < files.length; i++) {
-                        let formData = new FormData();
-                        formData.append('image', files[i]);
-                        formData.append('is_primary', false);
-                        formData.append('position', i);
-
-                        try {
-                            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-                            const response = await fetch(`/admin/products/${productId}/images`, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': csrfToken,
-                                    'Accept': 'application/json'
-                                },
-                                body: formData
-                            });
-
-                            if (!response.ok) hasErrors = true;
-                        } catch (error) {
-                            console.error(error);
-                            hasErrors = true;
-                        }
-                    }
-
-                    if (hasErrors) {
-                        uploadStatus.innerHTML = '<span class="text-danger"> Download error, check photo type</span>';
-                    } else {
-                        uploadStatus.innerHTML = '<span class="text-success"> Success</span>';
-                        setTimeout(() => window.location.reload(), 1000);
-                    }
-                    fileInput.value = '';
-                }
-            });
-
-
-        </script>
-    @endpush
-@endif
-
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const container = document.getElementById('attributes-container');
-            const addBtn = document.getElementById('add-attribute-btn');
-
-            if (addBtn && container) {
-                addBtn.addEventListener('click', function() {
-                    const row = document.createElement('div');
-                    row.className = 'row mb-2 attribute-row';
-                    row.innerHTML = `
-                <div class="col-5">
-                    <input type="text" name="attribute_keys[]" class="form-control" placeholder="Name" required>
-                </div>
-                <div class="col-5">
-                    <input type="text" name="attribute_values[]" class="form-control" placeholder="Value" required>
-                </div>
-                <div class="col-2">
-                    <button type="button" class="btn btn-outline-danger w-100 remove-attribute">Delete</button>
-                </div>
-            `;
-                    container.appendChild(row);
-                });
-
-                container.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('remove-attribute')) {
-                        e.target.closest('.attribute-row').remove();
-                    }
-                });
-            }
-        });
-    </script>
-@endpush
