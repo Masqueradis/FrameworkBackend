@@ -62,8 +62,8 @@ return [
             'report' => false,
         ],
 
-        'minio' =>
-        [
+        'minio'
+        => [
             'driver' => 's3',
             'key' => env('MINIO_ROOT_USER'),
             'secret' => env('MINIO_ROOT_PASSWORD'),
@@ -72,7 +72,7 @@ return [
             'use_path_style_endpoint' => true,
             'region' => env('AWS_DEFAULT_REGION', 'eu-central-1'),
             'url' => env('AWS_URL'),
-        ]
+        ],
 
     ],
 

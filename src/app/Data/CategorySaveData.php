@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Data\Casts\DataValueObjectIdCast;
+use App\ValueObjects\CategoryId;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
@@ -13,6 +16,7 @@ class CategorySaveData extends Data
 {
     public function __construct(
         public string $name,
-        public ?int $parent_id = null,
+        #[WithCast(DataValueObjectIdCast::class)]
+        public ?CategoryId $parent_id = null,
     ) {}
 }

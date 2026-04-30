@@ -47,7 +47,7 @@ class ProductFilter extends QueryFilter
      */
     public function attributes(array $attributes): void
     {
-        foreach($attributes as $attribute => $value) {
+        foreach ($attributes as $attribute => $value) {
             $this->builder->where("attributes->$attribute", (array) $value);
         }
     }

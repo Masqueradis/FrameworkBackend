@@ -31,7 +31,9 @@
         </small>
 
         <h5 class="card-title fw-bold text-dark flex-grow-1 fs-6 mb-3">
-            {{ $product->name }}
+            <a href="{{ route('web.products.show', $product) }}" class="text-decoration-none text-dark stretched-link">
+                {{ $product->name }}
+            </a>
         </h5>
 
         @if($product->attributes)
@@ -61,7 +63,7 @@
                 ${{ number_format($product->price, 2, '.', ',') }}
             </span>
 
-            <button class="btn btn-outline-primary btn-sm fw-medium" @disabled(!$product->available || $product->stock <= 0)>
+            <button class="btn btn-outline-primary btn-sm fw-medium position-relative" @disabled(!$product->available || $product->stock <= 0)>
                 Add to Cart
             </button>
         </div>
@@ -69,7 +71,7 @@
         @canany(['update', 'delete'], $product)
             <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
                 <span class="small text-muted fw-bold">Management:</span>
-                <div class="btn-group">
+                <div class="btn-group position-relative">
                     @can('update', $product)
                         <a href="{{ url('/admin/products/'.$product->id.'/edit') }}" class="btn btn-outline-warning btn-sm" style="margin-right: 5px">Edit</a>
                     @endcan

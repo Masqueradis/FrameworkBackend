@@ -70,7 +70,7 @@ class CategoryRepository
     {
         $query = Category::query();
 
-        if($excludeId !== null){
+        if ($excludeId !== null) {
             $query->where('id', '!=', $excludeId->value);
         }
 

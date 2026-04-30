@@ -17,6 +17,10 @@ class UploadImageData extends Data
         public int $position = 0,
     ) {}
 
+    /**
+     * @param array<string, mixed> $properties
+     * @return array<string, mixed>
+     */
     public static function prepareForPipeline(array $properties): array
     {
         if (isset($properties['is_primary'])) {

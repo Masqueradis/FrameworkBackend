@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
+use App\Data\ProductSaveData;
 use App\Models\Category;
 use App\Models\Permission;
 use App\Models\Product;
@@ -238,11 +239,42 @@ class ProductApiTest extends TestCase
                             'url',
                             'is_primary',
                             'position',
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ]);
 
         $this->assertStringStartsWith('http', $response->json('data.images.0.url'));
+    }
+
+    #[Test]
+    public function testPreparesAttributesAndAvailableFlagInDto(): void
+    {
+        $payload = [
+            'category_id' => 1,
+            'name' => 'RTX4090',
+            'price' => 10000,
+            'stock' => 50,
+            'attribute_keys' => ['1', '', '3'],
+            'attribute_values' => ['1', '2', '3'],
+        ];
+
+        $data = ProductSaveData::from($payload);
+
+        $this->assertFalse($data->available);
+
+        $this->assertEquals([
+            '1' => '1',
+            '3' => '3',
+        ], $data->attributes);
+    }
+
+    #[Test]
+    public function testCanViewPublicProductPage(): void
+    {
+        $product = Product::factory()->create(['available' => true]);
+        $response = $this->get(route('web.products.show', $product));
+        $response->assertStatus(200);
+        $response->assertViewIs('products.show');
     }
 }

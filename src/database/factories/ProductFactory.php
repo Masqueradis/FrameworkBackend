@@ -36,7 +36,7 @@ class ProductFactory extends Factory
             [
                 'CPU' => fake()->randomElement(['Ryzen 7', 'Ryzen 5', 'i5', 'i7']),
                 'RAM type' => fake()->randomElement(['DDR4', 'DDR5']),
-                'Frequency' => fake()->randomElement(['2,1', '4,3', '5,1'])
+                'Frequency' => fake()->randomElement(['2,1', '4,3', '5,1']),
             ],
         ];
 
