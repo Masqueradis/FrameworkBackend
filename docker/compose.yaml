@@ -127,6 +127,17 @@ services:
             exit 0;
             "
 
+    npm-setup:
+        image: node:22-alpine
+        profiles:
+            -   setup
+        volumes:
+            -   '../src:/var/www/html'
+        working_dir: /var/www/html
+        command: sh -c "npm install && npm run build"
+        networks:
+            - sail
+
 networks:
     sail:
         driver: bridge
