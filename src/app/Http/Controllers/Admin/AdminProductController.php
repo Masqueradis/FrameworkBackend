@@ -4,25 +4,34 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Data\CategorySaveData;
 use App\Data\ProductSaveData;
 use App\Data\UploadImageData;
-use App\Http\Controllers\ApiController;
-use App\Models\Category;
 use App\Models\Product;
 use App\Services\CategoryService;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
-readonly class AdminProductController
+readonly class AdminProductController implements HasMiddleware
 {
     public function __construct(
         private ProductService  $productService,
         private CategoryService $categoryService,
     ) {}
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('can:viewAny,App\Models\Product', only: ['index']),
+            new Middleware('can:create,App\Models\Product', only: ['create', 'store']),
+            new Middleware('can:update,product', only: ['edit', 'update', 'uploadImage']),
+            new Middleware('can:delete,product', only: ['destroy']),
+        ];
+    }
 
     public function index(): View
     {
@@ -43,7 +52,6 @@ readonly class AdminProductController
             ->with('success', 'Product created successfully.');
     }
 
-    #[Can('update', 'product')]
     public function edit(Product $product): View
     {
         $categories = $this->categoryService->getCategoriesForDropdown();

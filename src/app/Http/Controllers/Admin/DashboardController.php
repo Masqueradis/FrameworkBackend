@@ -14,10 +14,19 @@ class DashboardController
 {
     public function index(): View
     {
-        return view('admin.dashboard', [
-            'productsCount' => Product::count(),
-            'categoriesCount' => Category::count(),
-            'usersCount' => User::count(),
-        ]);
+        /** @var User $user */
+        $user = auth()->user();
+
+        if ($user->hasRole('admin')) {
+            $productsCount = Product::count();
+            $categoriesCount = Category::count();
+            $usersCount = User::count();
+        } else {
+            $productsCount = Product::where('user_id', $user->id)->count();
+            $categoriesCount = 0;
+            $usersCount = 0;
+        }
+
+        return view('admin.dashboard', compact('productsCount', 'categoriesCount', 'usersCount'));
     }
 }

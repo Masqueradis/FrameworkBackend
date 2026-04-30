@@ -38,6 +38,11 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (\Throwable $exception, Request $request) {
+            if ($exception instanceof \Illuminate\Validation\ValidationException
+                || $exception instanceof \Illuminate\Auth\AuthenticationException) {
+                return null;
+            }
+
             if ($request->wantsJson() || $request->is('api/*')) {
                 return response()->json(['message' => 'Server error'], Response::HTTP_INTERNAL_SERVER_ERROR);
             }

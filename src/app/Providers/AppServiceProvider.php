@@ -26,5 +26,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('access-panel', function (User $user) {
             return $user->hasRole(['admin', 'seller']);
         });
+
+        Gate::define('manage-categories', function (User $user) {
+            return $user->hasRole(['admin']);
+        });
     }
 }

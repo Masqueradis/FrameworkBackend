@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
@@ -22,9 +23,15 @@ class UploadImageTest extends TestCase
         Storage::fake('minio');
 
         $user = User::factory()->create();
+
+        Role::firstOrCreate(['name' => 'seller']);
+        $user->assignRole('seller');
         $this->actingAs($user);
 
-        $product = Product::factory()->create();
+        $product = Product::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
         $file = UploadedFile::fake()->image('image.jpg');
 
         $response = $this->postJson("/admin/products/{$product->id}/images", [
@@ -49,9 +56,12 @@ class UploadImageTest extends TestCase
         Storage::fake('minio');
 
         $user = User::factory()->create();
+
+        Role::firstOrCreate(['name' => 'seller']);
+        $user->assignRole('seller');
         $this->actingAs($user);
 
-        $product = Product::factory()->create();
+        $product = Product::factory()->create(['user_id' => $user->id]);
 
         $file = UploadedFile::fake()->create('image.pdf', 100, 'application/pdf');
 

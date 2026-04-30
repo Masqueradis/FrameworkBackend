@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,16 +24,36 @@ class ProductControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->admin = User::factory()->create();
+        Role::firstOrCreate(['name' => 'admin']);
+        $this->admin->assignRole('admin');
         $this->category = Category::factory()->create();
+
+        $this->seller = User::factory()->create();
+        Role::firstOrCreate(['name' => 'seller']);
+        $this->seller->assignRole('seller');
     }
 
     #[Test]
-    public function testDisplaysProductsIndex(): void
+    public function testDisplaysProductsIndexForAdmin(): void
     {
         Product::factory()->count(10)->create(['category_id' => $this->category->id]);
 
         $response = $this->actingAs($this->admin)
+            ->get(route('admin.products.index', $this->category));
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertViewIs('admin.products.index')
+            ->assertViewHas('products');
+    }
+
+    #[Test]
+    public function testDisplaysProductsIndexForSeller(): void
+    {
+        Product::factory()->count(10)->create(['category_id' => $this->category->id]);
+
+        $response = $this->actingAs($this->seller)
             ->get(route('admin.products.index', $this->category));
 
         $response->assertStatus(Response::HTTP_OK)
@@ -125,6 +146,23 @@ class ProductControllerTest extends TestCase
         $product = Product::factory()->create(['category_id' => $this->category->id]);
 
         $response = $this->actingAs($this->admin)
+            ->delete(route('admin.products.destroy', $product));
+
+        $response->assertRedirect(route('admin.products.index'))
+            ->assertSessionHas('success');
+
+        $this->assertSoftDeleted('products', ['id' => $product->id]);
+    }
+
+    #[Test]
+    public function testSellerDeletesProduct(): void
+    {
+        $product = Product::factory()->create([
+            'category_id' => $this->category->id,
+            'user_id' => $this->seller->id,
+        ]);
+
+        $response = $this->actingAs($this->seller)
             ->delete(route('admin.products.destroy', $product));
 
         $response->assertRedirect(route('admin.products.index'))

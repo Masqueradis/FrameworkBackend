@@ -45,12 +45,14 @@
                     Products
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="{{ route('admin.categories.index') }}"
-                   class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
-                        Categories
-                </a>
-            </li>
+            @can('manage-categories')
+                <li class="nav-item">
+                    <a href="{{ route('admin.categories.index') }}"
+                       class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+                            Categories
+                    </a>
+                </li>
+            @endcan
         </ul>
         <hr class="text-secondary mt-auto">
         <a href="{{ route('catalog.index') }}" class="btn btn-outline-secondary w-100 btn-sm text-start">
@@ -64,6 +66,11 @@
 
             <div class="dropdown">
                 <button class="btn btn-light dropdown-toggle border fw-bold" type="button" id="adminUserDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    @if(auth()->user()->hasRole('admin'))
+                        <span class="badge bg-danger rounded-circle" style="width: 10px; height: 10px; padding: 0;"></span>
+                    @elseif(auth()->user()->hasRole('seller'))
+                        <span class="badge bg-warning rounded-circle" style="width: 10px; height: 10px; padding: 0;"></span>
+                    @endif
                     {{ auth()->user()->name ?? 'Manager' }}
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="adminUserDropdown">

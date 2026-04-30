@@ -17,6 +17,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
@@ -114,6 +115,11 @@ class ProductServiceTest extends TestCase
     #[Test]
     public function testReturnsPaginatedProductsForAdminWithRelations(): void
     {
+        $admin = User::factory()->create();
+        Role::firstOrCreate(['name' => 'admin']);
+        $admin->assignRole('admin');
+        $this->actingAs($admin);
+
         $category = Category::factory()->create();
         Product::factory()->count(3)->create(['category_id' => $category->id]);
 

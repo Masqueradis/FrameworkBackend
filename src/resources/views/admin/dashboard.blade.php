@@ -7,29 +7,31 @@
         <div class="col-md-4">
             <div class="card shadow-sm border-0 bg-primary text-white h-100">
                 <div class="card-body d-flex flex-column justify-content-center align-items-center py-4">
-                    <h6 class="text-uppercase mb-2 opacity-75">Total Products</h6>
+                    <h6 class="text-uppercase mb-2 opacity-75">{{ auth()->user()->hasRole('admin') ? 'Total Products' : 'My Products' }}</h6>
                     <h2 class="display-5 fw-bold mb-0">{{ $productsCount }}</h2>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 bg-success text-white h-100">
-                <div class="card-body d-flex flex-column justify-content-center align-items-center py-4">
-                    <h6 class="text-uppercase mb-2 opacity-75">Categories</h6>
-                    <h2 class="display-5 fw-bold mb-0">{{ $categoriesCount }}</h2>
+        @can('manage-categories')
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 bg-success text-white h-100">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center py-4">
+                        <h6 class="text-uppercase mb-2 opacity-75">Categories</h6>
+                        <h2 class="display-5 fw-bold mb-0">{{ $categoriesCount }}</h2>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 bg-warning text-dark h-100">
-                <div class="card-body d-flex flex-column justify-content-center align-items-center py-4">
-                    <h6 class="text-uppercase mb-2 opacity-75">Active Users</h6>
-                    <h2 class="display-5 fw-bold mb-0">{{ $usersCount }}</h2>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 bg-warning text-dark h-100">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center py-4">
+                        <h6 class="text-uppercase mb-2 opacity-75">Active Users</h6>
+                        <h2 class="display-5 fw-bold mb-0">{{ $usersCount }}</h2>
+                    </div>
                 </div>
             </div>
-        </div>
+        @endcan
     </div>
 
     <div class="card shadow-sm border-0">
