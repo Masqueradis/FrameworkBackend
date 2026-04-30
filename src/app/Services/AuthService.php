@@ -24,15 +24,15 @@ readonly class AuthService
 
     public function register(RegisterUserData $data): void
     {
-        $oldToken = Cache::get('pending_email_'. $data->email);
-        if($oldToken){
-            Cache::forget('pending_email_'. $oldToken);
+        $oldToken = Cache::get('pending_email_' . $data->email);
+        if ($oldToken) {
+            Cache::forget('pending_email_' . $oldToken);
         }
 
         $token = Str::random(60);
 
-        Cache::put('pending_email_'. $data->email, $token, now()->addMinutes(30));
-        Cache::put('pending_email_'. $token, [
+        Cache::put('pending_email_' . $data->email, $token, now()->addMinutes(30));
+        Cache::put('pending_email_' . $token, [
             'name' => $data->name,
             'email' => $data->email,
             'password' => Hash::make($data->password),
@@ -48,9 +48,9 @@ readonly class AuthService
 
     public function verifyRegistration(string $token): AuthResultData
     {
-        $userData = Cache::get('pending_email_'. $token);
+        $userData = Cache::get('pending_email_' . $token);
 
-        if(!$userData){
+        if (!$userData) {
             throw ValidationException::withMessages([
                 'token' => ['Link invalid or expired.'],
             ]);

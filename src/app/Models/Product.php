@@ -61,6 +61,9 @@ class Product extends Model
         return $filter->apply($query);
     }
 
+    /**
+     * @return HasMany<ProductImage, $this>
+     */
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);

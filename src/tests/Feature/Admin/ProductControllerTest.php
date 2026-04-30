@@ -6,6 +6,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -130,5 +131,23 @@ class ProductControllerTest extends TestCase
             ->assertSessionHas('success');
 
         $this->assertSoftDeleted('products', ['id' => $product->id]);
+    }
+
+    #[Test]
+    public function testShowsPublicProductPageWithSortedImages(): void
+    {
+        $product = Product::factory()->create(['available' => true]);
+
+        ProductImage::insert([
+            ['product_id' => $product->id, 'path' => 'product-1.jpg', 'is_primary' => false, 'position' => 2],
+            ['product_id' => $product->id, 'path' => 'product-2.jpg', 'is_primary' => true, 'position' => 1],
+        ]);
+
+        $response = $this->get(route('web.products.show', $product));
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertViewIs('products.show');
+        $response->assertViewHas('product');
+        $response->assertViewHas('images');
     }
 }

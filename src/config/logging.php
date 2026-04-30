@@ -134,7 +134,7 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 7,
             'formatter' => JsonFormatter::class,
-        ]
+        ],
     ],
 
 ];

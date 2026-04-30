@@ -79,6 +79,9 @@ class ProductRepository
      */
     public function getPaginatedForAdmin(int $perPage = 15): LengthAwarePaginator
     {
-        return Product::with('category')->latest()->paginate($perPage);
+        return Product::query()
+            ->with(['category', 'images'])
+            ->orderBy('id', 'asc')
+            ->paginate($perPage);
     }
 }

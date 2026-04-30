@@ -15,8 +15,7 @@ abstract class QueryFilter
     protected Builder $builder;
 
     /** @param array<string, mixed> $request */
-    public function __construct(protected array $request)
-    {}
+    public function __construct(protected array $request) {}
 
     /**
      * @template TModel of Model
@@ -30,7 +29,7 @@ abstract class QueryFilter
         foreach ($this->request as $name => $value) {
             $methodName = str::camel($name);
 
-            if(!empty($value) && method_exists($this, $methodName)) {
+            if (!empty($value) && method_exists($this, $methodName)) {
                 $this->$methodName($value);
             }
         }

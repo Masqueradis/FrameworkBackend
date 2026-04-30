@@ -38,6 +38,16 @@
                                 </div>
                             </div>
 
+                            <div class="form-check form-switch mb-3">
+                                <input type="hidden" name="available" value="0">
+
+                                <input class="form-check-input" type="checkbox" role="switch" name="available" id="available" value="1"
+                                    {{ old('available', $product->available ?? true) ? 'checked' : '' }}>
+                                <label class="form-check-label fw-bold" for="available">
+                                    Available (visible in catalog)
+                                </label>
+                            </div>
+
                             <div class="col-md-3 mb-3">
                                 <label for="stock" class="form-label fw-bold">Stock <span class="text-danger">*</span></label>
                                 <input type="number" name="stock" id="stock" class="form-control @error('stock') is-invalid @enderror"
@@ -108,7 +118,7 @@
                         <h5 class="mb-3 text-primary">Upload Photos</h5>
                         <div class="mb-4">
                             <input class="form-control @error('images.*') is-invalid @enderror" type="file" name="images[]" id="images" multiple accept="image/png, image/jpeg, image/jpg">
-                            <div class="form-text">You can select multiple photos. Allowed formats: png, jpeg, jpg.</div>
+                            <div class="form-text">You can select multiple photos (up to 10). Allowed formats: png, jpeg, jpg.</div>
                             @error('images.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
@@ -118,6 +128,16 @@
                             </button>
                         </div>
                     </form>
+                    @if ($errors->any())
+                        <div class="alert alert-danger shadow-sm">
+                            <h6 class="alert-heading fw-bold mb-1">Please fix the following errors:</h6>
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

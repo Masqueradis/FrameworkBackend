@@ -347,8 +347,8 @@ class AuthApiTest extends TestCase
                 'message',
                 'data' => [
                     'user' => ['id', 'name', 'email'],
-                    'token'
-                ]
+                    'token',
+                ],
             ]);
         $this->assertNull(Cache::get('pending_email_' . $token));
     }

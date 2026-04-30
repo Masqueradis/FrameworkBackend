@@ -25,14 +25,20 @@ class ProductResource extends JsonResource
             'description' => $this->resource->description,
             'price' => (float) $this->resource->price,
             'stock' => $this->resource->stock,
+            'available' => $this->resource->available,
+            'attributes' => $this->resource->attributes,
             'category' => new CategoryResource($this->whenLoaded('category')),
             'images' => $this->whenLoaded('images', function () {
-                return $this->images->map(fn($image) => [
-                    'id' => $image->id,
-                    'url' => Storage::disk('minio')->url($image->path),
-                    'is_primary' => $image->is_primary,
-                    'position' => $image->position,
-                ]);
+                return $this->resource->images
+                    ->sortByDesc('is_primary')
+                    ->sortBy('position')
+                    ->values()
+                    ->map(fn($image) => [
+                        'id' => $image->id,
+                        'url' => Storage::disk('minio')->url($image->path),
+                        'is_primary' => $image->is_primary,
+                        'position' => $image->position,
+                    ]);
             }),
         ];
     }

@@ -76,7 +76,7 @@ class AuthController extends ApiController
     {
         $this->authService->register($request);
 
-        if(request()->expectsJson()) {
+        if (request()->expectsJson()) {
             return $this->respondSuccess(
                 data: [],
                 message: 'Registration pending. Check your email to activate your account.',

@@ -29,7 +29,10 @@ class CategoryServiceTest extends TestCase
     #[Test]
     public function testCanCreateCategory(): void
     {
-        $data = new CategorySaveData(name: 'New Category', parent_id: null);
+        $data = CategorySaveData::from([
+            'name' => 'New Category',
+            'parent_id' => null,
+        ]);
 
         $category = $this->categoryService->createCategory($data);
 
@@ -48,14 +51,14 @@ class CategoryServiceTest extends TestCase
         $category = Category::factory()->create(['name' => 'Old Category']);
         $parent = Category::factory()->create(['name' => 'Parent']);
 
-        $data = new CategorySaveData(name: 'New Category', parent_id: $parent->id);
+        $data = new CategorySaveData(name: 'New Category', parent_id: new CategoryId($parent->id));
 
         $this->categoryService->updateCategory($category, $data);
 
         $this->assertDatabaseHas('categories', [
             'id' => $category->id,
             'name' => 'New Category',
-            'parent_id' => $parent->id,
+            'parent_id' => $data->parent_id?->value,
         ]);
     }
 
@@ -108,7 +111,7 @@ class CategoryServiceTest extends TestCase
         $root1 = Category::factory()->create(['parent_id' => null, 'name' => 'Root1']);
         $root2 = Category::factory()->create(['parent_id' => null, 'name' => 'Root2']);
 
-        $child = Category::factory()->create(['parent_id'=>$root1->id]);
+        $child = Category::factory()->create(['parent_id' => $root1->id]);
 
         $roots = $repository->getRoots();
 
