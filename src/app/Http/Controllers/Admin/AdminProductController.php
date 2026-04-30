@@ -21,7 +21,7 @@ readonly class AdminProductController
 {
     public function __construct(
         private ProductService  $productService,
-        private CategoryService $categoryService
+        private CategoryService $categoryService,
     ) {}
 
     public function index(): View
@@ -43,6 +43,7 @@ readonly class AdminProductController
             ->with('success', 'Product created successfully.');
     }
 
+    #[Can('update', 'product')]
     public function edit(Product $product): View
     {
         $categories = $this->categoryService->getCategoriesForDropdown();

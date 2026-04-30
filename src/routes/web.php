@@ -45,10 +45,11 @@ Route::middleware('auth')->controller(AuthController::class)->group(function () 
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 
-    Route::prefix('admin')->group(function () {
+    Route::prefix('admin')->middleware('can:access-panel')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::resource('categories', AdminCategoryController::class)
+            ->middleware('role:admin')
             ->names('admin.categories')->except(['show']);
 
         Route::resource('products', AdminProductController::class)

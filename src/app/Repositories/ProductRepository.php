@@ -79,9 +79,13 @@ class ProductRepository
      */
     public function getPaginatedForAdmin(int $perPage = 15): LengthAwarePaginator
     {
-        return Product::query()
-            ->with(['category', 'images'])
-            ->orderBy('id', 'asc')
-            ->paginate($perPage);
+       $query = Product::query();
+
+       if (!auth()->user()->hasRole('admin')) {
+           $query->where('user_id', auth()->id())
+           ->orderByDesc('id');
+       }
+
+       return $query->latest()->paginate($perPage);
     }
 }
