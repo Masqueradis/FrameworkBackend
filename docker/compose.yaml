@@ -1,6 +1,7 @@
 services:
     app:
         image: masqueradisu/laravel-php:8.5-dev
+        platform: linux/amd64
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
