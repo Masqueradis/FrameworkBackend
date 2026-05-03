@@ -8,8 +8,8 @@ use App\Filters\ProductFilter;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
-use App\ValueObjects\CategoryId;
-use App\ValueObjects\ProductId;
+use App\ValueObjects\Id\CategoryId;
+use App\ValueObjects\Id\ProductId;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 

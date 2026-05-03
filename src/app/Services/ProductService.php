@@ -4,15 +4,14 @@ declare (strict_types=1);
 
 namespace App\Services;
 
-use App\Data\ProductIndexData;
-use App\Data\ProductSaveData;
-use App\Data\UploadImageData;
-use App\Models\Category;
+use App\DTO\ProductIndexDTO;
+use App\DTO\ProductSaveDTO;
+use App\DTO\UploadImageDTO;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Repositories\ProductImageRepository;
 use App\Repositories\ProductRepository;
-use App\ValueObjects\CategoryId;
+use App\ValueObjects\Id\CategoryId;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
@@ -26,10 +25,10 @@ readonly class ProductService
     ) {}
 
     /**
-     * @param ProductIndexData $data
+     * @param ProductIndexDTO $data
      * @return LengthAwarePaginator<int, Product>
      */
-    public function getFilteredProducts(ProductIndexData $data): LengthAwarePaginator
+    public function getFilteredProducts(ProductIndexDTO $data): LengthAwarePaginator
     {
         return $this->productRepository->getFiltered([
             'category_id' => $data->categoryId?->value,
@@ -55,7 +54,7 @@ readonly class ProductService
         ];
     }
 
-    public function createProduct(ProductSaveData $data): Product
+    public function createProduct(ProductSaveDTO $data): Product
     {
         $product = $this->productRepository->create([
             'user_id' => auth()->id(),
@@ -75,7 +74,7 @@ readonly class ProductService
         return $product;
     }
 
-    public function updateProduct(Product $product, ProductSaveData $data): Product
+    public function updateProduct(Product $product, ProductSaveDTO $data): Product
     {
         $updateData = [
             'category_id' => $data->categoryId->value,
@@ -113,7 +112,7 @@ readonly class ProductService
         return $this->productRepository->getPaginatedForAdmin($perPage);
     }
 
-    public function addImage(Product $product, UploadImageData $data): ProductImage
+    public function addImage(Product $product, UploadImageDTO $data): ProductImage
     {
         $path = $data->image->store('products', 'minio');
 
@@ -154,7 +153,7 @@ readonly class ProductService
             if ($image === null) {
                 continue;
             }
-            $imageData = new UploadImageData(
+            $imageData = new UploadImageDTO(
                 image: $image,
                 is_primary: $startPosition === 0 && $index === 0,
                 position: $startPosition + $index,

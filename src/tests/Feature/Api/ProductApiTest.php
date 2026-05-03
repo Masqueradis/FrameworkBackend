@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
-use App\Data\ProductSaveData;
+use App\DTO\ProductSaveDTO;
 use App\Models\Category;
 use App\Models\Permission;
 use App\Models\Product;
@@ -259,7 +259,7 @@ class ProductApiTest extends TestCase
             'attribute_values' => ['1', '2', '3'],
         ];
 
-        $data = ProductSaveData::from($payload);
+        $data = ProductSaveDTO::from($payload);
 
         $this->assertFalse($data->available);
 

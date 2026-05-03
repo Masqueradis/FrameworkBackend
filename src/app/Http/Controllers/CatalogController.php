@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Data\ProductIndexData;
+use App\DTO\ProductIndexDTO;
 use App\Services\CategoryService;
 use App\Services\ProductService;
-use App\ValueObjects\CategoryId;
+use App\ValueObjects\Id\CategoryId;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 
@@ -18,7 +18,7 @@ class CatalogController extends Controller
         private readonly CategoryService $categoryService,
     ) {}
 
-    public function index(ProductIndexData $data): View
+    public function index(ProductIndexDTO $data): View
     {
         $products = $this->productService->getFilteredProducts($data);
 

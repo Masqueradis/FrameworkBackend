@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Data\ProductSaveData;
-use App\Data\UploadImageData;
+use App\DTO\ProductSaveDTO;
+use App\DTO\UploadImageDTO;
 use App\Models\Product;
 use App\Services\CategoryService;
 use App\Services\ProductService;
@@ -45,7 +45,7 @@ readonly class AdminProductController implements HasMiddleware
         return view('admin.products.form', compact('categories'));
     }
 
-    public function store(ProductSaveData $data): RedirectResponse
+    public function store(ProductSaveDTO $data): RedirectResponse
     {
         $this->productService->createProduct($data);
         return redirect()->route('admin.products.index')
@@ -58,7 +58,7 @@ readonly class AdminProductController implements HasMiddleware
         return view('admin.products.form', compact('product', 'categories'));
     }
 
-    public function update(ProductSaveData $data, Product $product): RedirectResponse
+    public function update(ProductSaveDTO $data, Product $product): RedirectResponse
     {
         $this->productService->updateProduct($product, $data);
         return redirect()->route('admin.products.index')
@@ -72,7 +72,7 @@ readonly class AdminProductController implements HasMiddleware
             ->with('success', 'Product deleted successfully.');
     }
 
-    public function uploadImage(Product $product, UploadImageData $data): JsonResponse
+    public function uploadImage(Product $product, UploadImageDTO $data): JsonResponse
     {
         $image = $this->productService->addImage($product, $data);
 
