@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\DTO\AuthResultDTO;
-use App\DTO\LoginUserDTO;
-use App\DTO\RegisterUserDTO;
+use App\DTO\User\AuthResultDTO;
+use App\DTO\User\LoginUserDTO;
+use App\DTO\User\RegisterUserDTO;
+use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\Events\Registered;
-use App\Models\User;
 
 readonly class AuthService
 {

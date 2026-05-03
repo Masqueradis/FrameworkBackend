@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\DTO\ProductSaveDTO;
-use App\DTO\UploadImageDTO;
+use App\DTO\Product\ProductSaveDTO;
+use App\DTO\Product\UploadImageDTO;
 use App\Models\Product;
 use App\Services\CategoryService;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 readonly class AdminProductController implements HasMiddleware

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO;
+namespace App\DTO\Product;
 
 use Illuminate\Http\UploadedFile;
 use Spatie\LaravelData\Attributes\Validation\Image;

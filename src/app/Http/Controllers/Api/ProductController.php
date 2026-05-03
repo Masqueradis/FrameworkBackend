@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
-use App\DTO\ProductIndexDTO;
-use App\DTO\ProductSaveDTO;
+use App\DTO\Product\ProductIndexDTO;
+use App\DTO\Product\ProductSaveDTO;
 use App\Http\Controllers\ApiController;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Gate;
 
 class ProductController extends ApiController
 {
