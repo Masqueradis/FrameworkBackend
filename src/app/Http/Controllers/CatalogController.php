@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\DTO\ProductIndexDTO;
+use App\DTO\Product\ProductIndexDTO;
 use App\Services\CategoryService;
 use App\Services\ProductService;
 use App\ValueObjects\Id\CategoryId;

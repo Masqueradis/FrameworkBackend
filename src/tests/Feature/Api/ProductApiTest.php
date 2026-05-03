@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
-use App\DTO\ProductSaveDTO;
+use App\DTO\Product\ProductSaveDTO;
 use App\Models\Category;
 use App\Models\Permission;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\HttpFoundation\Response;
-use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ProductApiTest extends TestCase

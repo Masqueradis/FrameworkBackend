@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
-use App\DTO\AuthResultDTO;
+use App\DTO\User\AuthResultDTO;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\AuthService;
-use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;

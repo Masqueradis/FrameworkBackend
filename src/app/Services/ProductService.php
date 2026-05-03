@@ -4,9 +4,9 @@ declare (strict_types=1);
 
 namespace App\Services;
 
-use App\DTO\ProductIndexDTO;
-use App\DTO\ProductSaveDTO;
-use App\DTO\UploadImageDTO;
+use App\DTO\Product\ProductIndexDTO;
+use App\DTO\Product\ProductSaveDTO;
+use App\DTO\Product\UploadImageDTO;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Repositories\ProductImageRepository;
