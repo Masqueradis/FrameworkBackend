@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
-use App\Data\ProductIndexData;
-use App\Data\ProductSaveData;
+use App\DTO\ProductIndexDTO;
+use App\DTO\ProductSaveDTO;
 use App\Http\Controllers\ApiController;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
@@ -91,7 +91,7 @@ class ProductController extends ApiController
             ),
         ]
     )]
-    public function index(ProductIndexData $request): JsonResponse
+    public function index(ProductIndexDTO $request): JsonResponse
     {
         $products = $this->productService->getFilteredProducts($request);
         return $this->respondSuccess(
@@ -192,7 +192,7 @@ class ProductController extends ApiController
             new OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors'),
         ]
     )]
-    public function store(ProductSaveData $request): JsonResponse
+    public function store(ProductSaveDTO $request): JsonResponse
     {
         $product = $this->productService->createProduct($request);
 
@@ -245,7 +245,7 @@ class ProductController extends ApiController
             new OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: 'Validation errors'),
         ]
     )]
-    public function update(ProductSaveData $request, Product $product): JsonResponse
+    public function update(ProductSaveDTO $request, Product $product): JsonResponse
     {
         $updateProduct = $this->productService->updateProduct($product, $request);
 

@@ -6,10 +6,10 @@ namespace Tests\Feature\Repositories;
 
 use App\Models\User;
 use App\Repositories\UserRepository;
-use App\ValueObjects\UserId;
+use App\ValueObjects\Id\UserId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class UserRepositoryTest extends TestCase
 {

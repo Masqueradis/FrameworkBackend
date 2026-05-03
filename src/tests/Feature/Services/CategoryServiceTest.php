@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Services;
 
-use App\Data\CategorySaveData;
+use App\DTO\CategorySaveDTO;
 use App\Models\Category;
 use App\Repositories\CategoryRepository;
 use App\Services\CategoryService;
-use App\ValueObjects\CategoryId;
+use App\ValueObjects\Id\CategoryId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class CategoryServiceTest extends TestCase
 {
@@ -29,7 +29,7 @@ class CategoryServiceTest extends TestCase
     #[Test]
     public function testCanCreateCategory(): void
     {
-        $data = CategorySaveData::from([
+        $data = CategorySaveDTO::from([
             'name' => 'New Category',
             'parent_id' => null,
         ]);
@@ -51,7 +51,7 @@ class CategoryServiceTest extends TestCase
         $category = Category::factory()->create(['name' => 'Old Category']);
         $parent = Category::factory()->create(['name' => 'Parent']);
 
-        $data = new CategorySaveData(name: 'New Category', parent_id: new CategoryId($parent->id));
+        $data = new CategorySaveDTO(name: 'New Category', parent_id: new CategoryId($parent->id));
 
         $this->categoryService->updateCategory($category, $data);
 

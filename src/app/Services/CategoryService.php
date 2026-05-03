@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Data\CategorySaveData;
+use App\DTO\CategorySaveDTO;
 use App\Models\Category;
 use App\Repositories\CategoryRepository;
-use App\ValueObjects\CategoryId;
+use App\ValueObjects\Id\CategoryId;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
@@ -30,7 +30,7 @@ readonly class CategoryService
         return $this->categoryRepository->getAll();
     }
 
-    public function createCategory(CategorySaveData $data): Category
+    public function createCategory(CategorySaveDTO $data): Category
     {
         return $this->categoryRepository->create([
             'name' => $data->name,
@@ -39,7 +39,7 @@ readonly class CategoryService
         ]);
     }
 
-    public function updateCategory(Category $category, CategorySaveData $data): Category
+    public function updateCategory(Category $category, CategorySaveDTO $data): Category
     {
         return $this->categoryRepository->update($category, [
             'name' => $data->name,

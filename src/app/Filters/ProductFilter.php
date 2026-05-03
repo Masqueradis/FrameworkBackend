@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filters;
 
-use App\Models\Product;
-use App\ValueObjects\CategoryId;
+use App\ValueObjects\Id\CategoryId;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 

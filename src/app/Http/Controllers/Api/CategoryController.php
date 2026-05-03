@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
-use App\Data\CategorySaveData;
+use App\DTO\CategorySaveDTO;
 use App\Http\Controllers\ApiController;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
@@ -107,7 +107,7 @@ class CategoryController extends ApiController
             ),
         ]
     )]
-    public function store(CategorySaveData $request): JsonResponse
+    public function store(CategorySaveDTO $request): JsonResponse
     {
         $category = $this->categoryService->createCategory($request);
 
@@ -223,7 +223,7 @@ class CategoryController extends ApiController
             ),
         ]
     )]
-    public function update(Category $category, CategorySaveData $request): JsonResponse
+    public function update(Category $category, CategorySaveDTO $request): JsonResponse
     {
         $updatedCategory = $this->categoryService->updateCategory($category, $request);
 

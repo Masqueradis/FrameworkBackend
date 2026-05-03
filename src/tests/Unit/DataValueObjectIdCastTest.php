@@ -2,11 +2,11 @@
 
 namespace Tests\Unit;
 
-use App\Data\Casts\DataValueObjectIdCast;
-use Tests\TestCase;
+use App\Casts\DataValueObjectIdCast;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
+use Tests\TestCase;
 
 class DummyUnionDto extends Data
 {

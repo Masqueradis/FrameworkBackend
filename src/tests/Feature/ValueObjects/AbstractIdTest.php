@@ -2,10 +2,10 @@
 
 namespace Feature\ValueObjects;
 
-use App\ValueObjects\AbstractId;
+use App\ValueObjects\Id\AbstractId;
 use InvalidArgumentException;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class DummyId extends AbstractId {}
 class AnotherDummyId extends AbstractId {}
