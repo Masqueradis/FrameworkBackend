@@ -7,6 +7,7 @@ namespace Tests\Feature\Admin;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +22,9 @@ class CategoryControllerTest extends TestCase
     {
         parent::setUp();
         $this->admin = User::factory()->create();
+        Role::firstOrCreate(['name' => 'admin']);
+        $this->admin->assignRole('admin');
+        $this->category = Category::factory()->create();
     }
 
     #[Test]

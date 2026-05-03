@@ -10,6 +10,10 @@ init:
 		cp ./docker/.env.example ./docker/.env; \
 	fi
 
+force-init:
+	cp -f ./src/.env.example ./src/.env
+	cp -f ./docker/.env.example ./docker/.env
+
 up: init
 	${DOCKER_COMPOSE} up -d
 
@@ -29,16 +33,19 @@ bash: init
 build: init
 	${DOCKER_COMPOSE} build
 
-setup: init build up
+setup: force-init build up
 	${DOCKER_COMPOSE} exec app composer install
 	${DOCKER_COMPOSE} exec app php artisan key:generate
-	${DOCKER_COMPOSE} exec app php artisan migrate --seed
+	${DOCKER_COMPOSE} exec app php artisan migrate:fresh --seed
 	${DOCKER_COMPOSE} exec app php artisan passport:keys --force
 	${DOCKER_COMPOSE} exec app php artisan passport:client --personal --no-interaction
 	${DOCKER_COMPOSE} exec app php artisan storage:link
-	cd src && npm install
-	cd src && npm run build
+	${DOCKER_COMPOSE} run --rm npm-setup
+	make setup-minio
 	echo "App now available on address: http://localhost"
 
 phpstan:
 	${DOCKER_COMPOSE} exec app ./vendor/bin/phpstan analyse --memory-limit=2G
+
+setup-minio:
+	${DOCKER_COMPOSE} exec -t minio mkdir -p /data/laravel-minio

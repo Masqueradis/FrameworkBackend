@@ -6,11 +6,19 @@ namespace Tests\Feature\Services;
 
 use App\Data\ProductIndexData;
 use App\Data\ProductSaveData;
+use App\Data\UploadImageData;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\User;
 use App\Services\ProductService;
+use App\ValueObjects\CategoryId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Storage;
+use Mockery;
+use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -85,7 +93,7 @@ class ProductServiceTest extends TestCase
         $product = Product::factory()->create(['sku' => 'OLD-SKU']);
 
         $data = new ProductSaveData(
-            categoryId: $category->id,
+            categoryId: new CategoryId($category->id),
             name: 'Updated Name',
             price: 200,
             stock: 10,
@@ -107,6 +115,11 @@ class ProductServiceTest extends TestCase
     #[Test]
     public function testReturnsPaginatedProductsForAdminWithRelations(): void
     {
+        $admin = User::factory()->create();
+        Role::firstOrCreate(['name' => 'admin']);
+        $admin->assignRole('admin');
+        $this->actingAs($admin);
+
         $category = Category::factory()->create();
         Product::factory()->count(3)->create(['category_id' => $category->id]);
 
@@ -116,5 +129,113 @@ class ProductServiceTest extends TestCase
         $this->assertEquals(3, $paginator->total());
         $this->assertCount(2, $paginator->items());
         $this->assertTrue($paginator->first()->relationLoaded('category'));
+    }
+
+    #[Test]
+    public function testHandlesImageUploadsAndRespectsMaxLimits(): void
+    {
+        Storage::fake('minio');
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $service = app(ProductService::class);
+        $category = Category::factory()->create();
+
+        $initialImages = [];
+        for ($i = 0; $i < 8; $i++) {
+            $initialImages[] = UploadedFile::fake()->image("img_{$i}.jpg");
+        }
+
+        $createData = ProductSaveData::from([
+            'category_id' => new CategoryId($category->id),
+            'name' => 'New Name',
+            'price' => 100,
+            'images' => $initialImages,
+        ]);
+
+        $product = $service->createProduct($createData);
+
+        $product->refresh();
+
+        $this->assertCount(8, $product->images);
+        $this->assertTrue($product->images->first()->is_primary);
+
+        $newImages = [];
+        for ($i = 0; $i < 5; $i++) {
+            $newImages[] = UploadedFile::fake()->image("new_img_{$i}.jpg");
+        }
+
+        $updateData = ProductSaveData::from([
+            'category_id' => new CategoryId($category->id),
+            'name' => 'Updated Name',
+            'price' => 150,
+            'images' => $newImages,
+        ]);
+
+        $updatedProduct = $service->updateProduct($product, $updateData);
+
+        $updatedProduct->refresh();
+
+        $this->assertCount(10, $updatedProduct->images);
+
+        $savedImage = $updatedProduct->images->last();
+        Storage::disk('minio')->assertExists($savedImage->path);
+
+        $extraImage = UploadedFile::fake()->image("extra.jpg");
+        $extraData = ProductSaveData::from([
+            'category_id' => new CategoryId($category->id),
+            'name' => 'Name',
+            'price' => 100,
+            'images' => [$extraImage],
+        ]);
+
+        $service->updateProduct($updatedProduct, $extraData);
+
+        $this->assertCount(10, $updatedProduct->refresh()->images);
+    }
+
+    #[Test]
+    public function testThrowsExceptionIfImageUploadFails(): void
+    {
+        $service = app(ProductService::class);
+        $product = Product::factory()->create();
+
+        $failingFile = Mockery::mock(UploadedFile::class);
+        $failingFile->shouldReceive('store')->andReturn(false);
+
+        $data = new UploadImageData($failingFile, false, 0);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Failed to upload image to storage');
+
+        $service->addImage($product, $data);
+    }
+
+    #[Test]
+    public function testHandleImagesSkipsNullValuesInArray(): void
+    {
+        Storage::fake('minio');
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $service = app(ProductService::class);
+        $category = Category::factory()->create();
+
+        $createData = ProductSaveData::from([
+            'category_id' => new CategoryId($category->id),
+            'name' => 'Name',
+            'price' => 100,
+            'images' => [
+                UploadedFile::fake()->image("valid.jpg"),
+                null,
+            ],
+        ]);
+
+        $product = $service->createProduct($createData);
+        $product->refresh();
+
+        $this->assertCount(1, $product->images);
     }
 }

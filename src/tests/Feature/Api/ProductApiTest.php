@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
+use App\Data\ProductSaveData;
 use App\Models\Category;
 use App\Models\Permission;
 use App\Models\Product;
@@ -210,5 +211,70 @@ class ProductApiTest extends TestCase
         $response->assertStatus(Response::HTTP_OK)
             ->assertJsonPath('data.id', $product->id)
             ->assertJsonPath('data.name', $product->name);
+    }
+
+    #[Test]
+    public function testProductResponseContainsImageWithFullUrl(): void
+    {
+        $product = Product::factory()->create();
+
+        $product->images()->create([
+            'path' => 'product/test-image.jpg',
+            'is_primary' => true,
+            'position' => 0,
+        ]);
+
+        $response = $this->getJson("/api/v1/products/{$product->id}");
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'description',
+                    'price',
+                    'images' => [
+                        '*' => [
+                            'id',
+                            'url',
+                            'is_primary',
+                            'position',
+                        ],
+                    ],
+                ],
+            ]);
+
+        $this->assertStringStartsWith('http', $response->json('data.images.0.url'));
+    }
+
+    #[Test]
+    public function testPreparesAttributesAndAvailableFlagInDto(): void
+    {
+        $payload = [
+            'category_id' => 1,
+            'name' => 'RTX4090',
+            'price' => 10000,
+            'stock' => 50,
+            'attribute_keys' => ['1', '', '3'],
+            'attribute_values' => ['1', '2', '3'],
+        ];
+
+        $data = ProductSaveData::from($payload);
+
+        $this->assertFalse($data->available);
+
+        $this->assertEquals([
+            '1' => '1',
+            '3' => '3',
+        ], $data->attributes);
+    }
+
+    #[Test]
+    public function testCanViewPublicProductPage(): void
+    {
+        $product = Product::factory()->create(['available' => true]);
+        $response = $this->get(route('web.products.show', $product));
+        $response->assertStatus(200);
+        $response->assertViewIs('products.show');
     }
 }

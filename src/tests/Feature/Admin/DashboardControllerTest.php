@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,12 +20,33 @@ class DashboardControllerTest extends TestCase
     #[Test]
     public function testAdminDashboardLoadsCorrectly(): void
     {
-        $user = User::factory()->create();
+        $admin = User::factory()->create();
+        Role::firstOrCreate(['name' => 'admin']);
+        $admin->assignRole('admin');
+        $this->actingAs($admin);
 
         Category::factory()->count(3)->create();
         Product::factory()->count(6)->create();
 
-        $response = $this->actingAs($user)->get(route('admin.dashboard'));
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertViewIs('admin.dashboard')
+            ->assertViewHasAll(['productsCount', 'categoriesCount', 'usersCount']);
+    }
+
+    #[Test]
+    public function testSellerDashboardLoadsCorrectly(): void
+    {
+        $seller = User::factory()->create();
+        Role::firstOrCreate(['name' => 'seller']);
+        $seller->assignRole('seller');
+        $this->actingAs($seller);
+
+        Category::factory()->count(3)->create();
+        Product::factory()->count(6)->create();
+
+        $response = $this->actingAs($seller)->get(route('admin.dashboard'));
 
         $response->assertStatus(Response::HTTP_OK)
             ->assertViewIs('admin.dashboard')

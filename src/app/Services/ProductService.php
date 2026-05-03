@@ -6,10 +6,14 @@ namespace App\Services;
 
 use App\Data\ProductIndexData;
 use App\Data\ProductSaveData;
+use App\Data\UploadImageData;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
+use App\Repositories\ProductImageRepository;
 use App\Repositories\ProductRepository;
 use App\ValueObjects\CategoryId;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 
@@ -18,6 +22,7 @@ readonly class ProductService
     public function __construct(
         private ProductRepository $productRepository,
         private ProductAttributeService $attributeService,
+        private ProductImageRepository $productImageRepository,
     ) {}
 
     /**
@@ -26,13 +31,13 @@ readonly class ProductService
      */
     public function getFilteredProducts(ProductIndexData $data): LengthAwarePaginator
     {
-       return $this->productRepository->getFiltered([
-           'category_id' => $data->categoryId,
-           'min_price' => $data->minPrice,
-           'max_price' => $data->maxPrice,
-           'search' => $data->search,
-           'attributes' => $data->attributes,
-       ]);
+        return $this->productRepository->getFiltered([
+            'category_id' => $data->categoryId?->value,
+            'min_price' => $data->minPrice,
+            'max_price' => $data->maxPrice,
+            'search' => $data->search,
+            'attributes' => $data->attributes,
+        ]);
     }
 
     /**
@@ -52,9 +57,9 @@ readonly class ProductService
 
     public function createProduct(ProductSaveData $data): Product
     {
-        return $this->productRepository->create([
+        $product = $this->productRepository->create([
             'user_id' => auth()->id(),
-            'category_id' => $data->categoryId,
+            'category_id' => $data->categoryId->value,
             'name' => $data->name,
             'slug' => Str::slug($data->name) . '-' . uniqid(),
             'sku' => $data->sku ?? 'SKU-' . strtoupper(Str::random(8)),
@@ -64,12 +69,16 @@ readonly class ProductService
             'available' => $data->available,
             'attributes' => $data->attributes,
         ]);
+
+        $this->handleImages($product, $data->images);
+
+        return $product;
     }
 
     public function updateProduct(Product $product, ProductSaveData $data): Product
     {
         $updateData = [
-            'category_id' => $data->categoryId,
+            'category_id' => $data->categoryId->value,
             'name' => $data->name,
             'description' => $data->description,
             'price' => $data->price,
@@ -82,7 +91,12 @@ readonly class ProductService
             $updateData['sku'] = $data->sku;
         }
 
-        return $this->productRepository->update($product, $updateData);
+        $updatedProduct = $this->productRepository->update($product, $updateData);
+
+        $currentImagesCount = $product->images()->count();
+        $this->handleImages($product, $data->images, $currentImagesCount);
+
+        return $updatedProduct;
     }
 
     public function deleteProduct(Product $product): void
@@ -97,5 +111,56 @@ readonly class ProductService
     public function getPaginatedProductsForAdmin(int $perPage = 15): LengthAwarePaginator
     {
         return $this->productRepository->getPaginatedForAdmin($perPage);
+    }
+
+    public function addImage(Product $product, UploadImageData $data): ProductImage
+    {
+        $path = $data->image->store('products', 'minio');
+
+        if ($path === false) {
+            throw new \Exception('Failed to upload image to storage');
+        }
+
+        return $this->productImageRepository->createForProduct(
+            $product,
+            $path,
+            $data->is_primary,
+            $data->position,
+        );
+    }
+
+    /**
+     * @param Product $product
+     * @param array<int, UploadedFile|null>|null $images
+     * @param int $startPosition
+     * @return void
+     */
+    private function handleImages(Product $product, ?array $images, int $startPosition = 0): void
+    {
+        if (empty($images)) {
+            return;
+        }
+
+        $maxImagesLimit = 10;
+        $allowedToUpload = $maxImagesLimit - $startPosition;
+
+        if ($allowedToUpload <= 0) {
+            return;
+        }
+
+        $imagesToProcess = array_slice($images, 0, $allowedToUpload);
+
+        foreach ($imagesToProcess as $index => $image) {
+            if ($image === null) {
+                continue;
+            }
+            $imageData = new UploadImageData(
+                image: $image,
+                is_primary: $startPosition === 0 && $index === 0,
+                position: $startPosition + $index,
+            );
+
+            $this->addImage($product, $imageData);
+        }
     }
 }

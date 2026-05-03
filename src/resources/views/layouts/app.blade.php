@@ -35,6 +35,8 @@
                             Hello, {{ auth()->user()->name }}
                             @if(auth()->user()->hasRole('admin'))
                                 <span class="badge bg-danger ms-1">Admin</span>
+                            @elseif(auth()->user()->hasRole('seller'))
+                                <span class="badge bg-warning ms-1 text-dark">Seller</span>
                             @endif
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
@@ -42,11 +44,11 @@
                                 <a class="dropdown-item" href="{{ url('/profile') }}">Profile</a>
                             </li>
 
-                            @if(auth()->user()->hasRole('admin'))
+                            @can('access-panel')
                                 <li>
                                     <a class="dropdown-item" href="{{ route('admin.dashboard') }}">Admin Panel</a>
                                 </li>
-                            @endif
+                            @endcan
 
                             <li><hr class="dropdown-divider"></li>
 
@@ -76,6 +78,11 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-@stack('scripts')
+
+@if(session('error_alert'))
+    <script>
+        alert("{{ session('error_alert') }}");
+    </script>
+@endif
 </body>
 </html>

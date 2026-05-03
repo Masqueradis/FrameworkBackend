@@ -10,6 +10,7 @@ use App\ValueObjects\CategoryId;
 use App\ValueObjects\ProductId;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,5 +59,13 @@ class Product extends Model
     public function scopeFilter(Builder $query, QueryFilter $filter): Builder
     {
         return $filter->apply($query);
+    }
+
+    /**
+     * @return HasMany<ProductImage, $this>
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class);
     }
 }

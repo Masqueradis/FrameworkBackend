@@ -42,18 +42,19 @@ class RoleAndPermissionSeeder extends Seeder
 
         $admin = User::firstOrCreate(
             [
-            'email' => 'admin@example.com'
+                'email' => 'admin@example.com',
             ],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'remember_token' => Str::random(10),
-            ]);
+            ]
+        );
         $admin->assignRole($adminRole);
 
         $seller = User::firstOrCreate([
-            'email' => 'seller@example.com'
+            'email' => 'seller@example.com',
         ], [
             'name' => 'Sidorovich',
             'password' => Hash::make('password'),

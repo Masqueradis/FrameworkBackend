@@ -22,7 +22,7 @@ class CatalogController extends Controller
     {
         $products = $this->productService->getFilteredProducts($data);
 
-        $categoryIdVO = $data->categoryId ? new CategoryId((int) $data->categoryId) : null;
+        $categoryIdVO = $data->categoryId?->value ? new CategoryId((int) $data->categoryId->value) : null;
 
         $filtersData = $this->productService->getFilteredData($categoryIdVO);
 

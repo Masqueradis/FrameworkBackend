@@ -10,12 +10,19 @@ use Illuminate\Auth\Access\Response;
 
 class ProductPolicy
 {
+    public function before(User $user, string $ability): ?bool
+    {
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        return null;
+    }
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->hasRole('seller');
     }
 
     /**
@@ -23,7 +30,7 @@ class ProductPolicy
      */
     public function view(User $user, Product $product): bool
     {
-        return false;
+        return $user->id === $product->user_id;
     }
 
     /**
@@ -31,7 +38,7 @@ class ProductPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('manage all products', 'web');
+        return $user->hasRole('seller');
     }
 
     /**
@@ -39,7 +46,7 @@ class ProductPolicy
      */
     public function update(User $user, Product $product): bool
     {
-        return $user->hasPermissionTo('manage all products', 'web');
+        return $user->id === $product->user_id;
     }
 
     /**
@@ -47,7 +54,7 @@ class ProductPolicy
      */
     public function delete(User $user, Product $product): bool
     {
-        return $user->hasRole('admin', 'web');
+        return $user->id === $product->user_id;
     }
 
     /**

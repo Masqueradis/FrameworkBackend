@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\Filters\ProductFilter;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\User;
 use App\ValueObjects\CategoryId;
 use App\ValueObjects\ProductId;
 use Illuminate\Database\Eloquent\Collection;
@@ -27,7 +28,7 @@ class ProductRepository
     public function getFiltered(array $filters, int $perPage = 9): LengthAwarePaginator
     {
         return Product::query()
-            ->with('category')
+            ->with(['category', 'images'])
             ->where('available', true)
             ->filter(new ProductFilter($filters))
             ->paginate($perPage);
@@ -79,6 +80,14 @@ class ProductRepository
      */
     public function getPaginatedForAdmin(int $perPage = 15): LengthAwarePaginator
     {
-        return Product::with('category')->latest()->paginate($perPage);
+        $query = Product::query()->with('category');
+        /** @var User $user */
+        $user = auth()->user();
+
+        if (!$user->hasRole('admin')) {
+            $query->where('user_id', auth()->id());
+        }
+
+        return $query->orderBy('id', 'asc')->paginate($perPage);
     }
 }

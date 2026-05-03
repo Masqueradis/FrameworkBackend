@@ -17,13 +17,13 @@ class ProductAttributeService
     {
         $attributes = [];
 
-        foreach($products->pluck('attributes')->filter() as $productAttributes) {
-            foreach($productAttributes as $key => $value) {
+        foreach ($products->pluck('attributes')->filter() as $productAttributes) {
+            foreach ($productAttributes as $key => $value) {
                 $attributes[$key] = array_merge($attributes[$key] ?? [], (array) $value);
             }
         }
         return collect($attributes)
-            ->map(fn (array $values) => collect($values)->unique()->sort()->values()->all())
+            ->map(fn(array $values) => collect($values)->unique()->sort()->values()->all())
             ->all();
     }
 }
