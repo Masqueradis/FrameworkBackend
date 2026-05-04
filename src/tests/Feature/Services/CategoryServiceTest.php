@@ -76,6 +76,7 @@ class CategoryServiceTest extends TestCase
     #[Test]
     public function testReturnsPaginatedCategoriesWithParent(): void
     {
+        Category::query()->delete();
         $parent = Category::factory()->create(['name' => 'Parent']);
         Category::factory()->create(['parent_id' => $parent->id]);
 
@@ -90,6 +91,7 @@ class CategoryServiceTest extends TestCase
     #[Test]
     public function testReturnsCategoriesForDropdownAndExclude(): void
     {
+        Category::query()->delete();
         $firstCategory = Category::factory()->create(['name' => 'First Category']);
         $secondCategory = Category::factory()->create(['name' => 'Second Category']);
         $thirdCategory = Category::factory()->create(['name' => 'Third Category']);
@@ -106,6 +108,7 @@ class CategoryServiceTest extends TestCase
     #[Test]
     public function testGetRootsReturnsOnlyCategoriesWithoutParents(): void
     {
+        Category::query()->delete();
         $repository = app(CategoryRepository::class);
 
         $root1 = Category::factory()->create(['parent_id' => null, 'name' => 'Root1']);

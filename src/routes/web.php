@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\ProfileController;
@@ -27,6 +28,12 @@ Route::middleware('guest')->controller(AuthController::class)->group(function ()
     Route::get('/register', 'showRegisterForm')->name('register');
     Route::post('/register', 'register')->name('register.post');
     Route::get('/verify/{token}', 'verifyEmail')->name('verification.verify.custom');
+});
+
+Route::prefix('cart')->name('cart.')->group(function () {
+    Route::post('/add', [CartController::class, 'add'])->name('add');
+    Route::patch('/{cartItem}', [CartController::class, 'update'])->name('update');
+    Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('remove');
 });
 
 Route::middleware('auth')->controller(AuthController::class)->group(function () {

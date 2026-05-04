@@ -35,6 +35,7 @@ class ProductServiceTest extends TestCase
 
     public function testFilterProductsByMaxPrice(): void
     {
+        Product::query()->delete();
         Product::factory()->create(['price' => 100, 'available' => true]);
         Product::factory()->create(['price' => 200, 'available' => true]);
 
@@ -114,6 +115,7 @@ class ProductServiceTest extends TestCase
     #[Test]
     public function testReturnsPaginatedProductsForAdminWithRelations(): void
     {
+        Product::query()->delete();
         $admin = User::factory()->create();
         Role::firstOrCreate(['name' => 'admin']);
         $admin->assignRole('admin');

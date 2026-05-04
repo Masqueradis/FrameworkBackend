@@ -38,7 +38,7 @@ class CartServiceTest extends TestCase
             'stock' => 50
         ]);
 
-        $dto = new AddToCartDto($product->id, new CartQuantity(2));
+        $dto = new AddToCartDto($product->id, 2);
 
         $this->cartService->addItem($dto);
         $this->assertDatabaseHas('cart_items', [
@@ -55,7 +55,7 @@ class CartServiceTest extends TestCase
         $this->actingAs($user);
 
         $product = Product::factory()->create(['stock' => 1]);
-        $dto = new AddToCartDto($product->id, new CartQuantity(5));
+        $dto = new AddToCartDto($product->id, 5);
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Not enough stock available.');
@@ -71,8 +71,8 @@ class CartServiceTest extends TestCase
         $product1 = Product::factory()->create(['price' => 1000, 'stock' => 10]);
         $product2 = Product::factory()->create(['price' => 2000, 'stock' => 10]);
 
-        $this->cartService->addItem(new AddToCartDto($product1->id, new CartQuantity(2)));
-        $this->cartService->addItem(new AddToCartDto($product2->id, new CartQuantity(1)));
+        $this->cartService->addItem(new AddToCartDto($product1->id, 2));
+        $this->cartService->addItem(new AddToCartDto($product2->id, 1));
 
         $cart = $this->cartService->getCart();
         $total = $this->cartService->calculateTotal($cart);

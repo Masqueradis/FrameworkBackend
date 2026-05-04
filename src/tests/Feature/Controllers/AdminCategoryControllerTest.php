@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Admin;
+namespace Tests\Feature\Controllers;
 
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Role;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
+use Tests\TestCase;
 
-class CategoryControllerTest extends TestCase
+class AdminCategoryControllerTest extends TestCase
 {
     use RefreshDatabase;
 
