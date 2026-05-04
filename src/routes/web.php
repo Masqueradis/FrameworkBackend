@@ -31,6 +31,7 @@ Route::middleware('guest')->controller(AuthController::class)->group(function ()
 });
 
 Route::prefix('cart')->name('cart.')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('index');
     Route::post('/add', [CartController::class, 'add'])->name('add');
     Route::patch('/{cartItem}', [CartController::class, 'update'])->name('update');
     Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('remove');

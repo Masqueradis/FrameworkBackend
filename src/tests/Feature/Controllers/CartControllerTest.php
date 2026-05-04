@@ -26,16 +26,13 @@ class CartControllerTest extends TestCase
 
         $product = Product::factory()->create(['stock' => 10, 'price' => 200]);
 
-        $response = $this->postJson(route('cart.add'), [
+        $response = $this->post(route('cart.add'), [
             'product_id' => $product->id,
             'quantity' => 2,
         ]);
 
-        $response->assertOk();
-        $response->assertJson([
-            'success' => true,
-            'message' => 'Item added to cart.'
-        ]);
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Item added to cart.');
 
         $this->assertDatabaseHas('cart_items', [
             'product_id' => $product->id,
@@ -51,13 +48,13 @@ class CartControllerTest extends TestCase
 
         $product = Product::factory()->create(['stock' => 1]);
 
-        $response = $this->postJson(route('cart.add'), [
+        $response = $this->post(route('cart.add'), [
             'product_id' => $product->id,
             'quantity' => 2,
         ]);
 
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $response->assertJsonValidationErrors(['quantity']);
+        $response->assertStatus(Response::HTTP_FOUND);
+        $response->assertSessionHasErrors(['quantity']);
     }
 
     #[Test]
@@ -78,13 +75,10 @@ class CartControllerTest extends TestCase
             'price' => $product->price,
         ]);
 
-        $response = $this->deleteJson(route('cart.remove', $item->id));
+        $response = $this->delete(route('cart.remove', $item->id));
 
-        $response->assertOk();
-        $response->assertJson([
-            'success' => true,
-            'message' => 'Item removed from cart.'
-        ]);
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Item removed from cart.');
         $this->assertDatabaseMissing('cart_items', ['id' => $item->id]);
     }
 }
