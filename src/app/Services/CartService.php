@@ -10,7 +10,6 @@ use App\Models\Cart;
 use App\Models\Product;
 use App\Repositories\Contracts\CartRepositoryInterface;
 use App\ValueObjects\Cart\Money;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
 readonly class CartService
@@ -23,10 +22,7 @@ readonly class CartService
     {
         $userId = auth()->id() !== null ? (int) auth()->id() : null;
 
-        if(!Session::isStarted()) {
-            Session::start();
-        }
-        $sessionId = Session::getId();
+        $sessionId = session()->getId();
 
         return $this->cartRepository->findOrCreate($userId, $sessionId);
     }
@@ -38,7 +34,7 @@ readonly class CartService
         $existingItem = $cart->items()->where('product_id', $product->id)->first();
         $currentQuantity = $existingItem ? $existingItem->quantity : 0;
 
-        $newQuantity = $currentQuantity + $dto->quantity->getValue();
+        $newQuantity = $currentQuantity + $dto->quantity;
 
         if ($newQuantity > $product->stock) {
             throw ValidationException::withMessages([
@@ -63,13 +59,13 @@ readonly class CartService
             ]);
         }
 
-        if($dto->quantity->getValue() > $product->stock) {
+        if($dto->quantity > $product->stock) {
             throw ValidationException::withMessages([
                 'quantity' => 'Not enough stock available.'
             ]);
         }
 
-        $this->cartRepository->addOrUpdateItem($cart, $product->id, $dto->quantity->getValue(), $item->price);
+        $this->cartRepository->addOrUpdateItem($cart, $product->id, $dto->quantity, $item->price);
     }
 
     public function removeItem(int $cartItemId): void

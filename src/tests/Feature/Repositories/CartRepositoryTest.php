@@ -29,6 +29,7 @@ class CartRepositoryTest extends TestCase
     #[Test]
     public function testFindsOrCreateCartForGuestBySessionId(): void
     {
+        Cart::query()->delete();
         $sessionId = 'test-session-123';
 
         $cart1 = $this->cartRepository->findOrCreate(null, $sessionId);
