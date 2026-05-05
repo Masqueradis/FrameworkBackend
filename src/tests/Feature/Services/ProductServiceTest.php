@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Services;
 
-use App\Data\ProductIndexData;
-use App\Data\ProductSaveData;
-use App\Data\UploadImageData;
+use App\DTO\Product\ProductIndexDTO;
+use App\DTO\Product\ProductSaveDTO;
+use App\DTO\Product\UploadImageDTO;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\ProductService;
-use App\ValueObjects\CategoryId;
+use App\ValueObjects\Id\CategoryId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
-use Spatie\Permission\Models\Role;
-use Symfony\Component\HttpFoundation\File\Exception\UploadException;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
 
 class ProductServiceTest extends TestCase
 {
@@ -36,10 +35,11 @@ class ProductServiceTest extends TestCase
 
     public function testFilterProductsByMaxPrice(): void
     {
+        Product::query()->delete();
         Product::factory()->create(['price' => 100, 'available' => true]);
         Product::factory()->create(['price' => 200, 'available' => true]);
 
-        $data = ProductIndexData::from(['max_price' => 200]);
+        $data = ProductIndexDTO::from(['max_price' => 200]);
 
         $result = $this->productService->getFilteredProducts($data);
 
@@ -54,7 +54,7 @@ class ProductServiceTest extends TestCase
         Product::factory()->create(['name' => 'Second', 'description' => 'Second description', 'available' => true]);
         Product::factory()->create(['name' => 'Third', 'description' => 'Third', 'available' => true]);
 
-        $data = ProductIndexData::from(['search' => 'description']);
+        $data = ProductIndexDTO::from(['search' => 'description']);
 
         $result = $this->productService->getFilteredProducts($data);
 
@@ -75,7 +75,7 @@ class ProductServiceTest extends TestCase
                 'volume' => '64 GB',
             ]]);
 
-        $data = ProductIndexData::from(['attributes' => [
+        $data = ProductIndexDTO::from(['attributes' => [
             'RAM' => ['DDR4', 'DDR5'],
             'volume' => '32 GB',
         ]]);
@@ -92,7 +92,7 @@ class ProductServiceTest extends TestCase
         $category = Category::factory()->create();
         $product = Product::factory()->create(['sku' => 'OLD-SKU']);
 
-        $data = new ProductSaveData(
+        $data = new ProductSaveDTO(
             categoryId: new CategoryId($category->id),
             name: 'Updated Name',
             price: 200,
@@ -115,6 +115,7 @@ class ProductServiceTest extends TestCase
     #[Test]
     public function testReturnsPaginatedProductsForAdminWithRelations(): void
     {
+        Product::query()->delete();
         $admin = User::factory()->create();
         Role::firstOrCreate(['name' => 'admin']);
         $admin->assignRole('admin');
@@ -147,7 +148,7 @@ class ProductServiceTest extends TestCase
             $initialImages[] = UploadedFile::fake()->image("img_{$i}.jpg");
         }
 
-        $createData = ProductSaveData::from([
+        $createData = ProductSaveDTO::from([
             'category_id' => new CategoryId($category->id),
             'name' => 'New Name',
             'price' => 100,
@@ -166,7 +167,7 @@ class ProductServiceTest extends TestCase
             $newImages[] = UploadedFile::fake()->image("new_img_{$i}.jpg");
         }
 
-        $updateData = ProductSaveData::from([
+        $updateData = ProductSaveDTO::from([
             'category_id' => new CategoryId($category->id),
             'name' => 'Updated Name',
             'price' => 150,
@@ -183,7 +184,7 @@ class ProductServiceTest extends TestCase
         Storage::disk('minio')->assertExists($savedImage->path);
 
         $extraImage = UploadedFile::fake()->image("extra.jpg");
-        $extraData = ProductSaveData::from([
+        $extraData = ProductSaveDTO::from([
             'category_id' => new CategoryId($category->id),
             'name' => 'Name',
             'price' => 100,
@@ -204,7 +205,7 @@ class ProductServiceTest extends TestCase
         $failingFile = Mockery::mock(UploadedFile::class);
         $failingFile->shouldReceive('store')->andReturn(false);
 
-        $data = new UploadImageData($failingFile, false, 0);
+        $data = new UploadImageDTO($failingFile, false, 0);
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Failed to upload image to storage');
@@ -223,7 +224,7 @@ class ProductServiceTest extends TestCase
         $service = app(ProductService::class);
         $category = Category::factory()->create();
 
-        $createData = ProductSaveData::from([
+        $createData = ProductSaveDTO::from([
             'category_id' => new CategoryId($category->id),
             'name' => 'Name',
             'price' => 100,

@@ -6,10 +6,10 @@ namespace Tests\Feature\Repositories;
 
 use App\Models\Product;
 use App\Repositories\ProductRepository;
-use App\ValueObjects\ProductId;
+use App\ValueObjects\Id\ProductId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class ProductRepositoryTest extends TestCase
 {

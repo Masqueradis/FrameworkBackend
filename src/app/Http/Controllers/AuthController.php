@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Data\LoginUserData;
-use App\Data\RegisterUserData;
+use App\DTO\User\LoginUserDTO;
+use App\DTO\User\RegisterUserDTO;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuthService;
@@ -13,10 +13,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\View\View;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends ApiController
 {
@@ -72,7 +72,7 @@ class AuthController extends ApiController
             ),
         ]
     )]
-    public function register(RegisterUserData $request): JsonResponse|RedirectResponse
+    public function register(RegisterUserDTO $request): JsonResponse|RedirectResponse
     {
         $this->authService->register($request);
 
@@ -155,7 +155,7 @@ class AuthController extends ApiController
             ),
         ]
     )]
-    public function login(LoginUserData $request): JsonResponse|RedirectResponse
+    public function login(LoginUserDTO $request): JsonResponse|RedirectResponse
     {
         $resultData = $this->authService->login($request);
 

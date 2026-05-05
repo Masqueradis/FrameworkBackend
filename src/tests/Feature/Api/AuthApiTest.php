@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
-use App\Data\AuthResultData;
+use App\DTO\User\AuthResultDTO;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\AuthService;
-use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
@@ -217,7 +216,7 @@ class AuthApiTest extends TestCase
 
         $result = $service->verifyRegistration($token);
 
-        $this->assertInstanceOf(AuthResultData::class, $result);
+        $this->assertInstanceOf(AuthResultDTO::class, $result);
         $this->assertDatabaseHas('users', ['email' => $email]);
         $this->assertTrue($result->user->hasRole('customer', 'web'));
         $this->assertNull(Cache::get('pending_email_' . $token));

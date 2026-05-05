@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Data\CategorySaveData;
+use App\DTO\CategorySaveDTO;
 use App\Http\Controllers\ApiController;
 use App\Models\Category;
 use App\Services\CategoryService;
-use App\ValueObjects\CategoryId;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\ValueObjects\Id\CategoryId;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class AdminCategoryController extends ApiController
 {
@@ -32,7 +32,7 @@ class AdminCategoryController extends ApiController
         return view('admin.categories.form', compact('categories'));
     }
 
-    public function store(CategorySaveData $data): RedirectResponse
+    public function store(CategorySaveDTO $data): RedirectResponse
     {
         $this->categoryService->createCategory($data);
 
@@ -49,7 +49,7 @@ class AdminCategoryController extends ApiController
         return view('admin.categories.form', compact('category', 'categories'));
     }
 
-    public function update(Category $category, CategorySaveData $data): RedirectResponse
+    public function update(Category $category, CategorySaveDTO $data): RedirectResponse
     {
         $this->categoryService->updateCategory($category, $data);
 

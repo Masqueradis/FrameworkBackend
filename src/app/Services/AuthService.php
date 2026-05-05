@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Data\AuthResultData;
-use App\Data\LoginUserData;
-use App\Data\RegisterUserData;
+use App\DTO\User\AuthResultDTO;
+use App\DTO\User\LoginUserDTO;
+use App\DTO\User\RegisterUserDTO;
+use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\Events\Registered;
-use App\Models\User;
 
 readonly class AuthService
 {
@@ -22,7 +21,7 @@ readonly class AuthService
         private UserRepository $userRepository
     ) {}
 
-    public function register(RegisterUserData $data): void
+    public function register(RegisterUserDTO $data): void
     {
         $oldToken = Cache::get('pending_email_' . $data->email);
         if ($oldToken) {
@@ -46,7 +45,7 @@ readonly class AuthService
         });
     }
 
-    public function verifyRegistration(string $token): AuthResultData
+    public function verifyRegistration(string $token): AuthResultDTO
     {
         $userData = Cache::get('pending_email_' . $token);
 
@@ -70,10 +69,10 @@ readonly class AuthService
 
         $apiToken = $user->createToken('ApiAccess')->accessToken;
 
-        return new AuthResultData($user, $apiToken);
+        return new AuthResultDTO($user, $apiToken);
     }
 
-    public function login(LoginUserData $data): AuthResultData
+    public function login(LoginUserDTO $data): AuthResultDTO
     {
         $user = $this->userRepository->findByEmail($data->email);
 
@@ -84,7 +83,7 @@ readonly class AuthService
         }
         $token = $user->createToken('ApiAccess')->accessToken;
 
-        return new AuthResultData($user, $token);
+        return new AuthResultDTO($user, $token);
     }
 
     public function logout(User $user): void

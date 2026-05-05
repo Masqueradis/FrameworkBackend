@@ -6,10 +6,10 @@ namespace Tests\Feature\Repositories;
 
 use App\Models\Category;
 use App\Repositories\CategoryRepository;
-use App\ValueObjects\CategoryId;
+use App\ValueObjects\Id\CategoryId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class CategoryRepositoryTest extends TestCase
 {

@@ -2,7 +2,6 @@
 
 <div class="card h-100 shadow-sm border-0">
     @php
-        // Ищем главную картинку (is_primary = true), либо берем первую доступную
         $mainImage = $product->images->firstWhere('is_primary', true) ?? $product->images->first();
     @endphp
 
@@ -63,15 +62,21 @@
                 ${{ number_format($product->price, 2, '.', ',') }}
             </span>
 
-            <button class="btn btn-outline-primary btn-sm fw-medium position-relative" @disabled(!$product->available || $product->stock <= 0)>
-                Add to Cart
-            </button>
+            <form action="{{ route('cart.add') }}" method="POST" class="position-relative m-0" style="z-index: 2;">
+                @csrf
+                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                <input type="hidden" name="quantity" value="1">
+
+                <button type="submit" class="btn btn-outline-primary btn-sm fw-medium" @disabled(!$product->available || $product->stock <= 0)>
+                    Add to Cart
+                </button>
+            </form>
         </div>
 
         @canany(['update', 'delete'], $product)
-            <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+            <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center position-relative" style="z-index: 2;">
                 <span class="small text-muted fw-bold">Management:</span>
-                <div class="btn-group position-relative">
+                <div class="btn-group">
                     @can('update', $product)
                         <a href="{{ url('/admin/products/'.$product->id.'/edit') }}" class="btn btn-outline-warning btn-sm" style="margin-right: 5px">Edit</a>
                     @endcan
