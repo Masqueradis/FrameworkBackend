@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Services;
 
 use App\DTO\Cart\AddToCartDTO;
+use App\DTO\Cart\UpdateCartItemDTO;
 use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\CartService;
@@ -78,5 +80,97 @@ class CartServiceTest extends TestCase
         $total = $this->cartService->calculateTotal($cart);
 
         $this->assertEquals(4000, $total->getCents());
+    }
+
+    #[Test]
+    public function testUpdatesCartItemQuantity(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'session_id' => 'test-session-123',
+        ]);
+        $product = Product::factory()->create(['stock' => 10, 'price' => 200]);
+        $item = CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'price' => $product->price,
+        ]);
+
+        $response = $this->patch(route('cart.update', $item->id), [
+            'quantity' => 5,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Cart updated.');
+
+        $this->assertDatabaseHas('cart_items', [
+            'id' => $item->id,
+            'quantity' => 5,
+        ]);
+    }
+
+    #[Test]
+    public function testUpdateItemQuantityThrowsInvalidQuantityException(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'session_id' => 'test-session-123'
+        ]);
+        $product = Product::factory()->create([
+            'stock' => 10,
+            'price' => 200
+        ]);
+        $item = CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'price' => $product->price
+        ]);
+
+        $product->delete();
+
+        $dto = UpdateCartItemDTO::from([
+            'cartItemId' => $item->id,
+            'quantity' => 2
+        ]);
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Product no longer exists.');
+
+        $this->cartService->updateItemQuantity($dto);
+    }
+
+    #[Test]
+    public function testUpdatesItemQuantityThrowsExceptionIfStockExceeded(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'session_id' => 'test-session-123'
+        ]);
+
+        $product = Product::factory()->create(['stock' => 3, 'price' => 200]);
+        $item = CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'price' => $product->price
+        ]);
+
+        $dto = UpdateCartItemDTO::from(['cartItemId' => $item->id, 'quantity' => 5]);
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Not enough stock available.');
+
+        $this->cartService->updateItemQuantity($dto);
     }
 }

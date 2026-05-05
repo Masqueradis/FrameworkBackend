@@ -117,7 +117,7 @@ readonly class ProductService
         $path = $data->image->store('products', 'minio');
 
         if ($path === false) {
-            throw new \Exception('Failed to upload image to storage');
+            throw new \Exception('Failed to upload image to storage.');
         }
 
         return $this->productImageRepository->createForProduct(

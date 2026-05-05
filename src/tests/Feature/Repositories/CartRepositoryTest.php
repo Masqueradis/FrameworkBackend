@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Tests\Feature\Repositories;
 
 use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\CartRepositoryInterface;
 use App\ValueObjects\Cart\Money;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -76,5 +78,30 @@ class CartRepositoryTest extends TestCase
             'product_id' => $product->id,
             'quantity' => 5,
         ]);
+    }
+
+    #[Test]
+    public function testCartBelongsToUser(): void
+    {
+        $user = User::factory()->create();
+        $cart = Cart::create(['user_id' => $user->id, 'session_id' => 'test-session-123']);
+
+        $relation = $cart->user();
+
+        $this->assertInstanceOf(BelongsTo::class, $relation);
+        $this->assertEquals($user->id, $cart->user->id);
+    }
+
+    #[Test]
+    public function testCartItemBelongsToUser(): void
+    {
+        $cart = Cart::create(['session_id' => 'test-session-123']);
+        $product = Product::factory()->create(['price' => 500]);
+        $cartItem = CartItem::create(['cart_id' => $cart->id, 'product_id' => $product->id, 'quantity' => 2, 'price' => $product->price]);
+
+        $relation = $cartItem->cart();
+
+        $this->assertInstanceOf(BelongsTo::class, $relation);
+        $this->assertEquals($cart->id, $cartItem->cart->id);
     }
 }

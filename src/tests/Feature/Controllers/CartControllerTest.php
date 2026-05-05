@@ -81,4 +81,15 @@ class CartControllerTest extends TestCase
         $response->assertSessionHas('success', 'Item removed from cart.');
         $this->assertDatabaseMissing('cart_items', ['id' => $item->id]);
     }
+
+    #[Test]
+    public function testDisplaysCart(): void
+    {
+        $user = User::factory()->create();
+        $response = $this->actingAs($user)
+            ->get(route('cart.index'));
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertViewIs('cart.index');
+    }
 }

@@ -55,7 +55,7 @@ readonly class CartService
 
         if(!$product) {
             throw ValidationException::withMessages([
-                'quantity' => 'Product no longer exists'
+                'quantity' => 'Product no longer exists.'
             ]);
         }
 

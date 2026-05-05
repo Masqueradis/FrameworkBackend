@@ -2,6 +2,9 @@
 
 namespace Tests\Unit;
 
+use App\Casts\MoneyCast;
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\ValueObjects\Cart\CartQuantity;
 use App\ValueObjects\Cart\Money;
 use PHPUnit\Framework\TestCase;
@@ -71,5 +74,34 @@ class CartValueObjectsTest extends TestCase
         $this->expectExceptionMessage('Quantity must be between 1 and 99.');
 
         new CartQuantity(100);
+    }
+
+    #[Test]
+    public function testCartQuantityCanBeAdded(): void
+    {
+        $quantity = new CartQuantity(5);
+        $newQuantity = $quantity->add(10);
+        $this->assertEquals(15, $newQuantity->getValue());
+        $this->assertEquals(5, $quantity->getValue());
+    }
+
+    #[Test]
+    public function testMoneyThrowsExceptionIfNegativeAmount(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Amount cannot be negative.');
+        $money = new Money(500);
+        $money->multiply(-2);
+    }
+
+    #[Test]
+    public function testMoneyCastReturnsNullWhenSettingNull(): void
+    {
+        $cast = new MoneyCast();
+        $model = new CartItem();
+
+        $result = $cast->set($model, 'price', null, []);
+
+        $this->assertNull($result);
     }
 }
