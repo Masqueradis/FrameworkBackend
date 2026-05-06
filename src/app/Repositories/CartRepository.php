@@ -43,4 +43,9 @@ class CartRepository implements CartRepositoryInterface
     {
         CartItem::destroy($cartItemId);
     }
+
+    public function clearCart(int $cartId): void
+    {
+        Cart::find($cartId)?->items()->delete();
+    }
 }
