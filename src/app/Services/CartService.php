@@ -27,14 +27,14 @@ readonly class CartService
         return $this->cartRepository->findOrCreate($userId, $sessionId);
     }
 
-    public function addItem(AddToCartDTO $dto): void
+    public function addItem(AddToCartDTO $data): void
     {
-        $product = Product::findOrFail($dto->productId);
+        $product = Product::findOrFail($data->productId);
         $cart = $this->getCart();
         $existingItem = $cart->items()->where('product_id', $product->id)->first();
         $currentQuantity = $existingItem ? $existingItem->quantity : 0;
 
-        $newQuantity = $currentQuantity + $dto->quantity;
+        $newQuantity = $currentQuantity + $data->quantity;
 
         if ($newQuantity > $product->stock) {
             throw ValidationException::withMessages([
@@ -47,10 +47,10 @@ readonly class CartService
         $this->cartRepository->addOrUpdateItem($cart, $product->id, $newQuantity, $price);
     }
 
-    public function updateItemQuantity(UpdateCartItemDTO $dto): void
+    public function updateItemQuantity(UpdateCartItemDTO $data): void
     {
         $cart = $this->getCart();
-        $item = $cart->items()->findOrFail($dto->cartItemId);
+        $item = $cart->items()->findOrFail($data->cartItemId);
         $product = $item->product;
 
         if(!$product) {
@@ -59,13 +59,13 @@ readonly class CartService
             ]);
         }
 
-        if($dto->quantity > $product->stock) {
+        if($data->quantity > $product->stock) {
             throw ValidationException::withMessages([
                 'quantity' => 'Not enough stock available.'
             ]);
         }
 
-        $this->cartRepository->addOrUpdateItem($cart, $product->id, $dto->quantity, $item->price);
+        $this->cartRepository->addOrUpdateItem($cart, $product->id, $data->quantity, $item->price);
     }
 
     public function removeItem(int $cartItemId): void

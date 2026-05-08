@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\PaymentWebhookController;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -17,6 +18,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/login', 'login');
         Route::get('/verify/{token}', 'verifyEmail');
     });
+
+    Route::post('/webhooks/fake-payment', [PaymentWebhookController::class, 'handleFakePayment']);
 
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
     Route::apiResource('products', ProductController::class)->only(['index', 'show']);

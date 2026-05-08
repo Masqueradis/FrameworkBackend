@@ -30,21 +30,21 @@ class CartController extends ApiController
         return view('cart.index', compact('cart', 'total'));
     }
 
-    public function add(AddToCartDTO $dto): RedirectResponse
+    public function add(AddToCartDTO $data): RedirectResponse
     {
-        $this->cartService->addItem($dto);
+        $this->cartService->addItem($data);
 
         return back()->with('success', 'Item added to cart.');
     }
 
     public function update(Request $request, CartItem $cartItem): RedirectResponse
     {
-        $dto = UpdateCartItemDTO::from([
+        $data = UpdateCartItemDTO::from([
             'cartItemId' => $cartItem->id,
             'quantity' => $request->input('quantity'),
         ]);
 
-        $this->cartService->updateItemQuantity($dto);
+        $this->cartService->updateItemQuantity($data);
 
         return back()->with('success', 'Cart updated.');
     }

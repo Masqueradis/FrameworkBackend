@@ -34,7 +34,7 @@ class PaymentWebhookControllerTest extends TestCase
             'signature' => 'secret_hash_123'
         ];
 
-        $response = $this->postJson('/api/webhooks/fake-payment', $payload);
+        $response = $this->postJson('/api/v1/webhooks/fake-payment', $payload);
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJson(['message' => 'Webhook processed']);
