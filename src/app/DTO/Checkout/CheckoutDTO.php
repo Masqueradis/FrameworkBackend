@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\DTO\Payment;
+namespace App\DTO\Checkout;
 
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
