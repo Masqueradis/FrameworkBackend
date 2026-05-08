@@ -36,11 +36,11 @@ class CheckoutServiceTest extends TestCase
         $cart = new Cart();
         $cart->setRelation('items', collect([]));
 
-        $dto = new CheckoutDTO('Jonh', 'john@ex.com', null, '123 st', 'cash');
+        $data = new CheckoutDTO('Jonh', 'john@ex.com', null, '123 st', 'cash');
 
         $this->expectException(EmptyCartException::class);
 
-        $service->process($dto, $cart);
+        $service->process($data, $cart);
     }
 
     #[Test]
@@ -58,7 +58,7 @@ class CheckoutServiceTest extends TestCase
         $item = new CartItem(['price' => 100, 'quantity' => 2]);
         $cart->setRelation('items', collect([$item]));
 
-        $dto = new CheckoutDTO('John', 'john@ex.com', null, '123 st', 'cash');
+        $data = new CheckoutDTO('John', 'john@ex.com', null, '123 st', 'cash');
         $expectedOrder = new Order(['id' => 10]);
 
         $orderRepo->shouldReceive('createWithItems')
@@ -72,7 +72,7 @@ class CheckoutServiceTest extends TestCase
             ->once()
             ->with($cart->id);
 
-        $order = $service->process($dto, $cart);
+        $order = $service->process($data, $cart);
 
         $this->assertEquals($expectedOrder, $order);
     }
