@@ -29,6 +29,7 @@ class StripeGatewayTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Config::set('services.stripe.secret', 'sk_test_dummy_key');
         Config::set('services.stripe.webhook_secret', 'whsec_test_secret');
         $this->gateway = $this->app->make(StripeGateway::class);
     }
