@@ -42,4 +42,9 @@
             <p>Welcome to the new management panel. Select a section from the sidebar to begin.</p>
         </div>
     </div>
+    @if (session('error_alert'))
+        <div class="alert alert-danger">
+            {{ session('error_alert') }}
+        </div>
+    @endif
 @endsection

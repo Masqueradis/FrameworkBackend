@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->validateCsrfTokens(except: [
+            '/api/v1/webhooks'
+        ]);
+    })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \Laravel\Passport\Http\Middleware\CreateFreshApiToken::class,
@@ -26,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['message' => 'Access denied'], Response::HTTP_FORBIDDEN);
             }
 
-            return redirect()->to('/')->with('error_alert', 'You have no access for this page.');
+            return redirect()->route('catalog.index')->with('error_alert', 'You have no access for this page.');
         });
 
         $exceptions->render(function (NotFoundHttpException $exception, Request $request) {
@@ -49,4 +54,5 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return redirect()->back()->with('error_alert', 'Something went wrong.');
         });
+
     })->create();

@@ -49,10 +49,19 @@
                 <li class="nav-item">
                     <a href="{{ route('admin.categories.index') }}"
                        class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
-                            Categories
+                        Categories
                     </a>
                 </li>
             @endcan
+            @if(auth()->user()->hasRole('admin'))
+                <li class="nav-item mt-3 mb-1 px-2 text-uppercase text-secondary" style="font-size: 0.75rem;">Developers</li>
+
+                <li class="nav-item">
+                    <a href="{{ url('/api/documentation') }}" target="_blank" class="nav-link">
+                        Swagger API
+                    </a>
+                </li>
+            @endif
         </ul>
         <hr class="text-secondary mt-auto">
         <a href="{{ route('catalog.index') }}" class="btn btn-outline-secondary w-100 btn-sm text-start">

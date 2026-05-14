@@ -2,11 +2,15 @@
 
 namespace Tests\Feature\Repositories;
 
+use App\DTO\Checkout\CheckoutDTO;
+use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -37,9 +41,7 @@ class OrderRepositoryTest extends TestCase
         ]);
 
         $cartItem->setRelation('product', $product);
-
         $cartItems = collect([$cartItem]);
-
         $order = $repository->createWithItems($orderData, $cartItems);
 
         $this->assertDatabaseHas('orders', [

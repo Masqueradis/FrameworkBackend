@@ -36,12 +36,16 @@ return [
     ],
 
     'stripe' => [
+        'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
-    'yookassa' => [
-        'shop_id' => env('YOOKASSA_SHOP_ID'),
-        'secret' => env('YOOKASSA_SECRET'),
+    'paddle' => [
+        'env' => env('PADDLE_ENV', 'sandbox'),
+        'api_key' => env('PADDLE_API_KEY'),
+        'webhook_secret' => env('PADDLE_WEBHOOK_SECRET'),
+        'client_token' => env('PADDLE_CLIENT_TOKEN'),
     ],
 
 ];

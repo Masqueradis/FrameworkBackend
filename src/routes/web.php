@@ -2,20 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\AdminCategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\AdminProductController as AdminProductController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CatalogController;
-use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Web\CartController;
+use App\Http\Controllers\Web\CatalogController;
 use App\Http\Controllers\Web\ProductController as WebProductController;
+use App\Http\Controllers\Web\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\AdminCategoryController as AdminCategoryController;
-use App\Http\Controllers\Admin\AdminProductController as AdminProductController;
 
 Route::redirect('/', '/catalog');
 

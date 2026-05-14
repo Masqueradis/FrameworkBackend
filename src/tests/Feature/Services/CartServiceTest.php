@@ -173,4 +173,16 @@ class CartServiceTest extends TestCase
 
         $this->cartService->updateItemQuantity($data);
     }
+
+    #[Test]
+    public function itThrowsExceptionIfProductDoesNotExist(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $data = new AddToCartDTO(99999, 1);
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Product no longer exists.');
+        $this->cartService->addItem($data);
+    }
 }

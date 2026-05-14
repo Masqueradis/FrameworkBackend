@@ -3,6 +3,16 @@
 @section('title', 'Products Catalog')
 
 @section('content')
+    <style>
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
     <main class="container mb-5">
         <div class="row">
 

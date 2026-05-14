@@ -9,14 +9,19 @@ use Spatie\LaravelData\Attributes\Validation\In;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
-#[MapInputName(SnakeCaseMapper::class)]
 class PaymentWebhookDTO extends Data
 {
     public function __construct(
         public readonly int $orderId,
         public readonly string $transactionId,
+        #[In(['stripe', 'paddle'])]
+        public readonly string $provider,
         #[In(['success', 'failed'])]
         public readonly string $status,
-        public readonly string $signature,
     ) {}
+
+    public function isSuccess(): bool
+    {
+        return $this->status === 'success';
+    }
 }

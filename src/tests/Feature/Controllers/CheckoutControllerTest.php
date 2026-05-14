@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Tests\Feature\Controllers;
 
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Gateways\StripeGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
@@ -17,43 +17,134 @@ class CheckoutControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[Test]
-    public function testShowsCheckoutForm(): void
+    protected function tearDown(): void
     {
-        $response = $this->get(route('checkout.index'));
-        $response->assertStatus(Response::HTTP_OK);
-        $response->assertViewIs('checkout.index');
+        Mockery::close();
+        parent::tearDown();
     }
 
     #[Test]
-    public function testProcessesCheckoutAndRedirectsToSuccess(): void
+    public function itDisplaysCheckoutPage(): void
     {
         $user = User::factory()->create();
-        $cart = Cart::create(['user_id' => $user->id]);
-        $product = Product::factory()->create(['price' => 500]);
+        $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);
+        $product = Product::factory()->create(['price' => 1000]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 2,
+            'price' => 1000]);
+        $response = $this->actingAs($user)->get('/checkout');
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertViewIs('checkout.index');
+        $response->assertViewHas(['cart', 'total']);
+    }
+
+    #[Test]
+    public function itProcessesCheckoutAndReturnsGatewayUrl(): void
+    {
+        $user = User::factory()->create();
+        $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);
+        $product = Product::factory()->create(['price' => 1000, 'stock' => 10]);
+        CartItem::create(['cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'price' => 1000]);
+
+        $mockGateway = Mockery::mock(StripeGateway::class);
+        $mockGateway->shouldReceive('createCheckoutUrl')->once()->andReturn('https://fake-stripe.com/pay');
+        $this->app->instance(StripeGateway::class, $mockGateway);
+
+        $response = $this->actingAs($user)->postJson('/checkout', [
+            'customer_name' => 'John',
+            'customer_email' => 'test@example.com',
+            'customer_phone' => '123',
+            'shipping_address' => '123',
+            'payment_provider' => 'stripe'
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJson([
+            'status' => 'success',
+            'provider' => 'stripe',
+            'action' => 'https://fake-stripe.com/pay'
+        ]);
+    }
+
+    #[Test]
+    public function itReturns400ForEmptyCart(): void
+    {
+        $user = User::factory()->create();
+        Cart::create(['user_id' => $user->id, 'session_id' => '123']);
+
+        $response = $this->actingAs($user)->postJson('/checkout', [
+            'customer_name' => 'John',
+            'customer_email' => 'test@example.com',
+            'customer_phone' => '123',
+            'shipping_address' => '123',
+            'payment_provider' => 'stripe'
+        ]);
+
+        $response->assertStatus(Response::HTTP_BAD_REQUEST);
+        $response->assertJson([
+            'status' => 'error',
+            'message' => 'Your cart is empty.'
+        ]);
+    }
+
+    #[Test]
+    public function itReturns500OnGenericException(): void
+    {
+        $user = User::factory()->create();
+        $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);
+        $product = Product::factory()->create(['price' => 1000, 'stock' => 10]);
         CartItem::create([
             'cart_id' => $cart->id,
             'product_id' => $product->id,
             'quantity' => 1,
-            'price' => 500,
+            'price' => 1000
         ]);
 
-        $response = $this->actingAs($user)->post(route('checkout.store'), [
-            'customer_name' => 'John Doe',
+        $mockGateway = Mockery::mock(StripeGateway::class);
+        $mockGateway->shouldReceive('createCheckoutUrl')
+            ->andThrow(new \Exception('Gateway timeout'));
+        $this->app->instance(StripeGateway::class, $mockGateway);
+
+        $response = $this->actingAs($user)->postJson('/checkout', [
+            'customer_name' => 'John',
             'customer_email' => 'test@example.com',
-            'customer_phone' => '+0123456789',
-            'shipping_address' => '123 st',
-            'payment_provider' => 'stripe',
-            'payment_token' => 'tok_visa'
+            'customer_phone' => '123',
+            'shipping_address' => '123',
+            'payment_provider' => 'stripe'
         ]);
 
-        $response->assertRedirect(route('checkout.result'));
-        $response->assertSessionHas('status', 'success');
+        $response->assertStatus(Response::HTTP_INTERNAL_SERVER_ERROR);
+        $response->assertJson([
+            'status' => 'error',
+            'message' => 'Gateway timeout'
+        ]);
+    }
 
-        $this->assertDatabaseHas('orders', [
-            'customer_email' => 'test@example.com',
+    #[Test]
+    public function itDisplaysResultAndClearsCart(): void
+    {
+        $user = User::factory()->create();
+        $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);
+        $product = Product::factory()->create();
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'price' => 1000
         ]);
 
-        $this->assertDatabaseEmpty('cart_items');
+        $response = $this->actingAs($user)->get('/checkout/result');
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertViewIs('checkout.result');
+        $response->assertViewHas('status', 'success');
+
+        $this->assertDatabaseMissing('cart_items', ['cart_id' => $cart->id]);
     }
 }

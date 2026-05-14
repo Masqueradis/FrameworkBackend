@@ -11,11 +11,13 @@ use App\Exceptions\EmptyCartException;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
+use App\Models\Product;
+use App\Models\User;
 use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Services\CheckoutService;
-use App\Services\Gateways\Contracts\PaymentGatewayInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -24,105 +26,145 @@ class CheckoutServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[Test]
-    public function testThrowsExceptionIfCartIsEmpty(): void
+    protected function setUp(): void
     {
-        $cartRepo = Mockery::mock(CartRepositoryInterface::class);
-        $orderRepo = Mockery::mock(OrderRepositoryInterface::class);
-        $paymentRepo = Mockery::mock(PaymentGatewayInterface::class);
+        parent::setUp();
+        $this->checkoutService = $this->app->make(CheckoutService::class);
+    }
 
-        $service = new CheckoutService($cartRepo, $orderRepo, $paymentRepo);
-
-        $cart = new Cart();
-        $cart->setRelation('items', collect([]));
-
-        $data = new CheckoutDTO('Jonh', 'john@ex.com', null, '123 st', 'cash');
+    #[Test]
+    public function processThrowsExceptionIfCartIsEmpty(): void
+    {
+        $cart = Cart::create();
+        $dto = new CheckoutDTO(
+            'John',
+            'test@example.com',
+            '123',
+            'Address',
+            'stripe'
+        );
 
         $this->expectException(EmptyCartException::class);
-
-        $service->process($data, $cart);
+        $this->checkoutService->process($dto, $cart);
     }
 
     #[Test]
-    public function testProcessesCheckoutSuccessfully(): void
+    public function processCreatesOrderAndCalculatesTotal(): void
     {
-        $cartRepo = Mockery::mock(CartRepositoryInterface::class);
-        $orderRepo = Mockery::mock(OrderRepositoryInterface::class);
-        $paymentRepo = Mockery::mock(PaymentGatewayInterface::class);
+        $cart = Cart::create();
+        $product = Product::factory()->create(['price' => 1000]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 2,
+            'price' => $product->price,
+        ]);
 
-        $service = new CheckoutService($cartRepo, $orderRepo, $paymentRepo);
+        $dto = new CheckoutDTO(
+            'John',
+            'test@example.com',
+            '123',
+            'Address',
+            'stripe'
+        );
 
-        $cart = new Cart(['user_id' => 99]);
-        $cart->id = 1;
+        $order = $this->checkoutService->process($dto, $cart);
 
-        $item = new CartItem(['price' => 100, 'quantity' => 2]);
-        $cart->setRelation('items', collect([$item]));
-
-        $data = new CheckoutDTO('John', 'john@ex.com', null, '123 st', 'cash');
-        $expectedOrder = new Order(['id' => 10]);
-
-        $orderRepo->shouldReceive('createWithItems')
-            ->once()
-            ->with(Mockery::on(function (array $data) {
-                return $data['total_amount_cents'] === 200 && $data['customer_name'] === 'John';
-            }), $cart->items)
-            ->andReturn($expectedOrder);
-
-        $cartRepo -> shouldReceive('clearCart')
-            ->once()
-            ->with($cart->id);
-
-        $order = $service->process($data, $cart);
-
-        $this->assertEquals($expectedOrder, $order);
+        $this->assertInstanceOf(Order::class, $order);
+        $this->assertEquals(2000, $order->total_amount_cents->getCents());
+        $this->assertEquals(OrderStatus::Pending, $order->status);
+        $this->assertDatabaseHas('orders', ['customer_email' => 'test@example.com']);
     }
 
     #[Test]
-    public function testProcessesPaymentSuccessfully(): void
+    public function handleWebhookSuccessUpdatesStatus(): void
     {
-        $service = $this->app->make(CheckoutService::class);
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $product = Product::factory()->create(['price' => 10, 'stock' => 8]);
         $order = Order::create([
-            'customer_name' => 'John',
+            'customer_id' => $user->id,
+            'customer_name' => 'John Doe',
             'customer_email' => 'test@example.com',
-            'shipping_address' => '123 st',
-            'total_amount_cents' => 1000,
-            'status' => OrderStatus::Pending
+            'shipping_address' => '123',
+            'total_amount_cents' => $product->price,
+            'status' => OrderStatus::Pending,
+            'total_amount_cents' => 1000
+        ]);
+        $order->items()->create([
+            'product_id' => $product->id,
+            'quantity' => 2,
+            'price_cents' => 1000,
+            'product_name' => $product->name,
         ]);
 
-        $service->processPayment($order, 'tok_4242', 'fake_provider');
-
-        $order->refresh();
-
-        $this->assertEquals(OrderStatus::Processing, $order->status);
+        $this->checkoutService->handleWebhook($order, true, 'txn_123', 'stripe');
 
         $this->assertDatabaseHas('payments', [
             'order_id' => $order->id,
-            'status' => PaymentStatus::Paid->value,
-            'amount_cents' => 1000,
-            'provider' => 'fake_provider',
+            'transaction_id' => 'txn_123',
+            'status' => PaymentStatus::Paid
         ]);
+
+        $this->assertEquals(OrderStatus::Processing, $order->fresh()->status);
+        $this->assertEquals(8, $product->fresh()->stock);
     }
 
-    public function testFailsPaymentProperly(): void
+    #[Test]
+    public function handleWebhookFailureCancelsOrder(): void
     {
-        $service = $this->app->make(CheckoutService::class);
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $product = Product::factory()->create(['price' => 10, 'stock' => 8]);
         $order = Order::create([
-            'customer_name' => 'John',
+            'customer_id' => $user->id,
+            'customer_name' => 'John Doe',
             'customer_email' => 'test@example.com',
-            'shipping_address' => '123 st',
-            'total_amount_cents' => 1000,
+            'shipping_address' => '123',
+            'total_amount_cents' => $product->price,
             'status' => OrderStatus::Pending
         ]);
+        $order->items()->create([
+            'product_id' => $product->id,
+            'quantity' => 2,
+            'price_cents' => 1000,
+            'product_name' => $product->name,
+        ]);
 
-        $service->processPayment($order, 'tok_error', 'fake_provider');
-
-        $order->refresh();
-
-        $this->assertEquals(OrderStatus::Cancelled, $order->status);
+        $this->checkoutService->handleWebhook($order, false, 'txn_fail', 'stripe');
 
         $this->assertDatabaseHas('payments', [
-            'order_id' => $order->id,
-            'status' => PaymentStatus::Failed->value,
+            'status' => PaymentStatus::Failed,
         ]);
+
+        $this->assertEquals(OrderStatus::Cancelled, $order->fresh()->status);
+        $this->assertEquals(10, $product->fresh()->stock);
+    }
+
+    #[Test]
+    public function itThrowsExceptionIfNotEnoughStock(): void
+    {
+        $cart = Cart::create();
+        $product = Product::factory()->create(['price' => 1000, 'stock' => 1]);
+
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 2,
+            'price' => $product->price,
+            'product_name' => $product->name,
+        ]);
+
+        $dto = new CheckoutDTO(
+            'John',
+            'test@example.com',
+            '123',
+            'Address',
+            'stripe'
+        );
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage("Not enough stock for {$product->name}.");
+        $this->checkoutService->process($dto, $cart);
     }
 }

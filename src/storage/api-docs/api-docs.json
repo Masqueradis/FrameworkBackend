@@ -1039,6 +1039,182 @@
                     }
                 }
             }
+        },
+        "/checkout": {
+            "post": {
+                "tags": [
+                    "Checkout"
+                ],
+                "summary": "Create checkout session",
+                "description": "Process the active session cart and generate a payment URL for the chosen gateway. Requires active session with items in the cart.",
+                "operationId": "90d79004fa78225f18fb9853cf1d2c43",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "customerName",
+                                    "customerEmail",
+                                    "shippingAddress",
+                                    "paymentProvider"
+                                ],
+                                "properties": {
+                                    "customerName": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "customerEmail": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "customerPhone": {
+                                        "type": "string",
+                                        "example": "+1234567890",
+                                        "nullable": true
+                                    },
+                                    "shippingAddress": {
+                                        "type": "string",
+                                        "example": "123 Main St, New York, NY"
+                                    },
+                                    "paymentProvider": {
+                                        "type": "string",
+                                        "example": "stripe"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Checkout URL generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "provider": {
+                                            "type": "string",
+                                            "example": "stripe"
+                                        },
+                                        "action": {
+                                            "type": "string",
+                                            "example": "https://checkout.stripe.com/pay/..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Cart is empty validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Your cart is empty."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server or Payment Gateway error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Gateway timeout"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks/{provider}": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Handle payment webhook",
+                "description": "Process incoming webhooks from payment providers like Stripe or Paddle. Validates the signature and updates order status.",
+                "operationId": "4ecf8a626f131dfb651e0178b37fb47e",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "description": "Payment provider name (e.g., stripe, paddle)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Webhook processed successfully or ignored (e.g., irrelevant event type)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ignored event type",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid webhook signature",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid signature"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "tags": [
@@ -1049,6 +1225,14 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Checkout",
+            "description": "Checkout"
+        },
+        {
+            "name": "Payments",
+            "description": "Payments"
         }
     ]
 }

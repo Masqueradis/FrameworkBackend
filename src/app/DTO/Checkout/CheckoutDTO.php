@@ -21,7 +21,7 @@ class CheckoutDTO extends Data
         public readonly string $customerEmail,
         public readonly ?string $customerPhone,
         public readonly string $shippingAddress,
-        #[In(['stripe', 'paypal', 'cash'])]
+        #[In(['stripe', 'paddle'])]
         public readonly string $paymentProvider,
     ) {}
 }
