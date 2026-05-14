@@ -22,7 +22,8 @@
         "spatie/laravel-permission": "^7.3",
         "stripe/stripe-php": "^20.1",
         "yoomoney/yookassa-sdk-php": "^3.13",
-        "zircote/swagger-php": "^6.0"
+        "zircote/swagger-php": "^6.0",
+        "ext-curl": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

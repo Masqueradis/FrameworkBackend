@@ -56,4 +56,9 @@
             </div>
         @endif
     </div>
+    @if (session('error_alert'))
+        <div class="alert alert-danger">
+            {{ session('error_alert') }}
+        </div>
+    @endif
 @endsection

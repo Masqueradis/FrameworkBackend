@@ -8,6 +8,7 @@ use App\DTO\Cart\AddToCartDTO;
 use App\DTO\Cart\UpdateCartItemDTO;
 use App\Models\Cart;
 use App\Models\Product;
+use App\Models\CartItem;
 use App\Repositories\Contracts\CartRepositoryInterface;
 use App\ValueObjects\Cart\Money;
 use Illuminate\Validation\ValidationException;
@@ -27,19 +28,24 @@ readonly class CartService
         return $this->cartRepository->findOrCreate($userId, $sessionId);
     }
 
+    /**
+     * @throws \Throwable
+     */
     public function addItem(AddToCartDTO $data): void
     {
-        $product = Product::findOrFail($data->productId);
+        $product = Product::find($data->productId);
+
+        if(!$product) {
+            throw ValidationException::withMessages(['product' => 'Product no longer exists.']);
+        }
         $cart = $this->getCart();
-        $existingItem = $cart->items()->where('product_id', $product->id)->first();
+        $existingItem = $this->cartRepository->findItemByProductId($cart, $product->id);
         $currentQuantity = $existingItem ? $existingItem->quantity : 0;
 
         $newQuantity = $currentQuantity + $data->quantity;
 
-        if ($newQuantity > $product->stock) {
-            throw ValidationException::withMessages([
-                'quantity' => 'Not enough stock available.'
-            ]);
+        if($product->stock < $newQuantity) {
+            throw ValidationException::withMessages(['quantity' => 'Not enough stock available.']);
         }
 
         $price = new Money((int) $product->price);
@@ -50,22 +56,17 @@ readonly class CartService
     public function updateItemQuantity(UpdateCartItemDTO $data): void
     {
         $cart = $this->getCart();
-        $item = $cart->items()->findOrFail($data->cartItemId);
+        $item = $this->cartRepository->findItemById($cart, $data->cartItemId);
         $product = $item->product;
 
         if(!$product) {
-            throw ValidationException::withMessages([
-                'quantity' => 'Product no longer exists.'
-            ]);
+            throw ValidationException::withMessages(['product' => 'Product no longer exists.']);
+        }
+        if($product->stock < $data->quantity) {
+            throw ValidationException::withMessages(['quantity' => 'Not enough stock available.']);
         }
 
-        if($data->quantity > $product->stock) {
-            throw ValidationException::withMessages([
-                'quantity' => 'Not enough stock available.'
-            ]);
-        }
-
-        $this->cartRepository->addOrUpdateItem($cart, $product->id, $data->quantity, $item->price);
+        $this->cartRepository->addOrUpdateItem($cart, (int) $product->id, $data->quantity, $item->price);
     }
 
     public function removeItem(int $cartItemId): void

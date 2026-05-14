@@ -30,11 +30,6 @@ class AppServiceProvider extends ServiceProvider
             OrderRepositoryInterface::class,
             OrderRepository::class
         );
-
-        $this->app->bind(
-            PaymentGatewayInterface::class,
-            FakePaymentGateway::class
-        );
     }
 
     /**

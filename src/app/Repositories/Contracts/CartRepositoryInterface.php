@@ -14,4 +14,6 @@ interface CartRepositoryInterface
     public function addOrUpdateItem(Cart $cart, int $productId, int $quantity, Money $price): CartItem;
     public function removeItem(int $cartItemId): void;
     public function clearCart(int $cartId): void;
+    public function findItemByProductId(Cart $cart, int $productId): ?CartItem;
+    public function findItemById(Cart $cart, int $cartItemId): CartItem;
 }

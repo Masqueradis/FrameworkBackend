@@ -22,7 +22,7 @@ class AddToCartDTO extends Data
     public function __construct(
         #[Exists('products', 'id')]
         public readonly int $productId,
-        #[Min(1), Max(99)]
+        #[Min(1)]
         public readonly int $quantity,
     ) {}
 }

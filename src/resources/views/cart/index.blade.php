@@ -1,6 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
+    <style>
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+
     <div class="container py-5">
         <h1 class="h2 fw-bold mb-4">Your Cart</h1>
 
@@ -70,9 +81,10 @@
                 <div class="bg-light p-4 rounded shadow-sm col-12 col-md-5 col-lg-4">
                     <h3 class="h4 fw-bold text-dark mb-3">Total:</h3>
                     <p class="h3 fw-bold text-primary mb-4">{{ $total->getFormated() }}</p>
-                    <button class="btn btn-success btn-lg w-100 fw-bold">
-                        Checkout
-                    </button>
+
+                    <a href="{{ route('checkout.index') }}" class="btn btn-success btn-lg w-100 fw-bold">
+                        Proceed to Checkout
+                    </a>
                 </div>
             </div>
         @endif

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use App\DTO\Cart\AddToCartDTO;
 use App\DTO\Cart\UpdateCartItemDTO;
+use App\Http\Controllers\ApiController;
 use App\Models\CartItem;
 use App\Services\CartService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 

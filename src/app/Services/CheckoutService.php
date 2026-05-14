@@ -12,14 +12,12 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
-use App\Services\Gateways\Contracts\PaymentGatewayInterface;
+use Exception;
 
 readonly class CheckoutService
 {
     public function __construct(
-        private CartRepositoryInterface  $cartRepository,
         private OrderRepositoryInterface $orderRepository,
-        private PaymentGatewayInterface $paymentGateway,
     ) {}
 
     /**
@@ -27,7 +25,7 @@ readonly class CheckoutService
      */
     public function process(CheckoutDTO $data, Cart $cart): Order
     {
-        if($cart->items->isEmpty()) {
+        if ($cart->items->isEmpty()) {
             throw new EmptyCartException();
         }
 
@@ -45,34 +43,12 @@ readonly class CheckoutService
             'total_amount_cents' => $totalCents,
         ];
 
-        $order = $this->orderRepository->createWithItems($orderData, $cart->items);
-
-        $this->cartRepository->clearCart($cart->id);
-
-        return $order;
-    }
-
-    public function processPayment(Order $order, string $paymentToken, string $provider): void
-    {
-        $result = $this->paymentGateway->charge($order, $paymentToken);
-
-        $order->payments()->create([
-            'provider' => $provider,
-            'transaction_id' => $result->transactionId,
-            'amount_cents' => $order->total_amount_cents,
-            'status' => $result->isSuccess ? PaymentStatus::Paid : PaymentStatus::Failed,
-        ]);
-
-        if ($result->isSuccess) {
-            $order->update(['status' => OrderStatus::Processing]);
-        } else {
-            $order->update(['status' => OrderStatus::Cancelled]);
-        }
+        return $this->orderRepository->createWithItemsAndDeductStock($orderData, $cart->items);
     }
 
     public function handleWebhook(Order $order, bool $isSuccess, string $transactionId, string $provider): void
     {
-        $order->payments()->create([
+        $this->orderRepository->addPayment($order, [
             'provider' => $provider,
             'transaction_id' => $transactionId,
             'amount_cents' => $order->total_amount_cents,
@@ -80,9 +56,11 @@ readonly class CheckoutService
         ]);
 
         if($isSuccess) {
-            $order->update(['status' => OrderStatus::Processing]);
-        } else {
-            $order->update(['status' => OrderStatus::Cancelled]);
+            $this->orderRepository->updateStatus($order, OrderStatus::Processing);
+            return;
         }
+
+        $this->orderRepository->updateStatus($order, OrderStatus::Cancelled);
+        $this->orderRepository->restoreStock($order);
     }
 }
