@@ -7,6 +7,10 @@ namespace App\Providers;
 use App\Models\User;
 use App\Repositories\CartRepository;
 use App\Repositories\Contracts\CartRepositoryInterface;
+use App\Repositories\Contracts\OrderRepositoryInterface;
+use App\Repositories\OrderRepository;
+use App\Services\Gateways\Contracts\PaymentGatewayInterface;
+use App\Services\Gateways\FakePaymentGateway;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
@@ -17,7 +21,15 @@ class AppServiceProvider extends ServiceProvider
      * Register any application services.
      */
     public function register(): void {
-        $this->app->bind(CartRepositoryInterface::class, CartRepository::class);
+        $this->app->bind(
+            CartRepositoryInterface::class,
+            CartRepository::class
+        );
+
+        $this->app->bind(
+            OrderRepositoryInterface::class,
+            OrderRepository::class
+        );
     }
 
     /**

@@ -93,5 +93,6 @@
         alert("{{ session('error_alert') }}");
     </script>
 @endif
+@stack ('scripts')
 </body>
 </html>

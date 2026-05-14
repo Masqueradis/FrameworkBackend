@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit;
 
 use App\Casts\DataValueObjectIdCast;
@@ -21,8 +23,8 @@ class DataValueObjectIdCastTest extends TestCase
     #[Test]
     public function testReturnsOriginalValueIfTypeIsNotNamedType(): void
     {
-        $dto = DummyUnionDto::from(['mixed_id' => 123]);
+        $data = DummyUnionDto::from(['mixed_id' => 123]);
 
-        $this->assertEquals(123, $dto->mixed_id);
+        $this->assertEquals(123, $data->mixed_id);
     }
 }

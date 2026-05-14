@@ -23,12 +23,12 @@ class ProductFilter extends QueryFilter
 
     public function minPrice(float|int|string $price): void
     {
-        $this->builder->where('price', '>=', $price);
+        $this->builder->where('price', '>=', (float)$price);
     }
 
     public function maxPrice(float|int|string $price): void
     {
-        $this->builder->where('price', '<=', $price);
+        $this->builder->where('price', '<=', (float)$price);
     }
 
     public function search(string $search): void
@@ -47,7 +47,7 @@ class ProductFilter extends QueryFilter
     public function attributes(array $attributes): void
     {
         foreach ($attributes as $attribute => $value) {
-            $this->builder->where("attributes->$attribute", (array) $value);
+            $this->builder->whereIn("attributes->{$attribute}", (array) $value);
         }
     }
 }

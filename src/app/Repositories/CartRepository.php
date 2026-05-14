@@ -22,7 +22,7 @@ class CartRepository implements CartRepositoryInterface
 
     public function addOrUpdateItem(Cart $cart, int $productId, int $quantity, Money $price): CartItem
     {
-        $item = $cart->items()->where('product_id', $productId)->first();
+        $item = $this->findItemByProductId($cart, $productId);
 
         if($item) {
             $item->update([
@@ -42,5 +42,20 @@ class CartRepository implements CartRepositoryInterface
     public function removeItem(int $cartItemId): void
     {
         CartItem::destroy($cartItemId);
+    }
+
+    public function clearCart(int $cartId): void
+    {
+        Cart::find($cartId)?->items()->delete();
+    }
+
+    public function findItemByProductId(Cart $cart, int $productId): ?CartItem
+    {
+        return $cart->items()->where('product_id', $productId)->first();
+    }
+
+    public function findItemById(Cart $cart, int $cartItemId): CartItem
+    {
+        return $cart->items()->where('id', $cartItemId)->firstOrFail();
     }
 }

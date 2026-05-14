@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use App\DTO\Cart\AddToCartDTO;
 use App\DTO\Cart\UpdateCartItemDTO;
+use App\Http\Controllers\ApiController;
 use App\Models\CartItem;
 use App\Services\CartService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -30,21 +30,21 @@ class CartController extends ApiController
         return view('cart.index', compact('cart', 'total'));
     }
 
-    public function add(AddToCartDTO $dto): RedirectResponse
+    public function add(AddToCartDTO $data): RedirectResponse
     {
-        $this->cartService->addItem($dto);
+        $this->cartService->addItem($data);
 
         return back()->with('success', 'Item added to cart.');
     }
 
     public function update(Request $request, CartItem $cartItem): RedirectResponse
     {
-        $dto = UpdateCartItemDTO::from([
+        $data = UpdateCartItemDTO::from([
             'cartItemId' => $cartItem->id,
             'quantity' => $request->input('quantity'),
         ]);
 
-        $this->cartService->updateItemQuantity($dto);
+        $this->cartService->updateItemQuantity($data);
 
         return back()->with('success', 'Cart updated.');
     }

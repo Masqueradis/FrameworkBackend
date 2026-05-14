@@ -2,25 +2,27 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\AdminCategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\AdminProductController as AdminProductController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CatalogController;
-use App\Http\Controllers\Api\CategoryController;
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\Request;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\Web\CartController;
+use App\Http\Controllers\Web\CatalogController;
 use App\Http\Controllers\Web\ProductController as WebProductController;
+use App\Http\Controllers\Web\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\AdminCategoryController as AdminCategoryController;
-use App\Http\Controllers\Admin\AdminProductController as AdminProductController;
 
 Route::redirect('/', '/catalog');
 
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{product}', [WebProductController::class, 'show'])->name('web.products.show');
+
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::get('/checkout/result', [CheckoutController::class, 'result'])->name('checkout.result');
 
 Route::middleware('guest')->controller(AuthController::class)->group(function () {
     Route::get('/login', 'showLoginForm')->name('login');
