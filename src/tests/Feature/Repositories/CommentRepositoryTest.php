@@ -9,6 +9,7 @@ use App\Models\Comment;
 use App\Models\Product;
 use App\Models\User;
 use App\Repositories\CommentRepository;
+use App\Repositories\Contracts\CommentRepositoryInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -112,5 +113,35 @@ class CommentRepositoryTest extends TestCase
 
         $this->assertCount(1, $pendingComment);
         $this->assertTrue($pendingComment->every(fn ($comment) => $comment->status->isPending()));
+    }
+
+    #[Test]
+    public function testCanUpdateAnExistingComment(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create();
+        $comment = Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Awesome product',
+            'rating' => 4,
+            'status' => CommentStatus::Approved,
+        ]);
+
+        $repository = app(CommentRepositoryInterface::class);
+
+        $result = $repository->update($comment, [
+            'content' => 'New comment',
+            'rating' => 5,
+            'status' => CommentStatus::Pending,
+        ]);
+
+        $this->assertTrue($result);
+
+        $this->assertDatabaseHas('comments', [
+            'id' => $comment->id,
+            'content' => 'New comment',
+            'rating' => 5,
+        ]);
     }
 }

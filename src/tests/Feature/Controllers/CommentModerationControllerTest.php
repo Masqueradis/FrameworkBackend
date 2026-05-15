@@ -69,4 +69,46 @@ class CommentModerationControllerTest extends TestCase
         $response->assertSessionHas('success', 'Comment rejected successfully.');
         $this->assertEquals(CommentStatus::Rejected, $this->comment->fresh()->status);
     }
+
+    #[Test]
+    public function testDisplaysView(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create();
+        Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Test comment',
+            'status' => CommentStatus::Pending,
+            'rating' => 5,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.comments.index'));
+
+        $response->assertOk();
+        $response->assertViewIs('admin.comments.index');
+        $response->assertViewHas('comments');
+    }
+
+    #[Test]
+    public function testAdminCanDeleteAnyComment(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create();
+        $comment = Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Test comment',
+            'status' => CommentStatus::Pending,
+            'rating' => 5,
+        ]);
+
+        $response = $this->actingAs($this->admin)->delete(route('admin.comments.destroy', $comment));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Comment deleted successfully.');
+        $this->assertDatabaseMissing('comments', [
+            'id' => $comment->id,
+        ]);
+    }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Models;
 
+use App\Models\Comment;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
@@ -19,5 +20,7 @@ class ModelRelationsTest extends TestCase
         $this->assertInstanceOf(BelongsTo::class, new Order()->user());
         $this->assertInstanceOf(BelongsTo::class, new OrderItem()->order());
         $this->assertInstanceOf(BelongsTo::class, new Payment()->order());
+        $this->assertInstanceOf(BelongsTo::class, new Comment()->user());
+        $this->assertInstanceOf(BelongsTo::class, new Comment()->product());
     }
 }

@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 
     Route::post('/products/{product}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
     Route::prefix('admin')->middleware('can:access-panel')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
@@ -73,11 +74,12 @@ Route::middleware('auth')->group(function () {
             ->name('admin.products.images.upload');
 
         Route::middleware('role:admin')->group(function () {
+            Route::get('/comments', [CommentModerationController::class, 'index'])->name('admin.comments.index');
             Route::patch('comments/{comment}/approve', [CommentModerationController::class, 'approve'])
                 ->name('admin.comments.approve');
-
             Route::patch('/comments/{comment}/reject', [CommentModerationController::class, 'reject'])
                 ->name('admin.comments.reject');
+            Route::delete('/comments/{comment}', [CommentModerationController::class, 'destroy'])->name('admin.comments.destroy');
         });
     });
 });

@@ -12,9 +12,18 @@ interface CommentRepositoryInterface
 {
     /**
      * @param array<string, mixed> $data
-     * @return Comment
+     * @return ?Comment
      */
-    public function create(array $data): Comment;
+    public function create(array $data): ?Comment;
+
+    /**
+     * @param Comment $comment
+     * @param array<string, mixed> $data
+     * @return bool
+     */
+    public function update(Comment $comment, array $data): bool;
+    public function delete(Comment $comment): ?bool;
+    public function findByUserAndProduct(int $userId, int $productId): ?Comment;
     public function updateStatus(Comment $comment, CommentStatus $status): bool;
     /**
      * @param int $productId
