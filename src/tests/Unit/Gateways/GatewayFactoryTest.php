@@ -20,14 +20,14 @@ class GatewayFactoryTest extends TestCase
     }
 
     #[Test]
-    public function itCreatesPaddleGateway(): void
+    public function testCreatesPaddleGateway(): void
     {
         $gateway = GatewayFactory::make('paddle');
         $this->assertInstanceOf(PaddleGateway::class, $gateway);
     }
 
     #[Test]
-    public function itThrowsExceptionOnInvalidGateway(): void
+    public function testThrowsExceptionOnInvalidGateway(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unknown provider: unknown_crypto');

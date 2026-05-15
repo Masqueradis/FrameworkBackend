@@ -24,7 +24,7 @@ class CheckoutControllerTest extends TestCase
     }
 
     #[Test]
-    public function itDisplaysCheckoutPage(): void
+    public function testDisplaysCheckoutPage(): void
     {
         $user = User::factory()->create();
         $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);
@@ -42,7 +42,7 @@ class CheckoutControllerTest extends TestCase
     }
 
     #[Test]
-    public function itProcessesCheckoutAndReturnsGatewayUrl(): void
+    public function testProcessesCheckoutAndReturnsGatewayUrl(): void
     {
         $user = User::factory()->create();
         $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);
@@ -73,7 +73,7 @@ class CheckoutControllerTest extends TestCase
     }
 
     #[Test]
-    public function itReturns400ForEmptyCart(): void
+    public function testReturns400ForEmptyCart(): void
     {
         $user = User::factory()->create();
         Cart::create(['user_id' => $user->id, 'session_id' => '123']);
@@ -94,7 +94,7 @@ class CheckoutControllerTest extends TestCase
     }
 
     #[Test]
-    public function itReturns500OnGenericException(): void
+    public function testReturns500OnGenericException(): void
     {
         $user = User::factory()->create();
         $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);
@@ -127,7 +127,7 @@ class CheckoutControllerTest extends TestCase
     }
 
     #[Test]
-    public function itDisplaysResultAndClearsCart(): void
+    public function testDisplaysResultAndClearsCart(): void
     {
         $user = User::factory()->create();
         $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);

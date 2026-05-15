@@ -25,7 +25,7 @@ class WebhookControllerTest extends TestCase
     }
 
     #[Test]
-    public function itHandlesSuccessfulWebhook(): void
+    public function testHandlesSuccessfulWebhook(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -49,7 +49,7 @@ class WebhookControllerTest extends TestCase
     }
 
     #[Test]
-    public function itReturns400OnSignatureVerificationException(): void
+    public function testReturns400OnSignatureVerificationException(): void
     {
         $mockGateway = Mockery::mock(StripeGateway::class);
         $mockGateway->shouldReceive('verifyWebhook')
@@ -63,7 +63,7 @@ class WebhookControllerTest extends TestCase
     }
 
     #[Test]
-    public function itReturns200OnIgnoredEventException(): void
+    public function testReturns200OnIgnoredEventException(): void
     {
         $mockGateway = Mockery::mock(StripeGateway::class);
         $mockGateway->shouldReceive('verifyWebhook')
