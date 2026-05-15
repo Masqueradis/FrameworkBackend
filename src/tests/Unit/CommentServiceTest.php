@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\CommentRepositoryInterface;
 use App\Services\CommentService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Tests\TestCase;
@@ -18,6 +19,7 @@ use PHPUnit\Framework\Attributes\Test;
 
 class CommentServiceTest extends TestCase
 {
+    use RefreshDatabase;
     use MockeryPHPUnitIntegration;
 
     private CommentRepositoryInterface $repositoryMock;
