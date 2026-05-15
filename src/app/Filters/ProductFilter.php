@@ -4,21 +4,24 @@ declare(strict_types=1);
 
 namespace App\Filters;
 
+use App\Models\Product;
 use App\ValueObjects\Id\CategoryId;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @extends QueryFilter<Product>
+ */
 class ProductFilter extends QueryFilter
 {
     /**
      * @param int|string $id
-     * @return Builder<Model>
      */
-    public function categoryId(int|string $id): Builder
+    public function categoryId(int|string $id): void
     {
         $categoryIdVO = new CategoryId((int) $id);
 
-        return $this->builder->where('category_id', $categoryIdVO->value);
+        $this->builder->where('category_id', $categoryIdVO->value);
     }
 
     public function minPrice(float|int|string $price): void

@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace App\Filters;
 
-use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+/**
+ * @template TModel of Model
+ */
 abstract class QueryFilter
 {
-    /** @var Builder<Model> */
+    /** @var Builder<TModel> */
     protected Builder $builder;
 
     /** @param array<string, mixed> $request */
     public function __construct(protected array $request) {}
 
     /**
-     * @template TModel of Model
      * @param Builder<TModel> $builder
      * @return Builder<TModel>
      */
@@ -27,7 +28,7 @@ abstract class QueryFilter
         $this->builder = $builder;
 
         foreach ($this->request as $name => $value) {
-            $methodName = str::camel($name);
+            $methodName = Str::camel($name);
 
             if (!empty($value) && method_exists($this, $methodName)) {
                 $this->$methodName($value);

@@ -142,7 +142,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function itThrowsExceptionIfNotEnoughStock(): void
+    public function testThrowsExceptionIfNotEnoughStock(): void
     {
         $cart = Cart::create();
         $product = Product::factory()->create(['price' => 1000, 'stock' => 1]);

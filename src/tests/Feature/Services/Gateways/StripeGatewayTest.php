@@ -42,7 +42,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itBuildsLineItemsCorrectly(): void
+    public function testBuildsLineItemsCorrectly(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create(['name' => 'Test Product', 'price' => 1500]);
@@ -71,7 +71,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itThrowsExceptionOnInvalidWebhookSignature(): void
+    public function testThrowsExceptionOnInvalidWebhookSignature(): void
     {
         $request = Request::create('/webhooks/stripe', 'POST', [], [], [], [], '{"type":"checkout.session.completed"}');
         $request->headers->set('Stripe-Signature', 'invalid_signature');
@@ -82,7 +82,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itCreatesCheckoutUrl(): void
+    public function testCreatesCheckoutUrl(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -112,7 +112,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itVerifiesValidWebhook(): void
+    public function testVerifiesValidWebhook(): void
     {
         $payload = json_encode ([
             'type' => 'checkout.session.completed',
@@ -135,7 +135,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itIgnoresOtherWebhookEvents(): void
+    public function testIgnoresOtherWebhookEvents(): void
     {
         $payload = json_encode([
             'type' => 'payment_intent.succeeded',

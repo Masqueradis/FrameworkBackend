@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Gateways;
+namespace Tests\Unit;
 
 use App\Services\Gateways\GatewayFactory;
 use App\Services\Gateways\PaddleGateway;
 use App\Services\Gateways\StripeGateway;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class GatewayFactoryTest extends TestCase
 {
@@ -20,14 +20,14 @@ class GatewayFactoryTest extends TestCase
     }
 
     #[Test]
-    public function itCreatesPaddleGateway(): void
+    public function testCreatesPaddleGateway(): void
     {
         $gateway = GatewayFactory::make('paddle');
         $this->assertInstanceOf(PaddleGateway::class, $gateway);
     }
 
     #[Test]
-    public function itThrowsExceptionOnInvalidGateway(): void
+    public function testThrowsExceptionOnInvalidGateway(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unknown provider: unknown_crypto');

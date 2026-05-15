@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Repositories\Contracts\CommentRepositoryInterface;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use Illuminate\View\View;
 
 class ProductController
 {
-    public function show(Product $product): View
+    public function show(Product $product, CommentRepositoryInterface $commentRepo): View
     {
         $product->load('images');
 
@@ -17,6 +18,12 @@ class ProductController
             ->sortBy('position')
             ->values();
 
-        return view('products.show', compact('product', 'images'));
+        $comments = $commentRepo->getApprovedForProduct($product->id);
+
+        $userComment = auth()->check()
+            ? $commentRepo->findByUserAndProduct((int) auth()->id(), $product->id)
+            : null;
+
+        return view('products.show', compact('product', 'images', 'comments', 'userComment'));
     }
 }

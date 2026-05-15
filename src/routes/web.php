@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Admin\AdminCategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\AdminProductController as AdminProductController;
+use App\Http\Controllers\Admin\CommentModerationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Web\CartController;
 use App\Http\Controllers\Web\CatalogController;
+use App\Http\Controllers\Web\CommentController;
 use App\Http\Controllers\Web\ProductController as WebProductController;
 use App\Http\Controllers\Web\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -39,10 +41,10 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('remove');
 });
 
-Route::middleware('auth')->controller(AuthController::class)->group(function () {
+Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::prefix('email')->group(function () {
+    Route::prefix('email')->controller(AuthController::class)->group(function () {
         Route::get('/verify', 'showVerificationNotice')->name('verification.notice');
 
         Route::get('verify/{id}/{hash}', 'verifyEmail')
@@ -54,6 +56,9 @@ Route::middleware('auth')->controller(AuthController::class)->group(function () 
     });
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+
+    Route::post('/products/{product}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
     Route::prefix('admin')->middleware('can:access-panel')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
@@ -67,5 +72,14 @@ Route::middleware('auth')->controller(AuthController::class)->group(function () 
 
         Route::post('/products/{product}/images', [AdminProductController::class, 'uploadImage'])
             ->name('admin.products.images.upload');
+
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/comments', [CommentModerationController::class, 'index'])->name('admin.comments.index');
+            Route::patch('comments/{comment}/approve', [CommentModerationController::class, 'approve'])
+                ->name('admin.comments.approve');
+            Route::patch('/comments/{comment}/reject', [CommentModerationController::class, 'reject'])
+                ->name('admin.comments.reject');
+            Route::delete('/comments/{comment}', [CommentModerationController::class, 'destroy'])->name('admin.comments.destroy');
+        });
     });
 });

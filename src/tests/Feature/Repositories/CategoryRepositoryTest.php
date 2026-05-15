@@ -16,7 +16,7 @@ class CategoryRepositoryTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function itFindsCategoryById(): void
+    public function testFindsCategoryById(): void
     {
         $category = Category::factory()->create();
         $repository = new CategoryRepository();
@@ -28,7 +28,7 @@ class CategoryRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function itReturnsNullIfCategoryNotFound(): void
+    public function testReturnsNullIfCategoryNotFound(): void
     {
         $repository = new CategoryRepository();
 

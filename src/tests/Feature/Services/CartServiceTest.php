@@ -175,7 +175,7 @@ class CartServiceTest extends TestCase
     }
 
     #[Test]
-    public function itThrowsExceptionIfProductDoesNotExist(): void
+    public function testThrowsExceptionIfProductDoesNotExist(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);

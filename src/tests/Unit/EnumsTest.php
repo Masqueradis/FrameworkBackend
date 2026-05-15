@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use App\Enums\CommentStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use PHPUnit\Framework\TestCase;
@@ -26,5 +27,33 @@ class EnumsTest extends TestCase
         $this->assertEquals('pending', PaymentStatus::Pending->value);
         $this->assertEquals('paid', PaymentStatus::Paid->value);
         $this->assertEquals('failed', PaymentStatus::Failed->value);
+    }
+
+    #[Test]
+    public function testCorrectlyIdentifiesPendingStatus(): void
+    {
+        $status = CommentStatus::Pending;
+
+        $this->assertTrue($status->isPending());
+        $this->assertFalse($status->isApproved());
+        $this->assertFalse($status->isRejected());
+    }
+
+    #[Test]
+    public function testCorrectlyIdentifiesApprovedStatus(): void
+    {
+        $status = CommentStatus::Approved;
+
+        $this->assertTrue($status->isApproved());
+        $this->assertFalse($status->isPending());
+    }
+
+    #[Test]
+    public function testCorrectlyIdentifiesRejectedStatus(): void
+    {
+        $status = CommentStatus::Rejected;
+
+        $this->assertTrue($status->isRejected());
+        $this->assertFalse($status->isPending());
     }
 }

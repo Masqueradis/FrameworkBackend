@@ -6,7 +6,9 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Repositories\CartRepository;
+use App\Repositories\CommentRepository;
 use App\Repositories\Contracts\CartRepositoryInterface;
+use App\Repositories\Contracts\CommentRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Repositories\OrderRepository;
 use App\Services\Gateways\Contracts\PaymentGatewayInterface;
@@ -23,13 +25,21 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void {
         $this->app->bind(
             CartRepositoryInterface::class,
-            CartRepository::class
+            CartRepository::class,
+
+
         );
 
         $this->app->bind(
             OrderRepositoryInterface::class,
             OrderRepository::class
         );
+
+        $this->app->bind(
+            CommentRepositoryInterface::class,
+            CommentRepository::class
+        );
+
     }
 
     /**
