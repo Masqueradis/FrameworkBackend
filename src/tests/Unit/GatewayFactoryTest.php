@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Gateways;
+namespace Tests\Unit;
 
 use App\Services\Gateways\GatewayFactory;
 use App\Services\Gateways\PaddleGateway;
 use App\Services\Gateways\StripeGateway;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class GatewayFactoryTest extends TestCase
 {
