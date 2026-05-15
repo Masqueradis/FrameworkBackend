@@ -17,6 +17,23 @@ class CommentRepository implements CommentRepositoryInterface
         return Comment::create($data);
     }
 
+    public function update(Comment $comment, array $data): bool
+    {
+        return $comment->update($data);
+    }
+
+    public function delete(Comment $comment): ?bool
+    {
+        return $comment->delete();
+    }
+
+    public function findByUserAndProduct(int $userId, int $productId): ?Comment
+    {
+        return Comment::where('user_id', $userId)
+            ->where('product_id', $productId)
+            ->first();
+    }
+
     public function updateStatus(Comment $comment, CommentStatus $status): bool
     {
         return $comment->update(['status' => $status]);

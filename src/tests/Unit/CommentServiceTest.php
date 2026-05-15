@@ -38,6 +38,11 @@ class CommentServiceTest extends TestCase
         $product = Product::factory()->make(['id' => 1]);
         $dto = new CommentDTO(content: 'This is a valid clean review', rating: 5);
 
+        $this->repositoryMock->shouldReceive('findByUserAndProduct')
+            ->once()
+            ->with($user->id, $product->id)
+            ->andReturn(null);
+
         $expectedData = [
             'user_id' => $user->id,
             'product_id' => $product->id,
@@ -51,7 +56,7 @@ class CommentServiceTest extends TestCase
             ->with($expectedData)
             ->andReturn(new Comment($expectedData));
 
-        $comment = $this->service->addComment($user, $product, $dto);
+        $comment = $this->service->saveComment($user, $product, $dto);
 
         $this->assertEquals(CommentStatus::Pending, $comment->status);
     }
@@ -80,5 +85,37 @@ class CommentServiceTest extends TestCase
             ->andReturn(true);
 
         $this->service->reject($comment);
+    }
+
+    #[Test]
+    public function testUpdateExistingCommentAndResetsStatusToPending(): void
+    {
+        $user = User::factory()->make(['id' => 1]);
+        $product = Product::factory()->make(['id' => 1]);
+        $dto = new CommentDTO(content: 'This is a valid clean review', rating: 5);
+
+        $existingComment = new Comment([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => $dto->content,
+            'rating' => $dto->rating,
+            'status' => CommentStatus::Approved->value,
+        ]);
+
+        $this->repositoryMock->shouldReceive('findByUserAndProduct')
+            ->once()
+            ->with($user->id, $product->id)
+            ->andReturn($existingComment);
+
+        $this->repositoryMock->shouldReceive('update')
+            ->once()
+            ->with($existingComment, [
+                'content' => $dto->content,
+                'rating' => $dto->rating,
+                'status' => CommentStatus::Pending->value,
+            ])
+        ->andReturn(true);
+
+        $this->service->saveComment($user, $product, $dto);
     }
 }

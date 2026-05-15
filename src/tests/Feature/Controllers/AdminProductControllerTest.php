@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Controllers;
 
+use App\Enums\CommentStatus;
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\User;
@@ -187,5 +189,25 @@ class AdminProductControllerTest extends TestCase
         $response->assertViewIs('products.show');
         $response->assertViewHas('product');
         $response->assertViewHas('images');
+    }
+
+    #[Test]
+    public function testAuthenticatedUserCanViewProductPageAndItLoadsTheirComment(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create();
+
+        Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Test review',
+            'rating' => 5,
+            'status' => CommentStatus::Pending->value,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('web.products.show', $product));
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertViewHas('userComment');
     }
 }

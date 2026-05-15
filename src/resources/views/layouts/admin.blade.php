@@ -61,6 +61,13 @@
                         Swagger API
                     </a>
                 </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.comments.index') }}"
+                       class="nav-link {{ request()->routeIs('admin.comments.*') ? 'active' : '' }}">
+                        Review Moderation
+                    </a>
+                </li>
             @endif
         </ul>
         <hr class="text-secondary mt-auto">
