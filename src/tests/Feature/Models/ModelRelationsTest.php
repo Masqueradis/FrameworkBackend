@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Test;
 class ModelRelationsTest extends TestCase
 {
     #[Test]
-    public function itHasCorrectRelations(): void
+    public function testHasCorrectRelations(): void
     {
         $this->assertInstanceOf(BelongsTo::class, new Order()->user());
         $this->assertInstanceOf(BelongsTo::class, new OrderItem()->order());

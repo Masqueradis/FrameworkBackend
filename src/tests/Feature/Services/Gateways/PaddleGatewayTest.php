@@ -33,7 +33,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itCreatesCheckoutUrlSuccessfully(): void
+    public function testCreatesCheckoutUrlSuccessfully(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -66,7 +66,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itThrowsExceptionIfPaddleApiFails(): void
+    public function testThrowsExceptionIfPaddleApiFails(): void
     {
         $user = User::factory()->create();
         Http::fake([
@@ -88,7 +88,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itVerifiesValidWebhook(): void
+    public function testVerifiesValidWebhook(): void
     {
         $payload = json_encode([
             'event_type' => 'transaction.completed',
@@ -115,7 +115,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itThrowsExceptionOnInvalidSignature(): void
+    public function testThrowsExceptionOnInvalidSignature(): void
     {
         $request = Request::create('/webhook/paddle', 'POST');
         $request->headers->set('Paddle-Signature', 'ts=123;h1=invalid_hash');
@@ -126,7 +126,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itUsesProductionUrlWhenEnvIsProduction(): void
+    public function testUsesProductionUrlWhenEnvIsProduction(): void
     {
         Config::set('services.paddle.env', 'production');
         $gateway = $this->app->make(PaddleGateway::class);
@@ -134,7 +134,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itThrowsExceptionOnMissingSignature(): void
+    public function testThrowsExceptionOnMissingSignature(): void
     {
         $request = Request::create('/webhook/paddle', 'POST');
 
@@ -144,7 +144,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function itThrowsExceptionOnIgnoredEventType(): void
+    public function testThrowsExceptionOnIgnoredEventType(): void
     {
         $payload = json_encode(['event_type' => 'subscription.created', 'data' => []]);
         $ts = time();

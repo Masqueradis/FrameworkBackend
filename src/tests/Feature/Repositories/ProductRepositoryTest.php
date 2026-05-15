@@ -16,7 +16,7 @@ class ProductRepositoryTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function itFindsProductsById(): void
+    public function testFindsProductsById(): void
     {
         $product = Product::factory()->create();
         $repository = new ProductRepository();
@@ -28,7 +28,7 @@ class ProductRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function itReturnsNullIfProductNotFound(): void
+    public function testReturnsNullIfProductNotFound(): void
     {
         $repository = new ProductRepository();
 

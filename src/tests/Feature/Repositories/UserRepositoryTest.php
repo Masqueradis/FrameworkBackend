@@ -16,7 +16,7 @@ class UserRepositoryTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function itFindsUserById(): void
+    public function testFindsUserById(): void
     {
         $user = User::factory()->create();
         $repository = new UserRepository();
@@ -28,7 +28,7 @@ class UserRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function itReturnsNullIfUserNotFound(): void
+    public function testReturnsNullIfUserNotFound(): void
     {
         $repository = new UserRepository();
 
