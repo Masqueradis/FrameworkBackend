@@ -17,6 +17,11 @@ class CommentRepository implements CommentRepositoryInterface
         return Comment::create($data);
     }
 
+    public function updateStatus(Comment $comment, CommentStatus $status): bool
+    {
+        return $comment->update(['status' => $status]);
+    }
+
     public function getApprovedForProduct(int $productId): Collection
     {
         return Comment::where('product_id', $productId)

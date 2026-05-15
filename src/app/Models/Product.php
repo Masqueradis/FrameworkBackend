@@ -51,7 +51,7 @@ class Product extends Model
 
     /**
      * @param Builder<Product> $query
-     * @param QueryFilter $filter
+     * @param QueryFilter<Product> $filter
      * @return Builder<Product>
      */
     public function scopeFilter(Builder $query, QueryFilter $filter): Builder
