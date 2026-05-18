@@ -7,6 +7,7 @@ namespace App\Services;
 use App\DTO\Checkout\CheckoutDTO;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Events\OrderCreated;
 use App\Exceptions\EmptyCartException;
 use App\Models\Cart;
 use App\Models\Order;
@@ -43,7 +44,11 @@ readonly class CheckoutService
             'total_amount_cents' => $totalCents,
         ];
 
-        return $this->orderRepository->createWithItemsAndDeductStock($orderData, $cart->items);
+        $order = $this->orderRepository->createWithItemsAndDeductStock($orderData, $cart->items);
+
+        OrderCreated::dispatch($order);
+
+        return $order;
     }
 
     public function handleWebhook(Order $order, bool $isSuccess, string $transactionId, string $provider): void

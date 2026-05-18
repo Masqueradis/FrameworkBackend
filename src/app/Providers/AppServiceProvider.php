@@ -11,8 +11,6 @@ use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Repositories\Contracts\CommentRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Repositories\OrderRepository;
-use App\Services\Gateways\Contracts\PaymentGatewayInterface;
-use App\Services\Gateways\FakePaymentGateway;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;

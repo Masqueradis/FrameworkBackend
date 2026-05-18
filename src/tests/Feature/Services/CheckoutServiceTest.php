@@ -7,6 +7,7 @@ namespace Tests\Feature\Services;
 use App\DTO\Checkout\CheckoutDTO;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Events\OrderCreated;
 use App\Exceptions\EmptyCartException;
 use App\Models\Cart;
 use App\Models\CartItem;
@@ -17,6 +18,7 @@ use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Services\CheckoutService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
@@ -166,5 +168,34 @@ class CheckoutServiceTest extends TestCase
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage("Not enough stock for {$product->name}.");
         $this->checkoutService->process($dto, $cart);
+    }
+
+    #[Test]
+    public function testDispatchesOrderCreatedEventOnSuccessfulCheckout(): void
+    {
+        Event::fake();
+
+        $cart = Cart::create();
+        $product = Product::factory()->create(['price' => 1000]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'price' => $product->price,
+        ]);
+
+        $dto = new CheckoutDTO(
+            'John',
+            'test@example.com',
+            '123',
+            'Address',
+            'stripe',
+        );
+
+        $order = $this->checkoutService->process($dto, $cart);
+
+        Event::assertDispatched(OrderCreated::class, function ($event) use ($order) {
+            return $event->order->id === $order->id;
+        });
     }
 }
