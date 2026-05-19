@@ -79,4 +79,10 @@ class OrderRepository implements OrderRepositoryInterface
     {
         return $order->update(['status' => $status]);
     }
+
+    public function chunkOrdersByDateRange(string $dateFrom, string $dateTo, int $chunkSize, callable $callback): void
+    {
+        Order::whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->chunk($chunkSize, $callback);
+    }
 }

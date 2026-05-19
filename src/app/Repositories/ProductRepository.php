@@ -90,4 +90,9 @@ class ProductRepository
 
         return $query->orderBy('id', 'asc')->paginate($perPage);
     }
+
+    public function chunkAllProducts(int $chunkSize, callable $callback): void
+    {
+        Product::chunk($chunkSize, $callback);
+    }
 }
