@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminCategoryController as AdminCategoryControlle
 use App\Http\Controllers\Admin\AdminProductController as AdminProductController;
 use App\Http\Controllers\Admin\CommentModerationController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CheckoutController;
@@ -80,6 +81,12 @@ Route::middleware('auth')->group(function () {
             Route::patch('/comments/{comment}/reject', [CommentModerationController::class, 'reject'])
                 ->name('admin.comments.reject');
             Route::delete('/comments/{comment}', [CommentModerationController::class, 'destroy'])->name('admin.comments.destroy');
+
+            Route::prefix('reports')->name('admin.reports.')->group(function () {
+                Route::get('/', [ReportController::class, 'index'])->name('index');
+                Route::post('/', [ReportController::class, 'store'])->name('store');
+                Route::get('/{report}/download', [ReportController::class, 'download'])->name('download');
+            });
         });
     });
 });

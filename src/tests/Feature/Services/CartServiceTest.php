@@ -40,7 +40,7 @@ class CartServiceTest extends TestCase
             'stock' => 50
         ]);
 
-        $data = new AddToCartDto($product->id, 2);
+        $data = new AddToCartDTO($product->id, 2);
 
         $this->cartService->addItem($data);
         $this->assertDatabaseHas('cart_items', [

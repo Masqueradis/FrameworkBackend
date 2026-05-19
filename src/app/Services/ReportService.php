@@ -6,8 +6,10 @@ namespace App\Services;
 
 use App\DTO\Report\RequestReportDTO;
 use App\Enums\ReportStatus;
+use App\Jobs\GenerateReportJob;
 use App\Models\Report;
 use App\Repositories\Contracts\ReportRepositoryInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class ReportService
 {
@@ -30,5 +32,18 @@ class ReportService
         GenerateReportJob::dispatch($report->id);
 
         return $report;
+    }
+
+    public function getDownloadPath(Report $report, int $adminId): string
+    {
+        if ($report->admin_id !== $adminId) {
+            abort(Response::HTTP_FORBIDDEN, 'You have no access to this report.');
+        }
+
+        if($report->status !== ReportStatus::Completed || !$report->file_path) {
+            abort(Response::HTTP_NOT_FOUND, 'Report not found.');
+        }
+
+        return $report->file_path;
     }
 }
