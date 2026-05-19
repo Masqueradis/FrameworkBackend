@@ -32,4 +32,5 @@ interface OrderRepositoryInterface
      */
     public function addPayment(Order $order, array $paymentData): Payment;
     public function updateStatus(Order $order, OrderStatus $status): bool;
+    public function chunkOrdersByDateRange(string $dateFrom, string $dateTo, int $chunkSize, callable $callback): void;
 }
