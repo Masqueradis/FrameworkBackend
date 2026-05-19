@@ -10,7 +10,9 @@ use App\Repositories\CommentRepository;
 use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Repositories\Contracts\CommentRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
+use App\Repositories\Contracts\ReportRepositoryInterface;
 use App\Repositories\OrderRepository;
+use App\Repositories\ReportRepository;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
@@ -24,8 +26,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             CartRepositoryInterface::class,
             CartRepository::class,
-
-
         );
 
         $this->app->bind(
@@ -38,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
             CommentRepository::class
         );
 
+        $this->app->bind(
+            ReportRepositoryInterface::class,
+            ReportRepository::class
+        );
     }
 
     /**
