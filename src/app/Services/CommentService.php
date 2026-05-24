@@ -11,7 +11,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\CommentRepositoryInterface;
 
-class CommentService
+readonly class CommentService
 {
     public function __construct(
         private CommentRepositoryInterface $commentRepository,

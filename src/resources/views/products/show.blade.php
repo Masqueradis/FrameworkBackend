@@ -148,17 +148,27 @@
                             @csrf
 
                             <div class="mb-3">
-                                <label for="rating" class="form-label fw-bold text-muted">Product Rating <span class="text-danger">*</span></label>
-                                <select name="rating" id="rating" class="form-select w-auto @error('rating') is-invalid @enderror" required>
-                                    <option value="" disabled {{ !$userComment ? 'selected' : '' }}>Select rating...</option>
-                                    <option value="5" @selected(old('rating', $userComment?->rating) == 5)>5 - Excellent</option>
-                                    <option value="4" @selected(old('rating', $userComment?->rating) == 4)>4 - Good</option>
-                                    <option value="3" @selected(old('rating', $userComment?->rating) == 3)>3 - Average</option>
-                                    <option value="2" @selected(old('rating', $userComment?->rating) == 2)>2 - Poor</option>
-                                    <option value="1" @selected(old('rating', $userComment?->rating) == 1)>1 - Terrible</option>
-                                </select>
+                                <label class="form-label fw-bold text-muted d-block">Product Rating <span class="text-danger">*</span></label>
+
+                                <div class="star-rating position-relative">
+                                    <input type="radio" id="star5" name="rating" value="5" required {{ old('rating', $userComment?->rating) == 5 ? 'checked' : '' }} />
+                                    <label for="star5" title="5 - Excellent">★</label>
+
+                                    <input type="radio" id="star4" name="rating" value="4" {{ old('rating', $userComment?->rating) == 4 ? 'checked' : '' }} />
+                                    <label for="star4" title="4 - Good">★</label>
+
+                                    <input type="radio" id="star3" name="rating" value="3" {{ old('rating', $userComment?->rating) == 3 ? 'checked' : '' }} />
+                                    <label for="star3" title="3 - Average">★</label>
+
+                                    <input type="radio" id="star2" name="rating" value="2" {{ old('rating', $userComment?->rating) == 2 ? 'checked' : '' }} />
+                                    <label for="star2" title="2 - Poor">★</label>
+
+                                    <input type="radio" id="star1" name="rating" value="1" {{ old('rating', $userComment?->rating) == 1 ? 'checked' : '' }} />
+                                    <label for="star1" title="1 - Terrible">★</label>
+                                </div>
+
                                 @error('rating')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="text-danger small mt-1 fw-bold">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -259,6 +269,38 @@
         .thumbSwiper .swiper-slide-thumb-active {
             opacity: 1 !important;
             border: 2px solid #0d6efd !important;
+        }
+
+        .star-rating {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            font-size: 2.5rem;
+            line-height: 1;
+        }
+
+        .star-rating input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+
+        .star-rating label {
+            color: #e4e5e9;
+            cursor: pointer;
+            transition: color 0.2s ease-in-out;
+            padding-right: 5px;
+        }
+
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #ffc107;
+        }
+
+        .star-rating label:active {
+            transform: scale(0.9);
         }
     </style>
 
