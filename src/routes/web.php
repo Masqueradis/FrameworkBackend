@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
 
         Route::middleware('role:admin')->group(function () {
             Route::get('/comments', [CommentModerationController::class, 'index'])->name('admin.comments.index');
+            Route::get('/comments/product/{product}', [CommentModerationController::class, 'show'])->name('admin.comments.show');
             Route::patch('comments/{comment}/approve', [CommentModerationController::class, 'approve'])
                 ->name('admin.comments.approve');
             Route::patch('/comments/{comment}/reject', [CommentModerationController::class, 'reject'])

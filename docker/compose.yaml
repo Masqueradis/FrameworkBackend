@@ -164,6 +164,19 @@ services:
         networks:
             - sail
 
+    queue-worker:
+        image: masqueradisu/laravel-php:latest
+        platform: linux/amd64
+        volumes:
+            - '../src:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - pgsql
+            - rabbitmq
+        command: php artisan queue:work rabbitmq --queue=emails_queue,reports_queue --tries=3
+        container_name: ${APP_NAME}_queue_worker
+
 
 networks:
     sail:

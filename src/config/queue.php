@@ -103,23 +103,6 @@ return [
                     'vhost' => env('RABBITMQ_VHOST', '/'),
                 ],
             ],
-
-            'options' => [
-                'queue' => [
-                    'job' => VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob::class,
-                    'exchange' => env('RABBITMQ_EXCHANGE_NAME', 'shop_exchange'),
-                    'exchange_routing_key' => env('RABBITMQ_ROUTING_KEY', 'reports.#'),
-                ],
-
-                'exchange' => [
-                    'name' => env('RABBITMQ_EXCHANGE_NAME', 'shop_exchange'),
-                    'declare' => true,
-                    'type' => env('RABBITMQ_EXCHANGE_TYPE', \PhpAmqpLib\Exchange\AMQPExchangeType::TOPIC),
-                    'passive' => false,
-                    'durable' => true,
-                    'auto_delete' => false,
-                ],
-            ],
         ],
 
     ],

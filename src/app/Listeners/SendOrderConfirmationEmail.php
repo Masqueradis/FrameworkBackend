@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
 
-class SendOrderConfirmationEmail
+class SendOrderConfirmationEmail implements ShouldQueue
 {
     use InteractsWithQueue;
 
@@ -18,6 +18,10 @@ class SendOrderConfirmationEmail
     public function handle(OrderCreated $event): void
     {
         $order = $event->order;
+
+        if ($order->status === \App\Enums\OrderStatus::Pending) {
+            return;
+        }
 
         Mail::to($order->customer_email)->send(new OrderConfirmationMail($order));
     }

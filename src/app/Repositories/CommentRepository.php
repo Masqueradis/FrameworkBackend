@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Enums\CommentStatus;
 use App\Models\Comment;
+use App\Models\Product;
 use App\Repositories\Contracts\CommentRepositoryInterface;
 use Illuminate\Support\Collection;
 
@@ -47,10 +48,21 @@ class CommentRepository implements CommentRepositoryInterface
             ->get();
     }
 
-    public function getPendingForModeration(): Collection
+    public function getPendingCommentsForModeration(): Collection
     {
         return Comment::where('status', CommentStatus::Pending->value)
             ->oldest()
             ->get();
+    }
+
+    public function getPendingProductsForModeration(): Collection
+    {
+        return Product::whereHas('comments', function ($query) {
+            $query->where('status', CommentStatus::Pending->value);
+        })
+        ->withCount(['comments as pending_count' => function ($query) {
+            $query->where('status', CommentStatus::Pending->value);
+        }])
+        ->get();
     }
 }

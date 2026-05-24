@@ -1,14 +1,16 @@
 <?php
 
-namespace Tests\Feature\Reports;
+namespace Tests\Feature\Services;
 
 use App\DTO\Report\RequestReportDTO;
 use App\Enums\ReportStatus;
+use App\Jobs\GenerateReportJob;
 use App\Models\User;
+use App\Services\ReportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class ReportServiceTest extends TestCase
 {

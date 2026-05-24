@@ -71,6 +71,9 @@ class WebhookController extends ApiController
                 $dto->transactionId,
                 $dto->provider,
             );
+            if ($dto->isSuccess()) {
+                \App\Events\OrderCreated::dispatch($order);
+            }
         }
 
         return response()->json(['status' => 'success']);

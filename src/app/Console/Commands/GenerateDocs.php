@@ -34,6 +34,7 @@ class GenerateDocs extends Command
             $this->info('Docs generated successfully');
             return Command::SUCCESS;
         }
+
         $this->error('Something went wrong');
         return Command::FAILURE;
     }

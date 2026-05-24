@@ -37,9 +37,10 @@ class Money
 
     public function multiply(int $multiplier): self
     {
-        if($multiplier < 0) {
+        if ($multiplier < 0) {
             throw new InvalidArgumentException('Amount cannot be negative.');
         }
+
         return new self($this->cents * $multiplier);
     }
 }

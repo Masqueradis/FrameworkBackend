@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\Gateways\StripeGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Mockery;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
@@ -44,6 +45,8 @@ class CheckoutControllerTest extends TestCase
     #[Test]
     public function testProcessesCheckoutAndReturnsGatewayUrl(): void
     {
+        Event::fake();
+
         $user = User::factory()->create();
         $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);
         $product = Product::factory()->create(['price' => 1000, 'stock' => 10]);
@@ -96,6 +99,8 @@ class CheckoutControllerTest extends TestCase
     #[Test]
     public function testReturns500OnGenericException(): void
     {
+        Event::fake();
+
         $user = User::factory()->create();
         $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);
         $product = Product::factory()->create(['price' => 1000, 'stock' => 10]);
