@@ -1,0 +1,31 @@
+<?php
+
+namespace Tests\Feature\Models;
+
+use App\Enums\ReportStatus;
+use App\Models\Report;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+
+class ReportTest extends TestCase
+{
+    use RefreshDatabase;
+
+    #[Test]
+    public function testReportBelongsToAdmin(): void
+    {
+        $admin = User::factory()->create();
+        $report = Report::create([
+            'admin_id' => $admin->id,
+            'type' => 'sales',
+            'filters' => [],
+            'status' => ReportStatus::Completed
+        ]);
+
+        $this->assertInstanceOf(BelongsTo::class, $report->admin());
+        $this->assertEquals($admin->id, $report->admin->id);
+    }
+}

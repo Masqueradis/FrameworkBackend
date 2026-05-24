@@ -36,4 +36,22 @@ class ProductRepositoryTest extends TestCase
 
         $this->assertNull($foundProduct);
     }
+
+    #[Test]
+    public function testChunkAllProductsProcessesAllRecoirds(): void
+    {
+        Product::factory()->count(10)->create();
+        $repository = app(ProductRepository::class);
+
+        $processedProducts = 0;
+        $chunkCount = 0;
+
+        $repository->chunkAllProducts(2, function ($chunk) use (&$processedProducts, &$chunkCount) {
+            $chunkCount++;
+            $processedProducts += $chunk->count();
+        });
+
+        $this->assertEquals(5, $chunkCount);
+        $this->assertEquals(10, $processedProducts);
+    }
 }
