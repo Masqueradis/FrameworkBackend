@@ -109,7 +109,7 @@ class CommentRepositoryTest extends TestCase
             'rating' => 5,
         ]);
 
-        $pendingComment = $this->repository->getPendingForModeration();
+        $pendingComment = $this->repository->getPendingCommentsForModeration();
 
         $this->assertCount(1, $pendingComment);
         $this->assertTrue($pendingComment->every(fn ($comment) => $comment->status->isPending()));

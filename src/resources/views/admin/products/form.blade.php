@@ -21,7 +21,7 @@
                         <h5 class="mb-4 text-primary">General Info</h5>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-5 mb-3">
                                 <label for="name" class="form-label fw-bold">Name <span class="text-danger">*</span></label>
                                 <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror"
                                        value="{{ old('name', $product->name ?? '') }}" required>
@@ -38,21 +38,22 @@
                                 </div>
                             </div>
 
-                            <div class="form-check form-switch mb-3">
-                                <input type="hidden" name="available" value="0">
-
-                                <input class="form-check-input" type="checkbox" role="switch" name="available" id="available" value="1"
-                                    {{ old('available', $product->available ?? true) ? 'checked' : '' }}>
-                                <label class="form-check-label fw-bold" for="available">
-                                    Available (visible in catalog)
-                                </label>
-                            </div>
-
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-2 mb-3">
                                 <label for="stock" class="form-label fw-bold">Stock <span class="text-danger">*</span></label>
                                 <input type="number" name="stock" id="stock" class="form-control @error('stock') is-invalid @enderror"
                                        value="{{ old('stock', $product->stock ?? 0) }}" required min="0">
                                 @error('stock') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <div class="form-check form-switch mt-4 pt-1">
+                                    <input type="hidden" name="available" value="0">
+                                    <input class="form-check-input" type="checkbox" role="switch" name="available" id="available" value="1"
+                                        {{ old('available', $product->available ?? true) ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-bold" for="available">
+                                        Available
+                                    </label>
+                                </div>
                             </div>
                         </div>
 

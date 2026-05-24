@@ -54,4 +54,27 @@ class ReportRepositoryTest extends TestCase
         $this->assertCount(3, $reports);
         $this->assertEquals($admin->id, $reports->first()->admin_id);
     }
+
+    #[Test]
+    public function testUpdateStatusChangesReportStatus(): void
+    {
+        $admin = User::factory()->create();
+        $report = Report::create([
+            'admin_id' => $admin->id,
+            'type' => 'sales',
+            'filters' => [
+                'start_date' => '2026-05-01',
+                'end_date' => '2026-05-02',
+            ],
+            'status' => ReportStatus::Pending->value,
+        ]);
+        $repository = app(ReportRepository::class);
+
+        $repository->updateStatus($report, ReportStatus::Completed);
+
+        $this->assertDatabaseHas('reports', [
+            'id' => $report->id,
+            'status' => 'completed',
+        ]);
+    }
 }

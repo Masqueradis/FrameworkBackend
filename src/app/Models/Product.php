@@ -66,4 +66,12 @@ class Product extends Model
     {
         return $this->hasMany(ProductImage::class);
     }
+
+    /**
+     * @return HasMany<Comment, $this>
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

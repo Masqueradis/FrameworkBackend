@@ -12,6 +12,7 @@ use App\Models\ProductImage;
 use App\Repositories\ProductImageRepository;
 use App\Repositories\ProductRepository;
 use App\ValueObjects\Id\CategoryId;
+use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
@@ -117,7 +118,7 @@ readonly class ProductService
         $path = $data->image->store('products', 'minio');
 
         if ($path === false) {
-            throw new \Exception('Failed to upload image to storage.');
+            throw new Exception('Failed to upload image to storage.');
         }
 
         return $this->productImageRepository->createForProduct(
@@ -133,6 +134,7 @@ readonly class ProductService
      * @param array<int, UploadedFile|null>|null $images
      * @param int $startPosition
      * @return void
+     * @throws Exception
      */
     private function handleImages(Product $product, ?array $images, int $startPosition = 0): void
     {

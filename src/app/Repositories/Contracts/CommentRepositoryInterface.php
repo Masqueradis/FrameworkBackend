@@ -33,5 +33,6 @@ interface CommentRepositoryInterface
     /**
      * @return Collection<int, Comment>
      */
-    public function getPendingForModeration(): Collection;
+    public function getPendingCommentsForModeration(): Collection;
+    public function getPendingProductsForModeration(): Collection;
 }

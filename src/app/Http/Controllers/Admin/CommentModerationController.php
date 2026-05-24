@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\ApiController;
 use App\Models\Comment;
+use App\Models\Product;
 use App\Repositories\CommentRepository;
 use App\Repositories\Contracts\CommentRepositoryInterface;
 use App\Services\CommentService;
@@ -20,9 +21,16 @@ class CommentModerationController extends ApiController
 
     public function index(CommentRepositoryInterface $commentRepo): View
     {
-        $comments = $commentRepo->getPendingForModeration();
+        $products = $commentRepo->getPendingProductsForModeration();
 
-        return view('admin.comments.index', compact('comments'));
+        return view('admin.comments.index', compact('products'));
+    }
+
+    public function show(Product $product, CommentRepositoryInterface $commentRepo): View
+    {
+        $comments = $commentRepo->getPendingCommentsForModeration()->where('product_id', $product->id);
+
+        return view('admin.comments.show', compact('product', 'comments'));
     }
 
     public function approve(Comment $comment): RedirectResponse
