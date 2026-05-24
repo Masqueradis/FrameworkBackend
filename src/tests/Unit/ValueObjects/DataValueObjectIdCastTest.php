@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\ValueObjects;
 
 use App\Casts\DataValueObjectIdCast;
 use PHPUnit\Framework\Attributes\Test;

@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\ValueObjects;
 
 use App\Casts\MoneyCast;
-use App\Models\Cart;
 use App\Models\CartItem;
 use App\ValueObjects\Cart\CartQuantity;
 use App\ValueObjects\Cart\Money;
-use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 class CartValueObjectsTest extends TestCase
 {

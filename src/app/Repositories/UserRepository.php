@@ -9,6 +9,7 @@ use App\Enums\UserStatus;
 use App\Models\User;
 use App\ValueObjects\Id\UserId;
 use Illuminate\Support\Collection;
+use phpDocumentor\Reflection\Utils;
 
 class UserRepository
 {
@@ -24,6 +25,16 @@ class UserRepository
     public function create(array $data): User
     {
         return User::create($data);
+    }
+
+    public function update(User $user, array $data): bool
+    {
+        return $user->update($data);
+    }
+
+    public function delete(User $user): bool
+    {
+        return $user->delete();
     }
 
     public function findByEmail(string $email): ?User
