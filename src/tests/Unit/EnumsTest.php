@@ -7,6 +7,8 @@ namespace Tests\Unit;
 use App\Enums\CommentStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -55,5 +57,20 @@ class EnumsTest extends TestCase
 
         $this->assertTrue($status->isRejected());
         $this->assertFalse($status->isPending());
+    }
+
+    #[Test]
+    public function testUserRoleContainsExpectedValues(): void
+    {
+        $this->assertEquals('admin', UserRole::Admin->value);
+        $this->assertEquals('seller', UserRole::Seller->value);
+        $this->assertEquals('customer', UserRole::Customer->value);
+    }
+
+    #[Test]
+    public function testUserStatusContainsExpectedValues(): void
+    {
+        $this->assertEquals('active', UserStatus::Active->value);
+        $this->assertEquals('banned', UserStatus::Banned->value);
     }
 }

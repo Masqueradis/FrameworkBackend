@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use App\Models\User;
 use App\ValueObjects\Id\UserId;
+use Illuminate\Support\Collection;
 
 class UserRepository
 {
@@ -34,5 +37,24 @@ class UserRepository
     public function assignRole(User $user, string|array $role): void
     {
         $user->assignRole($role);
+    }
+
+    public function getByRole(UserRole $role): Collection
+    {
+        return User::role($role->value)->get();
+    }
+
+    public function updateStatus(int $userId, UserStatus $status): bool
+    {
+        return User::where('id', $userId)->update([
+            'status' => $status->value
+        ]) > 0;
+    }
+
+    public function update2faSecret(int $userId, ?string $secret): bool
+    {
+        return User::where('id', $userId)->update([
+            'google2fa_secret' => $secret
+        ]) > 0;
     }
 }
