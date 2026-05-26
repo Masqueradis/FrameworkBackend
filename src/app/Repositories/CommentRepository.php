@@ -8,7 +8,7 @@ use App\Enums\CommentStatus;
 use App\Models\Comment;
 use App\Models\Product;
 use App\Repositories\Contracts\CommentRepositoryInterface;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 class CommentRepository implements CommentRepositoryInterface
 {
@@ -64,5 +64,13 @@ class CommentRepository implements CommentRepositoryInterface
             $query->where('status', CommentStatus::Pending->value);
         }])
         ->get();
+    }
+
+    public function getByUserId(int $userId, array $relations = ['product']): Collection
+    {
+        return Comment::with($relations)
+            ->where('user_id', $userId)
+            ->latest()
+            ->get();
     }
 }

@@ -6,7 +6,7 @@ namespace App\Repositories\Contracts;
 
 use App\Enums\CommentStatus;
 use App\Models\Comment;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 interface CommentRepositoryInterface
 {
@@ -35,4 +35,5 @@ interface CommentRepositoryInterface
      */
     public function getPendingCommentsForModeration(): Collection;
     public function getPendingProductsForModeration(): Collection;
+    public function getByUserId(int $userId, array $relations = ['product']): Collection;
 }

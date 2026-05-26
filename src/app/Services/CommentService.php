@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTO\Comment\CommentDTO;
+use App\DTO\Comment\UpdateCommentDTO;
 use App\Enums\CommentStatus;
 use App\Models\Comment;
 use App\Models\Product;
@@ -15,7 +16,9 @@ readonly class CommentService
 {
     public function __construct(
         private CommentRepositoryInterface $commentRepository,
-    ) {}
+    )
+    {
+    }
 
     public function saveComment(User $user, Product $product, CommentDTO $dto): ?Comment
     {
@@ -36,6 +39,22 @@ readonly class CommentService
             'user_id' => $user->id,
             'product_id' => $product->id,
         ], $payload));
+    }
+
+    public function updateComment(Comment $comment, UpdateCommentDTO $dto): bool
+    {
+        $attributesToUpdate = collect([
+            'content' => $dto->content,
+            'rating' => $dto->rating,
+        ])->filter()->toArray();
+
+        if (empty($attributesToUpdate)) {
+            return false;
+        }
+
+        $attributesToUpdate['status'] = CommentStatus::Pending->value;
+
+        return $this->commentRepository->update($comment, $attributesToUpdate);
     }
 
     public function approve(Comment $comment): void
