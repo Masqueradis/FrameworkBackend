@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Services;
 
 use App\DTO\Comment\CommentDTO;
+use App\DTO\Comment\UpdateCommentDTO;
 use App\Enums\CommentStatus;
 use App\Models\Comment;
 use App\Models\Product;
@@ -119,5 +120,33 @@ class CommentServiceTest extends TestCase
         ->andReturn(true);
 
         $this->service->saveComment($user, $product, $dto);
+    }
+
+    #[Test]
+    public function testUpdateCommentFromProfileResetsStatusToPending(): void
+    {
+        $user = User::factory()->make();
+        $product = Product::factory()->make(['id' => 1]);
+        $comment = new Comment([
+            'id' => 1,
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Old valid content',
+            'rating' => 5,
+            'status' => CommentStatus::Approved->value,
+        ]);
+
+        $dto = new UpdateCommentDTO(content: 'New invalid content', rating: null);
+
+        $this->repositoryMock->shouldReceive('update')
+            ->once()
+            ->with($comment, [
+                'content' => 'New invalid content',
+                'status' => CommentStatus::Pending->value,
+            ])
+            ->andReturn(true);
+
+        $result = $this->service->updateComment($comment, $dto);
+        $this->assertTrue($result);
     }
 }
