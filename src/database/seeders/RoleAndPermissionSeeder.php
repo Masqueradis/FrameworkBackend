@@ -5,21 +5,18 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleAndPermissionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permissions = [
             'manage-all-products',
@@ -37,23 +34,18 @@ class RoleAndPermissionSeeder extends Seeder
         $adminRole = Role::findOrCreate('admin', 'web');
         $adminRole->givePermissionTo(Permission::all());
 
-        $managerRole = Role::findOrCreate('manager', 'web');
-        $managerRole->givePermissionTo([
+        Role::findOrCreate('manager', 'web')->givePermissionTo([
             'manage-all-products',
             'manage-categories',
             'manage-users',
             'assign-seller-role',
         ]);
 
-        $sellerRole = Role::findOrCreate('seller', 'web');
-        $sellerRole->givePermissionTo('manage-own-products');
-
-        $customerRole = Role::findOrCreate('customer', 'web');
+        Role::findOrCreate('seller', 'web')->givePermissionTo('manage-own-products');
+        Role::findOrCreate('customer', 'web');
 
         $admin = User::firstOrCreate(
-            [
-                'email' => 'admin@example.com',
-            ],
+            ['email' => 'admin@example.com'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
@@ -62,15 +54,5 @@ class RoleAndPermissionSeeder extends Seeder
             ]
         );
         $admin->assignRole($adminRole);
-
-        $seller = User::firstOrCreate([
-            'email' => 'seller@example.com',
-        ], [
-            'name' => 'Sidorovich',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-            'remember_token' => Str::random(10),
-        ]);
-        $seller->assignRole($sellerRole);
     }
 }
