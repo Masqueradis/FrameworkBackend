@@ -19,11 +19,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Category::factory()
-            ->count(5)
-            ->has(Product::factory()->count(10))
-            ->create();
-
-        $this->call(RoleAndPermissionSeeder::class);
+        $this->call(UltimateSeeder::class);
     }
 }
