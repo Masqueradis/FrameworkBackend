@@ -53,7 +53,7 @@
                     </a>
                 </li>
             @endcan
-            @if(auth()->user()->hasRole('admin'))
+            @if(auth()->user()->hasRole('admin|manager'))
                 <li class="nav-item mt-3 mb-1 px-2 text-uppercase text-secondary" style="font-size: 0.75rem;">Analytics</li>
                 <li class="nav-item">
                     <a href="{{ route('admin.reports.index') }}"
@@ -63,6 +63,13 @@
                 </li>
 
                 <li class="nav-item mt-3 mb-1 px-2 text-uppercase text-secondary" style="font-size: 0.75rem;">Administration</li>
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.users.index') }}"
+                       class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                        User Management
+                    </a>
+                </li>
 
                 <li class="nav-item">
                     <a href="{{ url('/api/documentation') }}" target="_blank" class="nav-link">

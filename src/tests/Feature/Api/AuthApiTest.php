@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Api;
 
 use App\DTO\User\AuthResultDTO;
+use App\Http\Controllers\AuthController;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\AuthService;
@@ -240,7 +241,7 @@ class AuthApiTest extends TestCase
         $response = $this->actingAs($user)->get('/profile');
 
         $response->assertStatus(Response::HTTP_OK)
-            ->assertViewIs('dashboard');
+            ->assertViewIs('profile.dashboard');
     }
 
     #[Test]
@@ -350,5 +351,43 @@ class AuthApiTest extends TestCase
                 ],
             ]);
         $this->assertNull(Cache::get('pending_email_' . $token));
+    }
+
+    #[Test]
+    public function testLoginApiRequires2faIfSecretIsSet(): void
+    {
+        $password = 'Password123!';
+        $user = User::factory()->create([
+            'password' => Hash::make($password),
+            'google2fa_secret' => 'SECRETKEY1234567'
+        ]);
+
+        $response = $this->postJson(route('login.post'), [
+            'email' => $user->email,
+            'password' => $password,
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('data.require_2fa', true);
+        $response->assertJsonPath('data.user_id', $user->id);
+        $response->assertJsonPath('message', 'Two factor authentication was successful.');
+    }
+
+    #[Test]
+    public function testLoginWebRequires2faIfSecretIsSet(): void
+    {
+        $password = 'Password123!';
+        $user = User::factory()->create([
+            'password' => Hash::make($password),
+            'google2fa_secret' => 'SECRETKEY1234567'
+        ]);
+
+        $response = $this->post(route('login.post'), [
+            'email' => $user->email,
+            'password' => $password,
+        ]);
+
+        $response->assertRedirect(route('login.2fa'));
+        $response->assertSessionHas('2fa:user_id', $user->id);
     }
 }

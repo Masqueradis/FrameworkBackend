@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\CommentRepositoryInterface;
 use App\Services\CommentService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
@@ -148,5 +149,39 @@ class CommentServiceTest extends TestCase
 
         $result = $this->service->updateComment($comment, $dto);
         $this->assertTrue($result);
+    }
+
+    #[Test]
+    public function testUpdateCommentReturnsFalseIfNoAttributesToUpdate(): void
+    {
+        $comment = Comment::factory()->create();
+
+        $dto = UpdateCommentDTO::from(['content' => null, 'rating' => null]);
+
+        $result = $this->service->updateComment($comment, $dto);
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function testGetUserComments(): void
+    {
+        $userId = 1;
+
+        $expectedComments = Collection::make([
+            new Comment(['id' => 1]),
+            new Comment(['id' => 2]),
+            new Comment(['id' => 3]),
+        ]);
+
+        $this->repositoryMock
+            ->shouldReceive('getByUserId')
+            ->once()
+            ->with($userId, ['product'])
+            ->andReturn($expectedComments);
+
+        $result = $this->service->getUserComments($userId);
+
+        $this->assertCount(3, $result);
     }
 }

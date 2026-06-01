@@ -6,7 +6,9 @@ namespace App\Repositories\Contracts;
 
 use App\Enums\CommentStatus;
 use App\Models\Comment;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface CommentRepositoryInterface
 {
@@ -34,6 +36,17 @@ interface CommentRepositoryInterface
      * @return Collection<int, Comment>
      */
     public function getPendingCommentsForModeration(): Collection;
-    public function getPendingProductsForModeration(): Collection;
+
+    /**
+     * @param int $perPage
+     * @return LengthAwarePaginator<int, Product>
+     */
+    public function getPendingProductsForModeration(int $perPage = 15): LengthAwarePaginator;
+
+    /**
+     * @param int $userId
+     * @param array<int, string> $relations
+     * @return Collection<int, Comment>
+     */
     public function getByUserId(int $userId, array $relations = ['product']): Collection;
 }

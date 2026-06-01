@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Permission;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\User;
@@ -24,7 +25,12 @@ class UploadImageTest extends TestCase
 
         $user = User::factory()->create();
 
-        Role::firstOrCreate(['name' => 'seller']);
+        Permission::firstOrCreate(['name' => 'manage-all-products']);
+        $permission = Permission::firstOrCreate(['name' => 'manage-own-products']);
+
+        $role = Role::firstOrCreate(['name' => 'seller']);
+        $role->givePermissionTo($permission);
+
         $user->assignRole('seller');
         $this->actingAs($user);
 
@@ -57,7 +63,12 @@ class UploadImageTest extends TestCase
 
         $user = User::factory()->create();
 
-        Role::firstOrCreate(['name' => 'seller']);
+        Permission::firstOrCreate(['name' => 'manage-all-products']);
+        $permission = Permission::firstOrCreate(['name' => 'manage-own-products']);
+
+        $role = Role::firstOrCreate(['name' => 'seller']);
+        $role->givePermissionTo($permission);
+
         $user->assignRole('seller');
         $this->actingAs($user);
 
@@ -69,7 +80,7 @@ class UploadImageTest extends TestCase
             'image' => $file,
         ]);
 
-        $response->assertStatus(422);
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertInvalid(['image']);
     }
 

@@ -22,7 +22,8 @@ class ProductPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('seller');
+        return $user->hasPermissionTo('manage-all-products') ||
+               $user->hasPermissionTo('manage-own-products');
     }
 
     /**
@@ -30,7 +31,11 @@ class ProductPolicy
      */
     public function view(User $user, Product $product): bool
     {
-        return $user->id === $product->user_id;
+        if ($user->hasPermissionTo('manage-all-products')) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -38,7 +43,8 @@ class ProductPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('seller');
+        return $user->hasPermissionTo('manage-all-products') ||
+               $user->hasPermissionTo('manage-own-products');
     }
 
     /**
@@ -46,7 +52,15 @@ class ProductPolicy
      */
     public function update(User $user, Product $product): bool
     {
-        return $user->id === $product->user_id;
+        if ($user->hasPermissionTo('manage-all-products')) {
+            return true;
+        }
+
+        if ($user->hasPermissionTo('manage-own-products')) {
+            return $user->id === $product->user_id;
+        }
+
+        return false;
     }
 
     /**
@@ -54,7 +68,15 @@ class ProductPolicy
      */
     public function delete(User $user, Product $product): bool
     {
-        return $user->id === $product->user_id;
+        if ($user->hasPermissionTo('manage-all-products')) {
+            return true;
+        }
+
+        if ($user->hasPermissionTo('manage-own-products')) {
+            return $user->id === $product->user_id;
+        }
+
+        return false;
     }
 
     /**

@@ -119,217 +119,208 @@
 
             </div>
         </div>
-    <div class="row mt-5">
-        <div class="col-12">
-            <hr class="mb-5">
-            <h4 class="fw-bold mb-4">Customer Reviews</h4>
 
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
+        <div class="row mt-5">
+            <div class="col-12">
+                <hr class="mb-5">
 
-            @auth
-                <div class="card shadow-sm border-0 bg-light mb-5">
-                    <div class="card-body p-4">
-                        <h5 class="card-title fw-bold mb-3">
-                            {{ $userComment ? 'Edit Your Review' : 'Write a Review' }}
-                        </h5>
+                <h4 class="fw-bold mb-4">Your Review</h4>
 
-                        @if($userComment && $userComment->status->isPending())
-                            <div class="alert alert-warning py-2 mb-3">
-                                Your current review is pending moderation. You can update it below.
-                            </div>
-                        @endif
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
 
-                        <form action="{{ route('comments.store', ['product' => $product->id]) }}" method="POST" id="comment-form">
-                            @csrf
-
-                            <div class="mb-3">
-                                <label class="form-label fw-bold text-muted d-block">Product Rating <span class="text-danger">*</span></label>
-
-                                <div class="star-rating position-relative">
-                                    <input type="radio" id="star5" name="rating" value="5" required {{ old('rating', $userComment?->rating) == 5 ? 'checked' : '' }} />
-                                    <label for="star5" title="5 - Excellent">★</label>
-
-                                    <input type="radio" id="star4" name="rating" value="4" {{ old('rating', $userComment?->rating) == 4 ? 'checked' : '' }} />
-                                    <label for="star4" title="4 - Good">★</label>
-
-                                    <input type="radio" id="star3" name="rating" value="3" {{ old('rating', $userComment?->rating) == 3 ? 'checked' : '' }} />
-                                    <label for="star3" title="3 - Average">★</label>
-
-                                    <input type="radio" id="star2" name="rating" value="2" {{ old('rating', $userComment?->rating) == 2 ? 'checked' : '' }} />
-                                    <label for="star2" title="2 - Poor">★</label>
-
-                                    <input type="radio" id="star1" name="rating" value="1" {{ old('rating', $userComment?->rating) == 1 ? 'checked' : '' }} />
-                                    <label for="star1" title="1 - Terrible">★</label>
-                                </div>
-
-                                @error('rating')
-                                <div class="text-danger small mt-1 fw-bold">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="content" class="form-label fw-bold text-muted">Your Review <span class="text-danger">*</span></label>
-                                <textarea name="content" id="content" rows="4"
-                                          class="form-control @error('content') is-invalid @enderror"
-                                          placeholder="Tell us what you liked or disliked about this product..."
-                                          required>{{ old('content', $userComment?->content) }}</textarea>
-                                @error('content')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </form> <div class="d-flex align-items-center gap-3 mt-3">
-                            <button type="submit" form="comment-form" class="btn btn-primary fw-bold px-4">
-                                {{ $userComment ? 'Update Review' : 'Submit for Moderation' }}
-                            </button>
-
-                            @if($userComment)
-                                <form action="{{ route('comments.destroy', $userComment) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete your review?');" class="m-0">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-outline-danger fw-bold px-4">
-                                        Delete Review
-                                    </button>
-                                </form>
-                            @endif
+                @if(!auth()->check())
+                    <div class="alert alert-secondary d-flex align-items-center mb-5" role="alert">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle-fill me-3 text-secondary" viewBox="0 0 16 16">
+                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                        </svg>
+                        <div>
+                            Please <a href="{{ route('login') }}" class="alert-link">log in</a> or <a href="{{ route('register') }}" class="alert-link">register</a> to leave a review.
                         </div>
                     </div>
-                </div>
-            @else
-                <div class="alert alert-secondary d-flex align-items-center mb-5" role="alert">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle-fill me-3 text-secondary" viewBox="0 0 16 16">
-                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                    </svg>
-                    <div>
-                        Please <a href="{{ route('login') }}" class="alert-link">log in</a> or <a href="{{ route('register') }}" class="alert-link">register</a> to leave a review.
+                @elseif(auth()->user()->status === \App\Enums\UserStatus::Banned)
+                    <div class="alert alert-danger d-flex align-items-center mb-5" role="alert">
+                        <div>
+                            <strong>Account Restricted.</strong> You cannot leave or edit reviews.
+                        </div>
                     </div>
-                </div>
-            @endauth
+                @elseif(!$userComment)
+                    <div class="mb-5">
+                        <button type="button" class="btn btn-primary fw-bold px-4" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                            Write a Review
+                        </button>
+                    </div>
+                @endif
 
-            <div class="mt-5">
-                <h5 class="fw-bold mb-4">Reviews ({{ $comments->count() }})</h5>
+                <div class="mt-4">
+                    @if($userComment)
+                        <div class="card mb-5 border-dark shadow-sm bg-white">
+                            <div class="card-header bg-white border-bottom border-dark text-dark d-flex justify-content-between align-items-center py-3">
 
-                @forelse($comments as $comment)
-                    <div class="card mb-3 border-0 shadow-sm bg-white">
-                        <div class="card-body p-4">
-
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="fw-bold mb-0 d-flex align-items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle me-2 text-secondary" viewBox="0 0 16 16">
-                                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-                                        <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
-                                    </svg>
-                                    {{ $comment->user->name }}
-                                </h6>
-
-                                <div class="d-flex align-items-center gap-3">
-                                    <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
-
-                                    @if(auth()->check() && auth()->user()->hasRole('admin'))
-                                        <form action="{{ route('admin.comments.destroy', $comment) }}" method="POST" onsubmit="return confirm('Delete this comment as Administrator?');" class="m-0">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Delete Review">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
-                                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
-                                                </svg>
-                                            </button>
-                                        </form>
+                                <div class="d-flex align-items-center">
+                                    @if(auth()->user()->avatar_path)
+                                        <img src="{{ Storage::disk('minio')->url(auth()->user()->avatar_path) }}" alt="Avatar" class="rounded-circle me-2 border border-dark-subtle" style="width: 32px; height: 32px; object-fit: cover;">
+                                    @else
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-person-circle me-2 text-secondary" viewBox="0 0 16 16">
+                                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                                        </svg>
                                     @endif
+                                    <span class="fw-bold fs-5">My Review</span>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2">
+                                    @if($userComment->status === \App\Enums\CommentStatus::Approved)
+                                        <span class="badge bg-success fw-bold me-2">Approved</span>
+                                    @elseif($userComment->status === \App\Enums\CommentStatus::Pending)
+                                        <span class="badge bg-warning text-dark fw-bold me-2">Pending</span>
+                                    @else
+                                        <span class="badge bg-danger fw-bold me-2">Rejected</span>
+                                    @endif
+
+                                    <button type="button" class="btn btn-sm btn-outline-primary fw-bold" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                                        Edit
+                                    </button>
+
+                                    <form action="{{ route('comments.destroy', $userComment) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete your review?');" class="m-0">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Delete</button>
+                                    </form>
                                 </div>
                             </div>
+                            <div class="card-body p-4">
+                                <div class="mb-3">
+                                    <span class="badge bg-warning text-dark fs-6 border border-warning-subtle">★ {{ $userComment->rating }} / 5</span>
+                                </div>
+                                <p class="mb-0 text-dark fs-6" style="white-space: pre-line;">{{ $userComment->content }}</p>
+                            </div>
+                        </div>
 
-                            <div class="mb-2">
-                                <span class="badge bg-warning text-dark fs-6">
+                        @include('partials.review-modal', [
+                            'id' => 'reviewModal',
+                            'action' => route('comments.store', ['product' => $product->id]),
+                            'method' => 'POST',
+                            'comment' => $userComment,
+                            'title' => 'Edit Your Review'
+                        ])
+                    @elseif(auth()->check())
+                        @include('partials.review-modal', [
+                            'id' => 'reviewModal',
+                            'action' => route('comments.store', ['product' => $product->id]),
+                            'method' => 'POST',
+                            'comment' => null,
+                            'title' => 'Write a Review'
+                        ])
+                    @endif
+
+                    <h5 class="fw-bold mb-4">Customer Reviews</h5>
+
+                    @forelse($comments as $comment)
+                        <div class="card mb-4 border-0 shadow-sm bg-white">
+                            <div class="card-body p-4">
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold mb-0 d-flex align-items-center text-dark">
+                                        @if($comment->user->avatar_path)
+                                            <img src="{{ Storage::disk('minio')->url($comment->user->avatar_path) }}" alt="Avatar" class="rounded-circle me-2 border border-dark-subtle" style="width: 24px; height: 24px; object-fit: cover;">
+                                        @else
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-circle me-2 text-secondary" viewBox="0 0 16 16">
+                                                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                                            </svg>
+                                        @endif
+                                        {{ $comment->user->name }}
+                                    </h6>
+
+                                    <div class="d-flex align-items-center gap-3">
+                                        <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
+
+                                        @if(auth()->check() && auth()->user()->hasRole('admin'))
+                                            <form action="{{ route('admin.comments.destroy', $comment) }}" method="POST" onsubmit="return confirm('Delete this comment as Administrator?');" class="m-0">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Delete Review">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                                                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                <span class="badge bg-warning text-dark fs-6 border border-warning-subtle">
                                     ★ {{ $comment->rating }} / 5
                                 </span>
+                                </div>
+
+                                <p class="mb-0 text-dark fs-6" style="white-space: pre-line;">{{ $comment->content }}</p>
+
                             </div>
-
-                            <p class="mb-0 text-dark" style="white-space: pre-line;">{{ $comment->content }}</p>
-
                         </div>
-                    </div>
-                @empty
-                    <div class="text-center py-5 bg-light rounded border text-muted">
-                        No reviews yet. Be the first to share your thoughts!
-                    </div>
-                @endforelse
+                    @empty
+                        @if(!$userComment)
+                            <div class="text-center py-5 bg-light rounded border text-muted">
+                                No reviews yet. Be the first to share your thoughts!
+                            </div>
+                        @else
+                            <div class="text-muted mb-4">No other reviews yet.</div>
+                        @endif
+                    @endforelse
+                </div>
             </div>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-    <style>
-        .thumbSwiper .swiper-slide-thumb-active {
-            opacity: 1 !important;
-            border: 2px solid #0d6efd !important;
-        }
-
-        .star-rating {
-            display: inline-flex;
-            flex-direction: row-reverse;
-            justify-content: flex-end;
-            font-size: 2.5rem;
-            line-height: 1;
-        }
-
-        .star-rating input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-
-        .star-rating label {
-            color: #e4e5e9;
-            cursor: pointer;
-            transition: color 0.2s ease-in-out;
-            padding-right: 5px;
-        }
-
-        .star-rating input:checked ~ label,
-        .star-rating label:hover,
-        .star-rating label:hover ~ label {
-            color: #ffc107;
-        }
-
-        .star-rating label:active {
-            transform: scale(0.9);
-        }
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var thumbSwiperContainer = document.querySelector(".thumbSwiper");
-            var thumbSwiper = null;
-
-            if (thumbSwiperContainer) {
-                thumbSwiper = new Swiper(".thumbSwiper", {
-                    spaceBetween: 10,
-                    slidesPerView: 4,
-                    freeMode: true,
-                    watchSlidesProgress: true,
-                });
+        <style>
+            .thumbSwiper .swiper-slide-thumb-active {
+                opacity: 1 !important;
+                border: 2px solid #0d6efd !important;
             }
+        </style>
 
-            if (document.querySelector(".mainSwiper")) {
-                new Swiper(".mainSwiper", {
-                    spaceBetween: 10,
-                    navigation: {
-                        nextEl: ".swiper-button-next",
-                        prevEl: ".swiper-button-prev",
-                    },
-                    thumbs: {
-                        swiper: thumbSwiper,
-                    },
-                });
-            }
-        });
-    </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var thumbSwiperContainer = document.querySelector(".thumbSwiper");
+                var thumbSwiper = null;
+
+                if (thumbSwiperContainer) {
+                    thumbSwiper = new Swiper(".thumbSwiper", {
+                        spaceBetween: 10,
+                        slidesPerView: 4,
+                        freeMode: true,
+                        watchSlidesProgress: true,
+                    });
+                }
+
+                if (document.querySelector(".mainSwiper")) {
+                    new Swiper(".mainSwiper", {
+                        spaceBetween: 10,
+                        navigation: {
+                            nextEl: ".swiper-button-next",
+                            prevEl: ".swiper-button-prev",
+                        },
+                        thumbs: {
+                            swiper: thumbSwiper,
+                        },
+                    });
+                }
+
+                @if($errors->has('rating') || $errors->has('content'))
+                var reviewModalElement = document.getElementById('reviewModal');
+                if (reviewModalElement) {
+                    var reviewModal = new bootstrap.Modal(reviewModalElement);
+                    reviewModal.show();
+                }
+                @endif
+            });
+        </script>
 @endsection

@@ -24,7 +24,7 @@ class ReportController extends ApiController
 
     public function index(): View
     {
-        $reports = $this->reportRepository->getByAdmin(auth()->id());
+        $reports = $this->reportRepository->getByAdmin((int) auth()->id());
 
         return view('admin.reports.index', compact('reports'));
     }
@@ -33,14 +33,14 @@ class ReportController extends ApiController
     {
         $dto = RequestReportDTO::from($request->all());
 
-        $this->reportService->requestGeneration(auth()->id(), $dto);
+        $this->reportService->requestGeneration((int) auth()->id(), $dto);
 
         return back()->with('success', 'Report send to generation queue.');
     }
 
     public function download(Report $report): StreamedResponse
     {
-        $filePath = $this->reportService->getDownloadPath($report, auth()->id());
+        $filePath = $this->reportService->getDownloadPath($report, (int) auth()->id());
 
         return Storage::disk('minio')->download($filePath);
     }

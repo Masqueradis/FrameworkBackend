@@ -42,6 +42,19 @@ class EnsureUserIsNotBannedTest extends TestCase
         $response = $this->actingAs($user)->postJson('/_test/comments');
 
         $response->assertForbidden();
-        $response->assertJsonPath('message', 'You are banned.');
+        $response->assertJsonPath('message', 'Your account is restricted. You cannot perform this action.');
+    }
+
+    #[Test]
+    public function testBannedUserRedirectsBackWithAlertOnWebRequest(): void
+    {
+        $user = User::factory()->create(['status' => UserStatus::Banned]);
+
+        $response = $this->actingAs($user)
+            ->from('/profile')
+            ->post('/_test/comments');
+
+        $response->assertRedirect('/profile');
+        $response->assertSessionHas('error_alert', 'Your account is restricted. You cannot post reviews.');
     }
 }

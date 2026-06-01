@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use OpenApi\Attributes as OA;
 use App\DTO\Product\ProductSaveDTO;
 use App\DTO\Product\UploadImageDTO;
 use App\Models\Product;
@@ -72,6 +73,75 @@ readonly class AdminProductController implements HasMiddleware
             ->with('success', 'Product deleted successfully.');
     }
 
+    #[OA\Post(
+        path: '/admin/products/{product}/images',
+        description: 'Accepts an image file and attaches it to the specified product.',
+        summary: 'Upload an image for a product',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['image'],
+                    properties: [
+                        new OA\Property(
+                            property: 'image',
+                            description: 'Image file (JPEG, PNG, up to 2MB)',
+                            type: 'string',
+                            format: 'binary'
+                        )
+                    ]
+                )
+            )
+        ),
+        tags: ['Admin Products'],
+        parameters: [
+            new OA\Parameter(
+                name: 'product',
+                description: 'Product ID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer', example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Image uploaded successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'message', type: 'string', example: 'Image added successfully.'),
+                        new OA\Property(
+                            property: 'image',
+                            properties: [
+                                new OA\Property(property: 'id', type: 'integer', example: 5),
+                                new OA\Property(property: 'product_id', type: 'integer', example: 1),
+                                new OA\Property(property: 'path', type: 'string', example: 'products/images/xyz123.jpg')
+                            ],
+                            type: 'object'
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthorized (missing or invalid token)'
+            ),
+            new OA\Response(
+                response: 403,
+                description: 'Forbidden (e.g., user lacks required permissions)'
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Product with the specified ID not found'
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'Validation error (e.g., file too large or invalid format)'
+            )
+        ]
+    )]
     public function uploadImage(Product $product, UploadImageDTO $data): JsonResponse
     {
         $image = $this->productService->addImage($product, $data);

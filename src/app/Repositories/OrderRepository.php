@@ -10,6 +10,7 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\ValueObjects\Cart\Money;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -75,7 +76,7 @@ class OrderRepository implements OrderRepositoryInterface
         return $order->payments()->create($paymentData);
     }
 
-    public function updateStatus(Order $order, OrderStatus $status): bool
+    public function updateStatus(Order $order, string $status): bool
     {
         return $order->update(['status' => $status]);
     }
@@ -84,5 +85,12 @@ class OrderRepository implements OrderRepositoryInterface
     {
         Order::whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->chunk($chunkSize, $callback);
+    }
+
+    public function getPaginatedUserOrders(int $userId, int $perPage = 5): LengthAwarePaginator
+    {
+        return Order::where('user_id', $userId)
+            ->latest()
+            ->paginate($perPage);
     }
 }

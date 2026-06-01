@@ -76,4 +76,9 @@ class CategoryRepository
 
         return $query->get();
     }
+
+    public function countAll(): int
+    {
+        return Category::count();
+    }
 }

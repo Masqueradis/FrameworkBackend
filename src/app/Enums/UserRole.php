@@ -9,4 +9,5 @@ enum UserRole:string
     case Admin = 'admin';
     case Seller = 'seller';
     case Customer = 'customer';
+    case Manager = 'manager';
 }

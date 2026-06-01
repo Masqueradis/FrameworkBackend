@@ -14,9 +14,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
-    /** @use HasFactory<CategoryFactory> */
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'customer_name',
