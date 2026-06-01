@@ -111,22 +111,4 @@ class CommentModerationControllerTest extends TestCase
             'id' => $comment->id,
         ]);
     }
-
-    #[Test]
-    public function testAdminCanViewProductCommentsForModeration(): void
-    {
-        $user = User::factory()->create();
-        $product = Product::factory()->create();
-        Comment::factory()->create([
-            'product_id' => $product->id,
-            'status' => CommentStatus::Pending->value,
-        ]);
-
-        $response = $this->actingAs($this->admin)
-            ->get(route('admin.comments.show', $product));
-
-        $response->assertStatus(Response::HTTP_OK);
-        $response->assertViewIs('admin.comments.show');
-        $response->assertViewHasAll(['product', 'comments']);
-    }
 }

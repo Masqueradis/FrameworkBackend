@@ -40,14 +40,27 @@
 
                 @auth
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle fw-bold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Hello, {{ auth()->user()->name }}
+                        <a class="nav-link dropdown-toggle fw-bold d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+
+                            @if(auth()->user()->avatar_path)
+                                <img src="{{ Storage::disk('minio')->url(auth()->user()->avatar_path) }}" alt="Avatar" class="rounded-circle shadow-sm me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                            @else
+                                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm me-2" style="width: 30px; height: 30px; font-size: 14px; font-weight: bold;">
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                </div>
+                            @endif
+
+                            <span>{{ auth()->user()->name }}</span>
+
                             @if(auth()->user()->hasRole('admin'))
-                                <span class="badge bg-danger ms-1">Admin</span>
+                                <span class="badge bg-danger ms-2">Admin</span>
                             @elseif(auth()->user()->hasRole('seller'))
-                                <span class="badge bg-warning ms-1 text-dark">Seller</span>
+                                <span class="badge bg-warning text-dark ms-2">Seller</span>
+                            @elseif(auth()->user()->hasRole('manager'))
+                                <span class="badge bg-warning text-dark ms-2">Manager</span>
                             @endif
                         </a>
+
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <li>
                                 <a class="dropdown-item" href="{{ url('/profile') }}">Profile</a>

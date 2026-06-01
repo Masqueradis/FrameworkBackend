@@ -59,14 +59,11 @@ readonly class CartService
         $item = $this->cartRepository->findItemById($cart, $data->cartItemId);
         $product = $item->product;
 
-        if(!$product) {
-            throw ValidationException::withMessages(['product' => 'Product no longer exists.']);
-        }
-        if($product->stock < $data->quantity) {
+        if($product?->stock < $data->quantity) {
             throw ValidationException::withMessages(['quantity' => 'Not enough stock available.']);
         }
 
-        $this->cartRepository->addOrUpdateItem($cart, (int) $product->id, $data->quantity, $item->price);
+        $this->cartRepository->addOrUpdateItem($cart, (int) $product?->id, $data->quantity, $item->price);
     }
 
     public function removeItem(int $cartItemId): void

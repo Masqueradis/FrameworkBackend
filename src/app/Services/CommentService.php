@@ -5,17 +5,22 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTO\Comment\CommentDTO;
+use App\DTO\Comment\UpdateCommentDTO;
 use App\Enums\CommentStatus;
 use App\Models\Comment;
 use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\CommentRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 readonly class CommentService
 {
     public function __construct(
         private CommentRepositoryInterface $commentRepository,
-    ) {}
+    )
+    {
+    }
 
     public function saveComment(User $user, Product $product, CommentDTO $dto): ?Comment
     {
@@ -38,6 +43,22 @@ readonly class CommentService
         ], $payload));
     }
 
+    public function updateComment(Comment $comment, UpdateCommentDTO $dto): bool
+    {
+        $attributesToUpdate = collect([
+            'content' => $dto->content,
+            'rating' => $dto->rating,
+        ])->filter()->toArray();
+
+        if (empty($attributesToUpdate)) {
+            return false;
+        }
+
+        $attributesToUpdate['status'] = CommentStatus::Pending->value;
+
+        return $this->commentRepository->update($comment, $attributesToUpdate);
+    }
+
     public function approve(Comment $comment): void
     {
         $this->commentRepository->updateStatus($comment, CommentStatus::Approved);
@@ -53,4 +74,21 @@ readonly class CommentService
         $this->commentRepository->delete($comment);
     }
 
+    /**
+     * @param int $userId
+     * @return Collection<int, Comment>
+     */
+    public function getUserComments(int $userId): Collection
+    {
+        return $this->commentRepository->getByUserId($userId, ['product']);
+    }
+
+    /**
+     * @param int $perPage
+     * @return LengthAwarePaginator<int, Product>
+     */
+    public function getProductsWithPendingComments(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->commentRepository->getPendingProductsForModeration($perPage);
+    }
 }

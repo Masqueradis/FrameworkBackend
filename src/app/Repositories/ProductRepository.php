@@ -84,7 +84,7 @@ class ProductRepository
         /** @var User $user */
         $user = auth()->user();
 
-        if (!$user->hasRole('admin')) {
+        if (!$user->hasRole(['admin', 'manager']) || !$user->hasPermissionTo('manage-all-products')) {
             $query->where('user_id', auth()->id());
         }
 
@@ -94,5 +94,15 @@ class ProductRepository
     public function chunkAllProducts(int $chunkSize, callable $callback): void
     {
         Product::chunk($chunkSize, $callback);
+    }
+
+    public function countAll(): int
+    {
+        return Product::count();
+    }
+
+    public function countByUserId(int $userId): int
+    {
+        return Product::where('user_id', $userId)->count();
     }
 }

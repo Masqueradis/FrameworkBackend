@@ -7,6 +7,7 @@ namespace Tests\Feature\Controllers;
 use App\Enums\CommentStatus;
 use App\Models\Category;
 use App\Models\Comment;
+use App\Models\Permission;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\User;
@@ -27,13 +28,19 @@ class AdminProductControllerTest extends TestCase
     {
         parent::setUp();
 
+        Permission::firstOrCreate(['name' => 'manage-all-products']);
+        Permission::firstOrCreate(['name' => 'manage-own-products']);
+
         $this->admin = User::factory()->create();
-        Role::firstOrCreate(['name' => 'admin']);
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $adminRole->givePermissionTo('manage-all-products');
         $this->admin->assignRole('admin');
+
         $this->category = Category::factory()->create();
 
         $this->seller = User::factory()->create();
-        Role::firstOrCreate(['name' => 'seller']);
+        $sellerRole = Role::firstOrCreate(['name' => 'seller']);
+        $sellerRole->givePermissionTo('manage-own-products');
         $this->seller->assignRole('seller');
     }
 

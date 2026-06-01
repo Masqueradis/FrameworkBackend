@@ -16,7 +16,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
-use App\Services\CheckoutService;
+use App\Services\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
@@ -31,7 +31,7 @@ class CheckoutServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->checkoutService = $this->app->make(CheckoutService::class);
+        $this->checkoutService = $this->app->make(OrderService::class);
     }
 
     #[Test]
@@ -108,7 +108,7 @@ class CheckoutServiceTest extends TestCase
             'status' => PaymentStatus::Paid
         ]);
 
-        $this->assertEquals(OrderStatus::Processing, $order->fresh()->status);
+        $this->assertEquals(OrderStatus::Completed, $order->fresh()->status);
         $this->assertEquals(8, $product->fresh()->stock);
     }
 

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Admin\AdminCategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\AdminProductController as AdminProductController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\CommentModerationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\TwoFactorController;
+use App\Http\Controllers\UserReviewController;
 use App\Http\Controllers\Web\CartController;
 use App\Http\Controllers\Web\CatalogController;
 use App\Http\Controllers\Web\CommentController;
@@ -33,6 +36,9 @@ Route::middleware('guest')->controller(AuthController::class)->group(function ()
     Route::get('/register', 'showRegisterForm')->name('register');
     Route::post('/register', 'register')->name('register.post');
     Route::get('/verify/{token}', 'verifyEmail')->name('verification.verify.custom');
+
+    Route::get('/login/2fa', [TwoFactorController::class, 'showVerifyForm'])->name('login.2fa');
+    Route::post('/login/2fa', [TwoFactorController::class, 'verifyLogin'])->name('login.2fa.post');
 });
 
 Route::prefix('cart')->name('cart.')->group(function () {
@@ -57,11 +63,28 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('/profile/avatar', [ProfileController::class, 'destroyAvatar'])->name('profile.avatar.destroy');
 
-    Route::post('/products/{product}/comments', [CommentController::class, 'store'])->name('comments.store');
-    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::get('/profile/reviews', [UserReviewController::class, 'index'])->name('profile.reviews.index');
+    Route::patch('/profile/reviews/{comment}', [UserReviewController::class, 'update'])
+        ->middleware('not.banned')
+        ->name('profile.reviews.update');
 
-    Route::prefix('admin')->middleware('can:access-panel')->group(function () {
+    Route::post('/2fa/generate', [TwoFactorController::class, 'generate'])->name('2fa.generate');
+    Route::post('/2fa/enable', [TwoFactorController::class, 'enable'])->name('2fa.enable');
+    Route::delete('/2fa/disable', [TwoFactorController::class, 'disable'])->name('2fa.disable');
+
+    Route::post('/products/{product}/comments', [CommentController::class, 'store'])
+        ->middleware(['auth', 'not.banned'])
+        ->name('comments.store');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
+        ->middleware(['auth', 'not.banned'])
+        ->name('comments.destroy');
+
+    Route::prefix('admin')->middleware('role:admin|manager|seller')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::resource('categories', AdminCategoryController::class)
@@ -74,9 +97,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/products/{product}/images', [AdminProductController::class, 'uploadImage'])
             ->name('admin.products.images.upload');
 
-        Route::middleware('role:admin')->group(function () {
+        Route::middleware('can:manage-users')->group(function () {
+            Route::prefix('users')->name('admin.users.')->group(function () {
+                Route::get('/', [AdminUserController::class, 'index'])->name('index');
+                Route::patch('/{user}/ban', [AdminUserController::class, 'ban'])->name('ban');
+                Route::patch('/{user}/unban', [AdminUserController::class, 'unban'])->name('unban');
+                Route::patch('/{user}/assign-role', [AdminUserController::class, 'assignRole'])->name('assign-role');
+            });
+
             Route::get('/comments', [CommentModerationController::class, 'index'])->name('admin.comments.index');
-            Route::get('/comments/product/{product}', [CommentModerationController::class, 'show'])->name('admin.comments.show');
             Route::patch('comments/{comment}/approve', [CommentModerationController::class, 'approve'])
                 ->name('admin.comments.approve');
             Route::patch('/comments/{comment}/reject', [CommentModerationController::class, 'reject'])

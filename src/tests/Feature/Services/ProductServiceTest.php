@@ -9,9 +9,10 @@ use App\DTO\Product\ProductSaveDTO;
 use App\DTO\Product\UploadImageDTO;
 use App\Events\OrderCreated;
 use App\Models\Category;
+use App\Models\Permission;
 use App\Models\Product;
 use App\Models\User;
-use App\Services\CheckoutService;
+use App\Services\OrderService;
 use App\Services\ProductService;
 use App\ValueObjects\Id\CategoryId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -119,9 +120,15 @@ class ProductServiceTest extends TestCase
     public function testReturnsPaginatedProductsForAdminWithRelations(): void
     {
         Product::query()->delete();
+
+        Permission::firstOrCreate(['name' => 'manage-all-products']);
+
         $admin = User::factory()->create();
         Role::firstOrCreate(['name' => 'admin']);
         $admin->assignRole('admin');
+
+        $admin->givePermissionTo('manage-all-products');
+
         $this->actingAs($admin);
 
         $category = Category::factory()->create();

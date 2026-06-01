@@ -19,18 +19,11 @@ class CommentModerationController extends ApiController
         private readonly CommentService $commentService,
     ) {}
 
-    public function index(CommentRepositoryInterface $commentRepo): View
+    public function index(): View
     {
-        $products = $commentRepo->getPendingProductsForModeration();
+        $products = $this->commentService->getProductsWithPendingComments(15);
 
         return view('admin.comments.index', compact('products'));
-    }
-
-    public function show(Product $product, CommentRepositoryInterface $commentRepo): View
-    {
-        $comments = $commentRepo->getPendingCommentsForModeration()->where('product_id', $product->id);
-
-        return view('admin.comments.show', compact('product', 'comments'));
     }
 
     public function approve(Comment $comment): RedirectResponse

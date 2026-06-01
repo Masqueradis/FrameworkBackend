@@ -8,7 +8,8 @@ use App\Enums\CommentStatus;
 use App\Models\Comment;
 use App\Models\Product;
 use App\Repositories\Contracts\CommentRepositoryInterface;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CommentRepository implements CommentRepositoryInterface
 {
@@ -55,14 +56,22 @@ class CommentRepository implements CommentRepositoryInterface
             ->get();
     }
 
-    public function getPendingProductsForModeration(): Collection
+    public function getPendingProductsForModeration(int $perPage = 15): LengthAwarePaginator
     {
         return Product::whereHas('comments', function ($query) {
             $query->where('status', CommentStatus::Pending->value);
         })
-        ->withCount(['comments as pending_count' => function ($query) {
-            $query->where('status', CommentStatus::Pending->value);
-        }])
-        ->get();
+            ->with(['comments' => function ($query) {
+                $query->where('status', CommentStatus::Pending->value)->with('user');
+            }])
+            ->paginate($perPage);
+    }
+
+    public function getByUserId(int $userId, array $relations = ['product']): Collection
+    {
+        return Comment::with($relations)
+            ->where('user_id', $userId)
+            ->latest()
+            ->get();
     }
 }

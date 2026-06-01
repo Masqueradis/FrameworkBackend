@@ -2,20 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\Services;
 
 use App\DTO\Comment\CommentDTO;
+use App\DTO\Comment\UpdateCommentDTO;
 use App\Enums\CommentStatus;
 use App\Models\Comment;
 use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\CommentRepositoryInterface;
 use App\Services\CommentService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class CommentServiceTest extends TestCase
 {
@@ -119,5 +121,67 @@ class CommentServiceTest extends TestCase
         ->andReturn(true);
 
         $this->service->saveComment($user, $product, $dto);
+    }
+
+    #[Test]
+    public function testUpdateCommentFromProfileResetsStatusToPending(): void
+    {
+        $user = User::factory()->make();
+        $product = Product::factory()->make(['id' => 1]);
+        $comment = new Comment([
+            'id' => 1,
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Old valid content',
+            'rating' => 5,
+            'status' => CommentStatus::Approved->value,
+        ]);
+
+        $dto = new UpdateCommentDTO(content: 'New invalid content', rating: null);
+
+        $this->repositoryMock->shouldReceive('update')
+            ->once()
+            ->with($comment, [
+                'content' => 'New invalid content',
+                'status' => CommentStatus::Pending->value,
+            ])
+            ->andReturn(true);
+
+        $result = $this->service->updateComment($comment, $dto);
+        $this->assertTrue($result);
+    }
+
+    #[Test]
+    public function testUpdateCommentReturnsFalseIfNoAttributesToUpdate(): void
+    {
+        $comment = Comment::factory()->create();
+
+        $dto = UpdateCommentDTO::from(['content' => null, 'rating' => null]);
+
+        $result = $this->service->updateComment($comment, $dto);
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function testGetUserComments(): void
+    {
+        $userId = 1;
+
+        $expectedComments = Collection::make([
+            new Comment(['id' => 1]),
+            new Comment(['id' => 2]),
+            new Comment(['id' => 3]),
+        ]);
+
+        $this->repositoryMock
+            ->shouldReceive('getByUserId')
+            ->once()
+            ->with($userId, ['product'])
+            ->andReturn($expectedComments);
+
+        $result = $this->service->getUserComments($userId);
+
+        $this->assertCount(3, $result);
     }
 }

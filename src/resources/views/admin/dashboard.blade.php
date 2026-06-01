@@ -7,7 +7,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm border-0 bg-primary text-white h-100">
                 <div class="card-body d-flex flex-column justify-content-center align-items-center py-4">
-                    <h6 class="text-uppercase mb-2 opacity-75">{{ auth()->user()->hasRole('admin') ? 'Total Products' : 'My Products' }}</h6>
+                    <h6 class="text-uppercase mb-2 opacity-75">{{ auth()->user()->hasRole(['admin', 'manager']) ? 'Total Products' : 'My Products' }}</h6>
                     <h2 class="display-5 fw-bold mb-0">{{ $productsCount }}</h2>
                 </div>
             </div>

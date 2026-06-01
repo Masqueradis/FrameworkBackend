@@ -33,7 +33,8 @@ class ProductApiTest extends TestCase
         $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'web']);
         $customerRole = Role::create(['name' => 'customer', 'guard_name' => 'web']);
 
-        $editProductsPermission = Permission::create(['name' => 'manage all products', 'guard_name' => 'web']);
+        $editProductsPermission = Permission::create(['name' => 'manage-all-products', 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage-own-products', 'guard_name' => 'web']);
         $editCatalogPermission = Permission::create(['name' => 'edit-catalog', 'guard_name' => 'web']);
 
         $adminRole->givePermissionTo($editProductsPermission);

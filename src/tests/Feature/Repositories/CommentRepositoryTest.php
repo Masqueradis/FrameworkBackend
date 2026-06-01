@@ -144,4 +144,29 @@ class CommentRepositoryTest extends TestCase
             'rating' => 5,
         ]);
     }
+
+    #[Test]
+    public function testGetByUserIdReturnsCommentsWithRelations(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create();
+
+        Comment::factory()->create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'status' => CommentStatus::Approved->value,
+        ]);
+
+        $repository = new CommentRepository();
+        $comments = $repository->getByUserId($user->id);
+
+        $this->assertCount(1, $comments);
+
+        $firstComment = $comments->first();
+
+        $this->assertInstanceOf(Comment::class, $firstComment);
+
+        $this->assertTrue($firstComment->relationLoaded('product'));
+        $this->assertEquals($user->id, $firstComment->user_id);
+    }
 }

@@ -8,6 +8,8 @@ use App\Enums\OrderStatus;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 interface OrderRepositoryInterface
@@ -31,6 +33,13 @@ interface OrderRepositoryInterface
      * @return Payment
      */
     public function addPayment(Order $order, array $paymentData): Payment;
-    public function updateStatus(Order $order, OrderStatus $status): bool;
+    public function updateStatus(Order $order, string $status): bool;
     public function chunkOrdersByDateRange(string $dateFrom, string $dateTo, int $chunkSize, callable $callback): void;
+
+    /**
+     * @param int $userId
+     * @param int $perPage
+     * @return LengthAwarePaginator<int, Order>
+     */
+    public function getPaginatedUserOrders(int $userId, int $perPage = 5): LengthAwarePaginator;
 }
