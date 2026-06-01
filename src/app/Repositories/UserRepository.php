@@ -8,6 +8,7 @@ use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\User;
 use App\ValueObjects\Id\UserId;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use phpDocumentor\Reflection\Utils;
 
@@ -27,12 +28,24 @@ class UserRepository
         return User::create($data);
     }
 
+    /**
+     * @param User $user
+     * @param array<string, mixed> $data
+     * @return bool
+     */
     public function update(User $user, array $data): bool
     {
         return $user->update($data);
     }
 
-    public function delete(User $user): bool
+    public function updateAvatar(int $userId, ?string $avatarPath): ?bool
+    {
+        return User::where('id', $userId)->update([
+            'avatar_path' => $avatarPath
+        ]) > 0;
+    }
+
+    public function delete(User $user): ?bool
     {
         return $user->delete();
     }
@@ -50,6 +63,10 @@ class UserRepository
         $user->assignRole($role);
     }
 
+    /**
+     * @param UserRole $role
+     * @return Collection<int, User>
+     */
     public function getByRole(UserRole $role): Collection
     {
         return User::role($role->value)->get();
@@ -67,5 +84,19 @@ class UserRepository
         return User::where('id', $userId)->update([
             'google2fa_secret' => $secret
         ]) > 0;
+    }
+
+    /**
+     * @param int $perPage
+     * @return LengthAwarePaginator<int, User>
+     */
+    public function paginate(int $perPage = 15): LengthAwarePaginator
+    {
+        return User::orderBy('id', 'desc')->paginate($perPage);
+    }
+
+    public function countAll(): int
+    {
+        return User::count();
     }
 }

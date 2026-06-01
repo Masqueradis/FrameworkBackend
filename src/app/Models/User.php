@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -76,6 +77,17 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
 
     public function isBanned(): bool
     {
-        return $this->status === UserStatus::Banned;
+        /** @var UserStatus $status */
+        $status = $this->status;
+
+        return $status === UserStatus::Banned;
+    }
+
+    /**
+     * @return HasMany<Order, $this>
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
     }
 }

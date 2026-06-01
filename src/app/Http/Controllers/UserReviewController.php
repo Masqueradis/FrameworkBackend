@@ -6,10 +6,13 @@ namespace App\Http\Controllers;
 
 use App\DTO\Comment\UpdateCommentDTO;
 use App\Models\Comment;
+use App\Models\User;
 use App\Services\CommentService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class UserReviewController extends ApiController
 {
@@ -19,12 +22,22 @@ class UserReviewController extends ApiController
         private readonly CommentService $commentService,
     ) {}
 
-    public function update(Comment $comment, UpdateCommentDTO $dto): JsonResponse
+    public function index(): View
+    {
+        $user = auth()->user();
+        assert($user instanceof User);
+
+        $comments = $this->commentService->getUserComments($user->id);
+
+        return view('profile.reviews', compact('comments'));
+    }
+
+    public function update(Comment $comment, UpdateCommentDTO $dto): RedirectResponse
     {
         $this->authorize('update', $comment);
 
         $this->commentService->updateComment($comment, $dto);
 
-        return response()->json(['message' => 'Review sent for moderation.']);
+        return back()->with(['message' => 'Review sent for moderation.']);
     }
 }

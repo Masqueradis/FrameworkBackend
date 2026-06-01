@@ -8,7 +8,7 @@ use App\DTO\Checkout\CheckoutDTO;
 use App\Exceptions\EmptyCartException;
 use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Services\CartService;
-use App\Services\CheckoutService;
+use App\Services\OrderService;
 use App\Services\Gateways\GatewayFactory;
 use App\Services\Gateways\StripeGateway;
 use Exception;
@@ -23,7 +23,7 @@ use OpenApi\Attributes as OA;
 class CheckoutController extends ApiController
 {
     public function __construct(
-        private readonly CheckoutService $checkoutService,
+        private readonly OrderService $checkoutService,
         private readonly CartRepositoryInterface $cartRepository,
     ) {}
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Services\CheckoutService;
+use App\Services\OrderService;
 use App\Services\Gateways\GatewayFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -51,7 +51,7 @@ class WebhookController extends ApiController
             )
         ]
     )]
-    public function handle(Request $request, string $provider, CheckoutService $checkoutService): JsonResponse
+    public function handle(Request $request, string $provider, OrderService $checkoutService): JsonResponse
     {
         try {
             $gateway = GatewayFactory::make($provider);

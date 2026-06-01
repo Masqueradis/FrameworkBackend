@@ -11,11 +11,13 @@ use App\Events\OrderCreated;
 use App\Exceptions\EmptyCartException;
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\User;
 use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use Exception;
+use Illuminate\Pagination\LengthAwarePaginator;
 
-readonly class CheckoutService
+readonly class OrderService
 {
     public function __construct(
         private OrderRepositoryInterface $orderRepository,
@@ -40,7 +42,7 @@ readonly class CheckoutService
             'customer_email' => $data->customerEmail,
             'customer_phone' => $data->customerPhone,
             'shipping_address' => $data->shippingAddress,
-            'status' => OrderStatus::Pending,
+            'status' => OrderStatus::Pending->value,
             'total_amount_cents' => $totalCents,
         ];
 
@@ -57,15 +59,25 @@ readonly class CheckoutService
             'provider' => $provider,
             'transaction_id' => $transactionId,
             'amount_cents' => $order->total_amount_cents,
-            'status' => $isSuccess ? PaymentStatus::Paid : PaymentStatus::Failed,
+            'status' => $isSuccess ? PaymentStatus::Paid->value : PaymentStatus::Failed->value,
         ]);
 
         if($isSuccess) {
-            $this->orderRepository->updateStatus($order, OrderStatus::Processing);
+            $this->orderRepository->updateStatus($order, OrderStatus::Completed->value);
             return;
         }
 
-        $this->orderRepository->updateStatus($order, OrderStatus::Cancelled);
+        $this->orderRepository->updateStatus($order, OrderStatus::Cancelled->value);
         $this->orderRepository->restoreStock($order);
+    }
+
+    /**
+     * @param int $userId
+     * @param int $perPage
+     * @return LengthAwarePaginator<int, Order>
+     */
+    public function getUserOrdersHistory(int $userId, int $perPage = 5): LengthAwarePaginator
+    {
+        return $this->orderRepository->getPaginatedUserOrders($userId, $perPage);
     }
 }

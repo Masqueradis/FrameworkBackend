@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Enums\OrderStatus;
 use App\Events\OrderCreated;
 use App\Mail\OrderConfirmationMail;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,7 +20,10 @@ class SendOrderConfirmationEmail implements ShouldQueue
     {
         $order = $event->order;
 
-        if ($order->status === \App\Enums\OrderStatus::Pending) {
+        /** @var OrderStatus $status */
+        $status = $event->order->status;
+
+        if ($status === OrderStatus::Pending) {
             return;
         }
 

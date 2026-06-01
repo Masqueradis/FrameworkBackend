@@ -52,11 +52,15 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFive();
 
         Gate::define('access-panel', function (User $user) {
-            return $user->hasRole(['admin', 'seller']);
+            return $user->hasRole(['admin', 'seller', 'manager']);
         });
 
         Gate::define('manage-categories', function (User $user) {
-            return $user->hasRole(['admin']);
+            return $user->hasRole(['admin', 'manager']);
+        });
+
+        Gate::define('manage-users', function (User $user) {
+            return $user->hasRole(['admin', 'manager']);
         });
     }
 }

@@ -11,6 +11,8 @@ use App\Models\Comment;
 use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\CommentRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 readonly class CommentService
 {
@@ -72,4 +74,21 @@ readonly class CommentService
         $this->commentRepository->delete($comment);
     }
 
+    /**
+     * @param int $userId
+     * @return Collection<int, Comment>
+     */
+    public function getUserComments(int $userId): Collection
+    {
+        return $this->commentRepository->getByUserId($userId, ['product']);
+    }
+
+    /**
+     * @param int $perPage
+     * @return LengthAwarePaginator<int, Product>
+     */
+    public function getProductsWithPendingComments(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->commentRepository->getPendingProductsForModeration($perPage);
+    }
 }

@@ -74,4 +74,11 @@ class Product extends Model
     {
         return $this->hasMany(Comment::class);
     }
+
+    protected static function booted(): void
+    {
+        static::deleted(function (Product $product) {
+            CartItem::where('product_id', $product->id)->delete();
+        });
+    }
 }

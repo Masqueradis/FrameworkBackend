@@ -134,7 +134,7 @@
                         </div>
                     @endforelse
                 </div>
-                <div class="mt-4 d-flex justify-content-center">
+                <div class="mt-4">
                     {{ $products->withQueryString()->links('pagination::bootstrap-5') }}
                 </div>
             </section>

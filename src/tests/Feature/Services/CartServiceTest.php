@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\CartService;
 use App\ValueObjects\Cart\CartQuantity;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -141,8 +142,7 @@ class CartServiceTest extends TestCase
             'quantity' => 2
         ]);
 
-        $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('Product no longer exists.');
+        $this->expectException(ModelNotFoundException::class);
 
         $this->cartService->updateItemQuantity($data);
     }

@@ -56,6 +56,12 @@ class GenerateReportJob implements ShouldQueue
     ): string {
         $handle = fopen('php://temp', 'r+');
 
+        // @codeCoverageIgnoreStart
+        if ($handle === false) {
+            throw new \RuntimeException('Failed to open temporary memory stream for CSV generation.');
+        }
+        // @codeCoverageIgnoreEnd
+
         if ($report->type === 'sales') {
             fputcsv($handle, [
                 'Order ID',
@@ -64,10 +70,13 @@ class GenerateReportJob implements ShouldQueue
                 'Total (Cents)',
                 'Status',
                 'Date',
-                ]);
+            ]);
 
-            $dateFrom = $report->filters['date_from'] ?? '2000-01-01';
-            $dateTo = $report->filters['date_to'] ?? now()->toDateString();
+            /** @var array<string, mixed> $filters */
+            $filters = $report->filters ?? [];
+
+            $dateFrom = $filters['date_from'] ?? '2000-01-01';
+            $dateTo = $filters['date_to'] ?? now()->toDateString();
 
             $orderRepository->chunkOrdersByDateRange($dateFrom, $dateTo, 100, function ($orders) use ($handle) {
                 foreach ($orders as $order) {
@@ -81,35 +90,41 @@ class GenerateReportJob implements ShouldQueue
                     ]);
                 }
             });
-            } elseif ($report->type === 'inventory') {
-                fputcsv($handle, [
-                    'Product ID',
-                    'Name',
-                    'SKU',
-                    'Price',
-                    'Stock',
-                    'Available',
-                ]);
+        } elseif ($report->type === 'inventory') {
+            fputcsv($handle, [
+                'Product ID',
+                'Name',
+                'SKU',
+                'Price',
+                'Stock',
+                'Available',
+            ]);
 
-                $productRepository->chunkAllProducts(100, function ($products) use ($handle) {
-                    foreach ($products as $product) {
-                        fputcsv($handle, [
-                            $product->id,
-                            $product->name,
-                            $product->sku,
-                            $product->price,
-                            $product->stock,
-                            $product->available ? 'Yes' : 'No',
-                        ]);
-                    }
-                });
-            } else {
+            $productRepository->chunkAllProducts(100, function ($products) use ($handle) {
+                foreach ($products as $product) {
+                    fputcsv($handle, [
+                        $product->id,
+                        $product->name,
+                        $product->sku,
+                        $product->price,
+                        $product->stock,
+                        $product->available ? 'Yes' : 'No',
+                    ]);
+                }
+            });
+        } else {
             throw new \Exception("Unknown report type: {$report->type}");
         }
 
         rewind($handle);
         $csvContent = stream_get_contents($handle);
         fclose($handle);
+
+        // @codeCoverageIgnoreStart
+        if ($csvContent === false) {
+            throw new \RuntimeException('Failed to read CSV content from stream.');
+        }
+        // @codeCoverageIgnoreEnd
 
         return $csvContent;
     }

@@ -10,10 +10,10 @@ use App\Repositories\UserRepository;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
-class ProfileService
+readonly class ProfileService
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
+        private UserRepository $userRepository,
     ) {}
 
     public function updateProfile(User $user, UpdateProfileDTO $dto): bool
@@ -26,9 +26,9 @@ class ProfileService
         return !empty($attributesToUpdate) && $this->userRepository->update($user, $attributesToUpdate);
     }
 
-    public function deleteAccount(User $user): bool
+    public function deleteAccount(User $user): ?bool
     {
-        $this->deleteOldAvatar($user->avatar_path);
+        $this->deleteAvatar($user);
 
         return $this->userRepository->delete($user);
     }
@@ -39,15 +39,31 @@ class ProfileService
             return null;
         }
 
-        $this->deleteOldAvatar($user->avatar_path);
+        if (!$newAvatar->isValid()) {
+            throw new \RuntimeException('Upload error: ' . $newAvatar->getErrorMessage());
+        }
 
-        return $newAvatar->store('avatars', 's3');
+        $this->deleteAvatar($user);
+
+        $path = $newAvatar->store('avatars', 'minio');
+
+        if ($path === false) {
+            throw new \RuntimeException('MinIO rejected the connection instantly. Check AWS_ENDPOINT in .env and make sure the MinIO container is running.');
+        }
+
+        return $path;
     }
 
-    private function deleteOldAvatar(?string $path): void
+    public function deleteAvatar(User $user): void
     {
-        if ($path) {
-            Storage::disk('s3')->delete($path);
+        if (!$user->avatar_path) {
+            return;
         }
+
+        Storage::disk('minio')->delete($user->avatar_path);
+
+        $this->userRepository->updateAvatar($user->id, null);
+
+        $user->avatar_path = null;
     }
 }

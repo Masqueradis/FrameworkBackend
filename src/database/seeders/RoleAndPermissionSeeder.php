@@ -22,10 +22,12 @@ class RoleAndPermissionSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permissions = [
-            'manage all products',
-            'manage own products',
-            'manage categories',
-            'manage users',
+            'manage-all-products',
+            'manage-own-products',
+            'manage-categories',
+            'manage-users',
+            'assign-seller-role',
+            'assign-admin-role',
         ];
 
         foreach ($permissions as $permission) {
@@ -35,8 +37,16 @@ class RoleAndPermissionSeeder extends Seeder
         $adminRole = Role::findOrCreate('admin', 'web');
         $adminRole->givePermissionTo(Permission::all());
 
+        $managerRole = Role::findOrCreate('manager', 'web');
+        $managerRole->givePermissionTo([
+            'manage-all-products',
+            'manage-categories',
+            'manage-users',
+            'assign-seller-role',
+        ]);
+
         $sellerRole = Role::findOrCreate('seller', 'web');
-        $sellerRole->givePermissionTo('manage own products');
+        $sellerRole->givePermissionTo('manage-own-products');
 
         $customerRole = Role::findOrCreate('customer', 'web');
 
