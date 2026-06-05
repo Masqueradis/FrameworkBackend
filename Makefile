@@ -36,7 +36,9 @@ build: init
 setup: init build up
 	${DOCKER_COMPOSE} exec app composer install
 	${DOCKER_COMPOSE} exec app php artisan key:generate
-	make seed-ultimate
+	${DOCKER_COMPOSE} exec app php artisan migrate:fresh --seed
+	${DOCKER_COMPOSE} exec app php artisan passport:keys --force
+	${DOCKER_COMPOSE} exec app php artisan passport:client --personal --no-interaction
 	${DOCKER_COMPOSE} exec app php artisan storage:link
 	${DOCKER_COMPOSE} run --rm npm-setup
 	make setup-minio
@@ -49,6 +51,4 @@ setup-minio:
 	${DOCKER_COMPOSE} exec -t minio mkdir -p /data/laravel-minio
 
 seed-ultimate: init
-	${DOCKER_COMPOSE} exec app php artisan migrate:fresh --seed
-	${DOCKER_COMPOSE} exec app php artisan passport:keys --force
-	${DOCKER_COMPOSE} exec app php artisan passport:client --personal --no-interaction
+	${DOCKER_COMPOSE} exec app php artisan db:seed --class=UltimateSeeder

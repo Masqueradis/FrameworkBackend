@@ -16,8 +16,6 @@ class UltimateSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call(RoleAndPermissionSeeder::class);
-
         $admin = User::where('email', 'admin@example.com')->first();
 
         $categories = [
