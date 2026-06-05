@@ -21,4 +21,6 @@ Store App is a web-based e-commerce platform for computer components built with 
 
 Now you can access the website at http://localhost
 
+If you want to generate test data, use "make seed-ultimate"
+
 ### Docs for [docker](/src/docs/schemas/Docker_README.md) and [src](/src/docs/schemas/PHP_README.md).
