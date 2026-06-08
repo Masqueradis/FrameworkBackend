@@ -180,7 +180,7 @@ class UltimateSeeder extends Seeder
 
         foreach ($products as $p) {
             $product = Product::create([
-                'user_id' => $admin->id,
+                'user_id' => $admin?->id,
                 'category_id' => $p['category']->id,
                 'name' => $p['name'],
                 'slug' => Str::slug($p['name']),
