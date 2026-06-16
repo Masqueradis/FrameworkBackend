@@ -35,7 +35,7 @@ class WebhookControllerTest extends TestCase
             'customer_email' => 'test@example.com',
             'shipping_address' => '123',
             'status' => OrderStatus::Pending,
-            'total_amount_cents' => 4500
+            'total_amount_cents' => 4500,
         ]);
         $dto = new PaymentWebhookDTO($order->id, 'txn_123', 'stripe', 'success');
 

@@ -19,7 +19,6 @@ use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 use OpenApi\Attributes as OA;
 
-
 class CheckoutController extends ApiController
 {
     public function __construct(
@@ -89,7 +88,7 @@ class CheckoutController extends ApiController
             ),
         ]
     )]
-    public function store(CheckoutDTO $data, StripeGateway $stripeGateway): JsonResponse
+    public function store(CheckoutDTO $data): JsonResponse
     {
         $userId = auth()->id() ? (int) auth()->id() : null;
         $cart = $this->cartRepository->findOrCreate($userId, session()->getId());
@@ -102,18 +101,20 @@ class CheckoutController extends ApiController
             return response()->json([
                 'status' => 'success',
                 'provider' => $data->paymentProvider,
-                'action' => $result
+                'action' => $result,
             ]);
         } catch (EmptyCartException $exception) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Your cart is empty.'
+                'message' => 'Your cart is empty.',
             ], Response::HTTP_BAD_REQUEST);
         } catch (\Exception $exception) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $exception->getMessage()],
-                Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => $exception->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 

@@ -31,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
-            '/api/v1/webhooks'
+            '/api/v1/webhooks',
         ]);
     })
     ->withMiddleware(function (Middleware $middleware): void {

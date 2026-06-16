@@ -62,7 +62,7 @@ readonly class OrderService
             'status' => $isSuccess ? PaymentStatus::Paid->value : PaymentStatus::Failed->value,
         ]);
 
-        if($isSuccess) {
+        if ($isSuccess) {
             $this->orderRepository->updateStatus($order, OrderStatus::Completed->value);
             return;
         }

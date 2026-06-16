@@ -90,7 +90,7 @@ readonly class AdminProductController implements HasMiddleware
                             description: 'Image file (JPEG, PNG, up to 2MB)',
                             type: 'string',
                             format: 'binary'
-                        )
+                        ),
                     ]
                 )
             )
@@ -103,7 +103,7 @@ readonly class AdminProductController implements HasMiddleware
                 in: 'path',
                 required: true,
                 schema: new OA\Schema(type: 'integer', example: 1)
-            )
+            ),
         ],
         responses: [
             new OA\Response(
@@ -117,10 +117,10 @@ readonly class AdminProductController implements HasMiddleware
                             properties: [
                                 new OA\Property(property: 'id', type: 'integer', example: 5),
                                 new OA\Property(property: 'product_id', type: 'integer', example: 1),
-                                new OA\Property(property: 'path', type: 'string', example: 'products/images/xyz123.jpg')
+                                new OA\Property(property: 'path', type: 'string', example: 'products/images/xyz123.jpg'),
                             ],
                             type: 'object'
-                        )
+                        ),
                     ]
                 )
             ),
@@ -139,7 +139,7 @@ readonly class AdminProductController implements HasMiddleware
             new OA\Response(
                 response: 422,
                 description: 'Validation error (e.g., file too large or invalid format)'
-            )
+            ),
         ]
     )]
     public function uploadImage(Product $product, UploadImageDTO $data): JsonResponse
@@ -150,5 +150,12 @@ readonly class AdminProductController implements HasMiddleware
             'message' => 'Image added successfully.',
             'image' => $image,
         ], Response::HTTP_OK);
+    }
+
+    public function destroyAllImages(Product $product, ProductService $productService)
+    {
+        $productService->deleteAllImages($product);
+
+        return back()->with('success', 'All images have been successfully removed.');
     }
 }

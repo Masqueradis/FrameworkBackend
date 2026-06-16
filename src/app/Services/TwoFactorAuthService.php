@@ -15,8 +15,7 @@ class TwoFactorAuthService
 
     public function __construct(
         private readonly UserRepository $userRepository,
-    )
-    {
+    ) {
         $this->google2fa = new Google2FA();
     }
 

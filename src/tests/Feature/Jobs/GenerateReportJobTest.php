@@ -98,7 +98,7 @@ class GenerateReportJobTest extends TestCase
             'type' => 'inventory',
             'filters' => [],
             'status' => ReportStatus::Pending,
-            ]);
+        ]);
 
         Product::factory()->count(3)->create();
 

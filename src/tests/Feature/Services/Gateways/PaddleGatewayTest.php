@@ -39,8 +39,8 @@ class PaddleGatewayTest extends TestCase
         $this->actingAs($user);
         Http::fake([
             '*/transactions' => Http::response([
-                'data' => ['id' => 'txn_12345']
-            ], 200)
+                'data' => ['id' => 'txn_12345'],
+            ], 200),
         ]);
 
         $product = Product::factory()->create(['price' => 1000]);
@@ -50,13 +50,13 @@ class PaddleGatewayTest extends TestCase
             'customer_email' => 'test@example.com',
             'shipping_address' => '123',
             'status' => OrderStatus::Pending,
-            'total_amount_cents' => 2000
+            'total_amount_cents' => 2000,
         ]);
         $order->items()->create([
             'product_id' => $product->id,
             'quantity' => 2,
             'price' => 1000,
-            'price_cents' => 1000*100,
+            'price_cents' => 1000 * 100,
             'product_name' => $product->name,
         ]);
 
@@ -70,7 +70,7 @@ class PaddleGatewayTest extends TestCase
     {
         $user = User::factory()->create();
         Http::fake([
-            '*/transactions' => Http::response(['Bad request'], Response::HTTP_BAD_REQUEST)
+            '*/transactions' => Http::response(['Bad request'], Response::HTTP_BAD_REQUEST),
         ]);
 
         $order = Order::create([
@@ -79,7 +79,7 @@ class PaddleGatewayTest extends TestCase
             'customer_email' => 'test@example.com',
             'shipping_address' => '123',
             'status' => OrderStatus::Pending,
-            'total_amount_cents' => 2000
+            'total_amount_cents' => 2000,
         ]);
 
         $this->expectException(\Exception::class);
@@ -94,8 +94,8 @@ class PaddleGatewayTest extends TestCase
             'event_type' => 'transaction.completed',
             'data' => [
                 'id' => 'txn_999',
-                'custom_data' => ['order_id' => 15]
-            ]
+                'custom_data' => ['order_id' => 15],
+            ],
         ]);
 
         $ts = time();

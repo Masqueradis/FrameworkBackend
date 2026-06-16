@@ -64,14 +64,14 @@ class CheckoutControllerTest extends TestCase
             'customer_email' => 'test@example.com',
             'customer_phone' => '123',
             'shipping_address' => '123',
-            'payment_provider' => 'stripe'
+            'payment_provider' => 'stripe',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJson([
             'status' => 'success',
             'provider' => 'stripe',
-            'action' => 'https://fake-stripe.com/pay'
+            'action' => 'https://fake-stripe.com/pay',
         ]);
     }
 
@@ -86,13 +86,13 @@ class CheckoutControllerTest extends TestCase
             'customer_email' => 'test@example.com',
             'customer_phone' => '123',
             'shipping_address' => '123',
-            'payment_provider' => 'stripe'
+            'payment_provider' => 'stripe',
         ]);
 
         $response->assertStatus(Response::HTTP_BAD_REQUEST);
         $response->assertJson([
             'status' => 'error',
-            'message' => 'Your cart is empty.'
+            'message' => 'Your cart is empty.',
         ]);
     }
 
@@ -108,7 +108,7 @@ class CheckoutControllerTest extends TestCase
             'cart_id' => $cart->id,
             'product_id' => $product->id,
             'quantity' => 1,
-            'price' => 1000
+            'price' => 1000,
         ]);
 
         $mockGateway = Mockery::mock(StripeGateway::class);
@@ -121,13 +121,13 @@ class CheckoutControllerTest extends TestCase
             'customer_email' => 'test@example.com',
             'customer_phone' => '123',
             'shipping_address' => '123',
-            'payment_provider' => 'stripe'
+            'payment_provider' => 'stripe',
         ]);
 
         $response->assertStatus(Response::HTTP_INTERNAL_SERVER_ERROR);
         $response->assertJson([
             'status' => 'error',
-            'message' => 'Gateway timeout'
+            'message' => 'Gateway timeout',
         ]);
     }
 
@@ -141,7 +141,7 @@ class CheckoutControllerTest extends TestCase
             'cart_id' => $cart->id,
             'product_id' => $product->id,
             'quantity' => 1,
-            'price' => 1000
+            'price' => 1000,
         ]);
 
         $response = $this->actingAs($user)->get('/checkout/result');

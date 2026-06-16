@@ -34,7 +34,7 @@ class ProfileControllerTest extends TestCase
         $response = $this->actingAs($user)
             ->from(route('profile.edit'))
             ->patch(route('profile.update'), [
-                'name' => 'Updated Name'
+                'name' => 'Updated Name',
             ]);
 
         $response->assertSessionHasNoErrors();

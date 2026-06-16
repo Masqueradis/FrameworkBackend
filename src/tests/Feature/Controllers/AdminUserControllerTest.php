@@ -81,7 +81,7 @@ class AdminUserControllerTest extends TestCase
         $response = $this->actingAs($this->admin)
             ->from(route('admin.users.index'))
             ->patch(route('admin.users.assign-role', $user), [
-                'role' => UserRole::Seller->value
+                'role' => UserRole::Seller->value,
             ]);
 
         $response->assertSessionHasNoErrors();

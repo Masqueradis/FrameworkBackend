@@ -24,7 +24,7 @@ class SendOrderConfirmationMailTest extends TestCase
             'customer_email' => 'test@example.com',
             'shipping_address' => '123',
             'status' => OrderStatus::Pending,
-            'total_amount_cents' => 4500
+            'total_amount_cents' => 4500,
         ]);
 
         $event = new OrderCreated($order);

@@ -22,7 +22,7 @@ class ReportTest extends TestCase
             'admin_id' => $admin->id,
             'type' => 'sales',
             'filters' => [],
-            'status' => ReportStatus::Completed
+            'status' => ReportStatus::Completed,
         ]);
 
         $this->assertInstanceOf(BelongsTo::class, $report->admin());

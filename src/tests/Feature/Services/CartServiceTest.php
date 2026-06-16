@@ -38,7 +38,7 @@ class CartServiceTest extends TestCase
 
         $product = Product::factory()->create([
             'price' => 1000,
-            'stock' => 50
+            'stock' => 50,
         ]);
 
         $data = new AddToCartDTO($product->id, 2);
@@ -122,24 +122,24 @@ class CartServiceTest extends TestCase
 
         $cart = Cart::create([
             'user_id' => $user->id,
-            'session_id' => 'test-session-123'
+            'session_id' => 'test-session-123',
         ]);
         $product = Product::factory()->create([
             'stock' => 10,
-            'price' => 200
+            'price' => 200,
         ]);
         $item = CartItem::create([
             'cart_id' => $cart->id,
             'product_id' => $product->id,
             'quantity' => 1,
-            'price' => $product->price
+            'price' => $product->price,
         ]);
 
         $product->delete();
 
         $data = UpdateCartItemDTO::from([
             'cartItemId' => $item->id,
-            'quantity' => 2
+            'quantity' => 2,
         ]);
 
         $this->expectException(ModelNotFoundException::class);
@@ -155,7 +155,7 @@ class CartServiceTest extends TestCase
 
         $cart = Cart::create([
             'user_id' => $user->id,
-            'session_id' => 'test-session-123'
+            'session_id' => 'test-session-123',
         ]);
 
         $product = Product::factory()->create(['stock' => 3, 'price' => 200]);
@@ -163,7 +163,7 @@ class CartServiceTest extends TestCase
             'cart_id' => $cart->id,
             'product_id' => $product->id,
             'quantity' => 1,
-            'price' => $product->price
+            'price' => $product->price,
         ]);
 
         $data = UpdateCartItemDTO::from(['cartItemId' => $item->id, 'quantity' => 5]);

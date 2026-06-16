@@ -31,7 +31,7 @@ class CommentController extends ApiController
 
     public function destroy(Comment $comment): RedirectResponse
     {
-        if(auth()->id() !== $comment->user_id) {
+        if (auth()->id() !== $comment->user_id) {
             abort(Response::HTTP_FORBIDDEN, 'Unauthorized action.');
         }
 

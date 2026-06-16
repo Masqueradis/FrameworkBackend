@@ -30,7 +30,7 @@ class PaddleGateway implements GatewayStrategyInterface
                 'custom_data' => ['order_id' => $order->id],
                 'customer_info' => ['email' => $order->customer_email],
                 'checkout' => [
-                    'success_url' => route('checkout.result'), '?status=success'
+                    'success_url' => route('checkout.result'), '?status=success',
                 ],
             ]);
 
@@ -56,7 +56,7 @@ class PaddleGateway implements GatewayStrategyInterface
         $secret = config('services.paddle.webhook_secret');
         $expectedH1 = hash_hmac('sha256', $signedPayload, $secret);
 
-        if(!hash_equals($h1, $expectedH1)) {
+        if (!hash_equals($h1, $expectedH1)) {
             throw new Exception('Invalid Paddle signature', Response::HTTP_BAD_REQUEST);
         }
 
@@ -90,12 +90,12 @@ class PaddleGateway implements GatewayStrategyInterface
                     'description' => $item->product->name ?? 'Unknown product',
                     'unit_price' => [
                         'amount' => (string) $priceObj->getCents(),
-                        'currency_code' => 'USD'
+                        'currency_code' => 'USD',
                     ],
                     'product' => [
                         'name' => $item->product->name ?? 'Unknown product',
-                        'tax_category' => 'standard'
-                    ]
+                        'tax_category' => 'standard',
+                    ],
                 ],
                 'quantity' => $item->quantity,
             ];

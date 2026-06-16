@@ -100,7 +100,7 @@ class AuthController extends ApiController
                 in: 'path',
                 required: true,
                 schema: new OA\Schema(type: 'string', example: 'a1b2c3d4e5f6g7h8i9j0')
-            )
+            ),
         ],
         responses: [
             new OA\Response(
@@ -128,10 +128,10 @@ class AuthController extends ApiController
                                     description: 'Authentication token (Bearer)',
                                     type: 'string',
                                     example: '1|laravel_sanctum_token_xyz123'
-                                )
+                                ),
                             ],
                             type: 'object'
-                        )
+                        ),
                     ]
                 )
             ),
@@ -141,10 +141,10 @@ class AuthController extends ApiController
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'success', type: 'boolean', example: false),
-                        new OA\Property(property: 'message', type: 'string', example: 'The link is expired or invalid. Please register again.')
+                        new OA\Property(property: 'message', type: 'string', example: 'The link is expired or invalid. Please register again.'),
                     ]
                 )
-            )
+            ),
         ]
     )]
     public function verifyEmail(string $token): JsonResponse|RedirectResponse
@@ -301,7 +301,7 @@ class AuthController extends ApiController
                 description: 'Verification link sent successfully',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: 'message', type: 'string', example: 'Verification link sent!')
+                        new OA\Property(property: 'message', type: 'string', example: 'Verification link sent!'),
                     ]
                 )
             ),
@@ -312,7 +312,7 @@ class AuthController extends ApiController
             new OA\Response(
                 response: 429,
                 description: 'Too Many Requests (rate limit exceeded for sending emails)'
-            )
+            ),
         ]
     )]
     public function resendVerificationEmail(Request $request): JsonResponse|RedirectResponse
@@ -342,14 +342,14 @@ class AuthController extends ApiController
                         new OA\Property(property: 'email_verified_at', type: 'string', format: 'date-time', example: '2026-05-31T15:00:00Z', nullable: true),
                         new OA\Property(property: 'avatar_path', type: 'string', example: 'avatars/file123.jpg', nullable: true),
                         new OA\Property(property: 'created_at', type: 'string', format: 'date-time', example: '2026-05-01T10:00:00Z'),
-                        new OA\Property(property: 'updated_at', type: 'string', format: 'date-time', example: '2026-05-31T12:00:00Z')
+                        new OA\Property(property: 'updated_at', type: 'string', format: 'date-time', example: '2026-05-31T12:00:00Z'),
                     ]
                 )
             ),
             new OA\Response(
                 response: 401,
                 description: 'Unauthorized (missing or invalid token)'
-            )
+            ),
         ]
     )]
     public function user(Request $request): JsonResponse|RedirectResponse

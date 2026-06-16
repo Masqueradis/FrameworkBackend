@@ -52,7 +52,7 @@ class StripeGatewayTest extends TestCase
             'customer_email' => 'test@example.com',
             'shipping_address' => '123',
             'status' => OrderStatus::Pending,
-            'total_amount_cents' => 4500
+            'total_amount_cents' => 4500,
         ]);
         $order->items()->create([
             'product_id' => $product->id,
@@ -92,7 +92,7 @@ class StripeGatewayTest extends TestCase
             'customer_email' => 'test@example.com',
             'shipping_address' => '123',
             'status' => OrderStatus::Pending,
-            'total_amount_cents' => 4500
+            'total_amount_cents' => 4500,
         ]);
 
         $mockClient = Mockery::mock(ClientInterface::class);
@@ -101,7 +101,7 @@ class StripeGatewayTest extends TestCase
             ->andReturn([
                 json_encode(['url' => 'https://checkout.stripe.com/pay']),
                 200,
-                []
+                [],
             ]);
 
         ApiRequestor::setHttpClient($mockClient);
@@ -114,14 +114,14 @@ class StripeGatewayTest extends TestCase
     #[Test]
     public function testVerifiesValidWebhook(): void
     {
-        $payload = json_encode ([
+        $payload = json_encode([
             'type' => 'checkout.session.completed',
             'data' => [
                 'object' => [
                     'metadata' => ['order_id' => '10'],
                     'payment_intent' => 'pi_123',
                 ],
-            ]
+            ],
         ]);
 
         $request = Request::create('/webhooks/stripe', 'POST', [], [], [], [], $payload);
@@ -139,7 +139,7 @@ class StripeGatewayTest extends TestCase
     {
         $payload = json_encode([
             'type' => 'payment_intent.succeeded',
-            'data' => ['object' => []]
+            'data' => ['object' => []],
         ]);
 
         $request = Request::create('/webhooks/stripe', 'POST', [], [], [], [], $payload);

@@ -39,7 +39,7 @@ class CleanupImages extends Command
         $filesInDb = ProductImage::pluck('path')->toArray();
         $files = array_diff($filesInStorage, $filesInDb);
 
-        if(empty($files)) {
+        if (empty($files)) {
             $this->info('All files are synced.');
             return self::SUCCESS;
         }
@@ -48,7 +48,7 @@ class CleanupImages extends Command
 
         $deletedCount = 0;
         foreach ($files as $file) {
-            if($disk->delete($file)) {
+            if ($disk->delete($file)) {
                 $this->line('Deleting ' . $file);
                 $deletedCount++;
             }

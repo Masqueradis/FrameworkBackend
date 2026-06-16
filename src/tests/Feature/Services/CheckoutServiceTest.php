@@ -91,7 +91,7 @@ class CheckoutServiceTest extends TestCase
             'shipping_address' => '123',
             'total_amount_cents' => $product->price,
             'status' => OrderStatus::Pending,
-            'total_amount_cents' => 1000
+            'total_amount_cents' => 1000,
         ]);
         $order->items()->create([
             'product_id' => $product->id,
@@ -105,7 +105,7 @@ class CheckoutServiceTest extends TestCase
         $this->assertDatabaseHas('payments', [
             'order_id' => $order->id,
             'transaction_id' => 'txn_123',
-            'status' => PaymentStatus::Paid
+            'status' => PaymentStatus::Paid,
         ]);
 
         $this->assertEquals(OrderStatus::Completed, $order->fresh()->status);
@@ -124,7 +124,7 @@ class CheckoutServiceTest extends TestCase
             'customer_email' => 'test@example.com',
             'shipping_address' => '123',
             'total_amount_cents' => $product->price,
-            'status' => OrderStatus::Pending
+            'status' => OrderStatus::Pending,
         ]);
         $order->items()->create([
             'product_id' => $product->id,

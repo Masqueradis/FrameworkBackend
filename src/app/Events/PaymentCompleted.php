@@ -11,8 +11,9 @@ use Illuminate\Queue\SerializesModels;
 
 class PaymentCompleted
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-    public function __construct(public Payment $payment)
-    {}
+    public function __construct(public Payment $payment) {}
 }

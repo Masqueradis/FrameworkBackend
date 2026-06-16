@@ -147,7 +147,19 @@
             <div class="col-lg-4 mb-4">
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-4">
-                        <h5 class="mb-3 text-primary">Existing Photos</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0 text-primary">Existing Photos</h5>
+
+                            @if($product->images && $product->images->count() > 0)
+                                <form action="{{ route('admin.products.images.destroy-all', $product) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete ALL images? This cannot be undone.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Remove All
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
 
                         <div id="image-gallery" class="row g-2">
                             @if($product->images && $product->images->count() > 0)

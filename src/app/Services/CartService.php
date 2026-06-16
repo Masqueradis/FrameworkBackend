@@ -35,7 +35,7 @@ readonly class CartService
     {
         $product = Product::find($data->productId);
 
-        if(!$product) {
+        if (!$product) {
             throw ValidationException::withMessages(['product' => 'Product no longer exists.']);
         }
         $cart = $this->getCart();
@@ -44,7 +44,7 @@ readonly class CartService
 
         $newQuantity = $currentQuantity + $data->quantity;
 
-        if($product->stock < $newQuantity) {
+        if ($product->stock < $newQuantity) {
             throw ValidationException::withMessages(['quantity' => 'Not enough stock available.']);
         }
 
@@ -59,7 +59,7 @@ readonly class CartService
         $item = $this->cartRepository->findItemById($cart, $data->cartItemId);
         $product = $item->product;
 
-        if($product?->stock < $data->quantity) {
+        if ($product?->stock < $data->quantity) {
             throw ValidationException::withMessages(['quantity' => 'Not enough stock available.']);
         }
 

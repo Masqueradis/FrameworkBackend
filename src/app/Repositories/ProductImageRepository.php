@@ -18,4 +18,9 @@ class ProductImageRepository
 
         return $image;
     }
+
+    public function deleteAllForProduct(Product $product): void
+    {
+        $product->images()->delete();
+    }
 }

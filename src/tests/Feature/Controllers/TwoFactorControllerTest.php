@@ -37,7 +37,7 @@ class TwoFactorControllerTest extends TestCase
         $response = $this->actingAs($user)
             ->from('/profile')
             ->post(action([TwoFactorController::class, 'enable']), [
-                'otp' => '123456'
+                'otp' => '123456',
             ]);
 
         $response->assertRedirect('/profile');
@@ -56,7 +56,7 @@ class TwoFactorControllerTest extends TestCase
             ->withSession(['2fa_secret' => $secret, '2fa_qr' => 'qr_code_url'])
             ->from('/profile')
             ->post(action([TwoFactorController::class, 'enable']), [
-                'otp' => $otp
+                'otp' => $otp,
             ]);
 
         $response->assertRedirect('/profile');
@@ -76,7 +76,7 @@ class TwoFactorControllerTest extends TestCase
             ->withSession(['2fa_secret' => $secret])
             ->from('/profile')
             ->post(action([TwoFactorController::class, 'enable']), [
-                'otp' => '000000'
+                'otp' => '000000',
             ]);
 
         $response->assertRedirect('/profile');
@@ -120,7 +120,7 @@ class TwoFactorControllerTest extends TestCase
     public function testVerifyLoginRedirectsToLoginIfNoSession(): void
     {
         $response = $this->post(action([TwoFactorController::class, 'verifyLogin']), [
-            'otp' => '123456'
+            'otp' => '123456',
         ]);
 
         $response->assertRedirect(route('login'));
@@ -136,7 +136,7 @@ class TwoFactorControllerTest extends TestCase
 
         $response = $this->withSession(['2fa:user_id' => $user->id])
             ->post(action([TwoFactorController::class, 'verifyLogin']), [
-                'otp' => $otp
+                'otp' => $otp,
             ]);
 
         $response->assertRedirect('/profile');
@@ -153,7 +153,7 @@ class TwoFactorControllerTest extends TestCase
         $response = $this->from('/2fa')
             ->withSession(['2fa:user_id' => $user->id])
             ->post(action([TwoFactorController::class, 'verifyLogin']), [
-                'otp' => '000000'
+                'otp' => '000000',
             ]);
 
         $response->assertRedirect('/2fa');

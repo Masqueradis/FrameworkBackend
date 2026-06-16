@@ -22,8 +22,8 @@ class ProductPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('manage-all-products') ||
-               $user->hasPermissionTo('manage-own-products');
+        return $user->hasPermissionTo('manage-all-products')
+               || $user->hasPermissionTo('manage-own-products');
     }
 
     /**
@@ -43,8 +43,8 @@ class ProductPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('manage-all-products') ||
-               $user->hasPermissionTo('manage-own-products');
+        return $user->hasPermissionTo('manage-all-products')
+               || $user->hasPermissionTo('manage-own-products');
     }
 
     /**

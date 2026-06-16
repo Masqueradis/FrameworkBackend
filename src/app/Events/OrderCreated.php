@@ -11,8 +11,9 @@ use Illuminate\Queue\SerializesModels;
 
 class OrderCreated
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-    public function __construct(public Order $order)
-    {}
+    public function __construct(public Order $order) {}
 }

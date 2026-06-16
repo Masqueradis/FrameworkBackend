@@ -27,7 +27,7 @@ class WebhookController extends ApiController
                 in: 'path',
                 required: true,
                 schema: new OA\Schema(type: 'string')
-            )
+            ),
         ],
         responses: [
             new OA\Response(
@@ -48,7 +48,7 @@ class WebhookController extends ApiController
                         new OA\Property(property: 'message', type: 'string', example: 'Invalid signature'),
                     ]
                 )
-            )
+            ),
         ]
     )]
     public function handle(Request $request, string $provider, OrderService $checkoutService): JsonResponse
@@ -64,7 +64,7 @@ class WebhookController extends ApiController
             return response()->json(['message' => $exception->getMessage()], $code);
         }
         $order = Order::find($dto->orderId);
-        if($order) {
+        if ($order) {
             $checkoutService->handleWebhook(
                 $order,
                 $dto->isSuccess(),

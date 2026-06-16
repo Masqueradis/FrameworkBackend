@@ -54,8 +54,8 @@ class UltimateSeeder extends Seeder
                     'GPU' => 'RTX 4090',
                     'VRAM' => '24 GB',
                     'Memory Type' => 'GDDR6X',
-                    'TDP' => '450W'
-                ]
+                    'TDP' => '450W',
+                ],
             ],
             ['category' => $categories['GPU NVIDIA'],
                 'name' => 'MSI GeForce RTX 4070 Ti',
@@ -65,8 +65,8 @@ class UltimateSeeder extends Seeder
                     'GPU' => 'RTX 4070 Ti',
                     'VRAM' => '12 GB',
                     'Memory Type' => 'GDDR6X',
-                    'TDP' => '285W'
-                ]
+                    'TDP' => '285W',
+                ],
             ],
 
             ['category' => $categories['GPU AMD'],
@@ -77,8 +77,8 @@ class UltimateSeeder extends Seeder
                     'GPU' => 'RX 7900 XTX',
                     'VRAM' => '24 GB',
                     'Memory Type' => 'GDDR6',
-                    'TDP' => '355W'
-                ]
+                    'TDP' => '355W',
+                ],
             ],
             ['category' => $categories['GPU AMD'],
                 'name' => 'PowerColor Radeon RX 7800 XT',
@@ -88,8 +88,8 @@ class UltimateSeeder extends Seeder
                     'GPU' => 'RX 7800 XT',
                     'VRAM' => '16 GB',
                     'Memory Type' => 'GDDR6',
-                    'TDP' => '263W'
-                ]
+                    'TDP' => '263W',
+                ],
             ],
 
             ['category' => $categories['CPU Intel'],
@@ -99,8 +99,8 @@ class UltimateSeeder extends Seeder
                 'attr' => [
                     'CPU' => 'i9-14900K',
                     'RAM type' => 'DDR5',
-                    'Frequency' => '6.0 GHz'
-                ]
+                    'Frequency' => '6.0 GHz',
+                ],
             ],
             ['category' => $categories['CPU Intel'],
                 'name' => 'Intel Core i5-13600K',
@@ -109,8 +109,8 @@ class UltimateSeeder extends Seeder
                 'attr' => [
                     'CPU' => 'i5-13600K',
                     'RAM type' => 'DDR4/DDR5',
-                    'Frequency' => '5.1 GHz'
-                ]
+                    'Frequency' => '5.1 GHz',
+                ],
             ],
 
             ['category' => $categories['CPU AMD'],
@@ -120,8 +120,8 @@ class UltimateSeeder extends Seeder
                 'attr' => [
                     'CPU' => 'Ryzen 7 7800X3D',
                     'RAM type' => 'DDR5',
-                    'Frequency' => '5.0 GHz'
-                ]
+                    'Frequency' => '5.0 GHz',
+                ],
             ],
             ['category' => $categories['CPU AMD'],
                 'name' => 'AMD Ryzen 5 7600X',
@@ -130,8 +130,8 @@ class UltimateSeeder extends Seeder
                 'attr' => [
                     'CPU' => 'Ryzen 5 7600X',
                     'RAM type' => 'DDR5',
-                    'Frequency' => '5.3 GHz'
-                ]
+                    'Frequency' => '5.3 GHz',
+                ],
             ],
 
             ['category' => $categories['Case NZXT'],
@@ -141,8 +141,8 @@ class UltimateSeeder extends Seeder
                 'attr' => [
                     'Form Factor' => 'ATX',
                     'Color' => 'Black',
-                    'Material' => 'Steel/Glass'
-                ]
+                    'Material' => 'Steel/Glass',
+                ],
             ],
             ['category' => $categories['Case NZXT'],
                 'name' => 'NZXT H5 Elite White',
@@ -152,8 +152,8 @@ class UltimateSeeder extends Seeder
                 'attr' => [
                     'Form Factor' => 'ATX',
                     'Color' => 'White',
-                    'Material' => 'Steel/Glass'
-                ]
+                    'Material' => 'Steel/Glass',
+                ],
             ],
 
             ['category' => $categories['Case Deepcool'],
@@ -163,8 +163,8 @@ class UltimateSeeder extends Seeder
                 'attr' => [
                     'Form Factor' => 'E-ATX',
                     'Color' => 'Black',
-                    'Material' => 'Steel/Glass'
-                ]
+                    'Material' => 'Steel/Glass',
+                ],
             ],
             ['category' => $categories['Case Deepcool'],
                 'name' => 'Deepcool Macube 110',
@@ -173,8 +173,8 @@ class UltimateSeeder extends Seeder
                 'attr' => [
                     'Form Factor' => 'Micro-ATX',
                     'Color' => 'White',
-                    'Material' => 'Steel'
-                ]
+                    'Material' => 'Steel',
+                ],
             ],
         ];
 

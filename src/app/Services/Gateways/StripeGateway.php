@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class StripeGateway implements GatewayStrategyInterface
 {
-    public function __construct ()
+    public function __construct()
     {
         Stripe::setApiKey(config('services.stripe.secret'));
     }

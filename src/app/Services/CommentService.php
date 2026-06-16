@@ -18,9 +18,7 @@ readonly class CommentService
 {
     public function __construct(
         private CommentRepositoryInterface $commentRepository,
-    )
-    {
-    }
+    ) {}
 
     public function saveComment(User $user, Product $product, CommentDTO $dto): ?Comment
     {

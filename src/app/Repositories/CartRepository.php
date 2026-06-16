@@ -24,7 +24,7 @@ class CartRepository implements CartRepositoryInterface
     {
         $item = $this->findItemByProductId($cart, $productId);
 
-        if($item) {
+        if ($item) {
             $item->update([
                 'quantity' => $quantity,
                 'price' => $price,

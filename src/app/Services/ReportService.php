@@ -43,7 +43,7 @@ class ReportService
         /** @var ReportStatus $status */
         $status = $report->status;
 
-        if($status !== ReportStatus::Completed || !$report->file_path) {
+        if ($status !== ReportStatus::Completed || !$report->file_path) {
             abort(Response::HTTP_NOT_FOUND, 'Report not found.');
         }
 

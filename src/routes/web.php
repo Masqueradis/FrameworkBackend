@@ -96,6 +96,8 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/products/{product}/images', [AdminProductController::class, 'uploadImage'])
             ->name('admin.products.images.upload');
+        Route::delete('/products/{product}/images', [AdminProductController::class, 'destroyAllImages'])
+            ->name('admin.products.images.destroy-all');
 
         Route::middleware('can:manage-users')->group(function () {
             Route::prefix('users')->name('admin.users.')->group(function () {

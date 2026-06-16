@@ -43,10 +43,10 @@ class OrderRepository implements OrderRepositoryInterface
             $productIds = $cartItems->pluck('product_id')->toArray();
             $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
 
-            foreach($cartItems as $item) {
+            foreach ($cartItems as $item) {
                 $product = $products->get($item->product_id);
 
-                if(!$product || $product->stock < $item->quantity) {
+                if (!$product || $product->stock < $item->quantity) {
                     throw ValidationException::withMessages([
                         'quantity' => "Not enough stock for {$item->product?->name}.",
                     ]);

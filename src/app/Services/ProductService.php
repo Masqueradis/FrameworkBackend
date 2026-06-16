@@ -15,6 +15,7 @@ use App\ValueObjects\Id\CategoryId;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 readonly class ProductService
@@ -163,5 +164,15 @@ readonly class ProductService
 
             $this->addImage($product, $imageData);
         }
+    }
+
+    public function deleteAllImages(Product $product): void
+    {
+        $images = $product->images;
+        foreach ($images as $image) {
+            Storage::disk('minio')->delete($image->path);
+        }
+
+        $this->productImageRepository->deleteAllForProduct($product);
     }
 }

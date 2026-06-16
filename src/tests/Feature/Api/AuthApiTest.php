@@ -359,7 +359,7 @@ class AuthApiTest extends TestCase
         $password = 'Password123!';
         $user = User::factory()->create([
             'password' => Hash::make($password),
-            'google2fa_secret' => 'SECRETKEY1234567'
+            'google2fa_secret' => 'SECRETKEY1234567',
         ]);
 
         $response = $this->postJson(route('login.post'), [
@@ -379,7 +379,7 @@ class AuthApiTest extends TestCase
         $password = 'Password123!';
         $user = User::factory()->create([
             'password' => Hash::make($password),
-            'google2fa_secret' => 'SECRETKEY1234567'
+            'google2fa_secret' => 'SECRETKEY1234567',
         ]);
 
         $response = $this->post(route('login.post'), [

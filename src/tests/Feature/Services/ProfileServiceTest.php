@@ -30,7 +30,7 @@ class ProfileServiceTest extends TestCase
     public function testCanUpdateNickname(): void
     {
         $user = User::factory()->create(['name' => 'Old name']);
-        $dto = new UpdateProfileDTO(name: 'New name', avatar:null);
+        $dto = new UpdateProfileDTO(name: 'New name', avatar: null);
 
         $this->profileService->updateProfile($user, $dto);
 
@@ -46,7 +46,7 @@ class ProfileServiceTest extends TestCase
         Storage::disk('minio')->put('avatars/old_avatar.jpg', 'old content');
 
         $file = UploadedFile::fake()->image('new_avatar.jpg');
-        $dto = new UpdateProfileDTO(name: 'Awesome name', avatar:$file);
+        $dto = new UpdateProfileDTO(name: 'Awesome name', avatar: $file);
 
         $this->profileService->updateProfile($user, $dto);
 

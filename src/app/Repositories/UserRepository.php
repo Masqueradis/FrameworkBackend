@@ -41,7 +41,7 @@ class UserRepository
     public function updateAvatar(int $userId, ?string $avatarPath): ?bool
     {
         return User::where('id', $userId)->update([
-            'avatar_path' => $avatarPath
+            'avatar_path' => $avatarPath,
         ]) > 0;
     }
 
@@ -75,14 +75,14 @@ class UserRepository
     public function updateStatus(int $userId, UserStatus $status): bool
     {
         return User::where('id', $userId)->update([
-            'status' => $status->value
+            'status' => $status->value,
         ]) > 0;
     }
 
     public function update2faSecret(int $userId, ?string $secret): bool
     {
         return User::where('id', $userId)->update([
-            'google2fa_secret' => $secret
+            'google2fa_secret' => $secret,
         ]) > 0;
     }
 

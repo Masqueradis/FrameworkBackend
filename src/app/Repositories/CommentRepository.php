@@ -13,7 +13,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class CommentRepository implements CommentRepositoryInterface
 {
-
     public function create(array $data): Comment
     {
         return Comment::create($data);

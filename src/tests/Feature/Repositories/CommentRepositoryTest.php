@@ -85,7 +85,7 @@ class CommentRepositoryTest extends TestCase
         $approvedComments = $this->repository->getApprovedForProduct($product->id);
 
         $this->assertCount(2, $approvedComments);
-        $this->assertTrue($approvedComments->every(fn ($comment) => $comment->status->isApproved()));
+        $this->assertTrue($approvedComments->every(fn($comment) => $comment->status->isApproved()));
     }
 
     #[Test]
@@ -112,7 +112,7 @@ class CommentRepositoryTest extends TestCase
         $pendingComment = $this->repository->getPendingCommentsForModeration();
 
         $this->assertCount(1, $pendingComment);
-        $this->assertTrue($pendingComment->every(fn ($comment) => $comment->status->isPending()));
+        $this->assertTrue($pendingComment->every(fn($comment) => $comment->status->isPending()));
     }
 
     #[Test]

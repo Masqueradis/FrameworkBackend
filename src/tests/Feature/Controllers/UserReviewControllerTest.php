@@ -25,7 +25,7 @@ class UserReviewControllerTest extends TestCase
 
         Comment::factory()->count(3)->create([
             'user_id' => $user->id,
-            'product_id' => $product->id
+            'product_id' => $product->id,
         ]);
 
         $response = $this->actingAs($user)
@@ -47,7 +47,7 @@ class UserReviewControllerTest extends TestCase
             'user_id' => $user->id,
             'product_id' => $product->id,
             'content' => 'Old',
-            'rating' => 1
+            'rating' => 1,
         ]);
 
         $response = $this->actingAs($user)

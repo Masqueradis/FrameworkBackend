@@ -65,7 +65,7 @@ class CartControllerTest extends TestCase
 
         $cart = Cart::create([
             'user_id' => $user->id,
-            'session_id' => 'test-session-123'
+            'session_id' => 'test-session-123',
         ]);
         $product = Product::factory()->create();
         $item = CartItem::create([

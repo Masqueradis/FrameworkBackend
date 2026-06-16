@@ -15,9 +15,10 @@ use Illuminate\Queue\SerializesModels;
 
 class OrderConfirmationMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
-    public function __construct(public Order $order){}
+    public function __construct(public Order $order) {}
 
     public function envelope(): Envelope
     {

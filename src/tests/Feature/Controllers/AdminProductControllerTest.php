@@ -12,6 +12,8 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
@@ -216,5 +218,39 @@ class AdminProductControllerTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertViewHas('userComment');
+    }
+
+    #[Test]
+    public function testDestroyAllImagesRemovesFilesFromStorageAndDatabase(): void
+    {
+        Storage::fake('minio');
+
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $admin = User::factory()->create();
+        $admin->assignRole($adminRole);
+
+        $product = Product::factory()->create();
+
+        $file1 = UploadedFile::fake()->image('photo1.jpg')->store('products', 'minio');
+        $file2 = UploadedFile::fake()->image('photo2.jpg')->store('products', 'minio');
+
+        ProductImage::factory()->create(['product_id' => $product->id, 'path' => $file1]);
+        ProductImage::factory()->create(['product_id' => $product->id, 'path' => $file2]);
+
+        Storage::disk('minio')->assertExists($file1);
+        $this->assertDatabaseCount('product_images', 2);
+
+        $response = $this->actingAs($admin)
+            ->from(route('admin.products.edit', $product))
+            ->delete(route('admin.products.images.destroy-all', $product));
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect(route('admin.products.edit', $product));
+        $response->assertSessionHas('success', 'All images have been successfully removed.');
+
+
+        $this->assertDatabaseMissing('product_images', ['product_id' => $product->id]);
+        Storage::disk('minio')->assertMissing($file1);
+        Storage::disk('minio')->assertMissing($file2);
     }
 }
