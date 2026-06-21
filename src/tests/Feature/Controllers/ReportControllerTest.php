@@ -48,7 +48,7 @@ class ReportControllerTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $response->assertSessionHas('success', 'Report send to generation queue.');
+        $response->assertSessionHas('success', 'Report sent to generation queue.');
 
         $this->assertDatabaseHas('reports', [
             'admin_id' => $this->admin->id,

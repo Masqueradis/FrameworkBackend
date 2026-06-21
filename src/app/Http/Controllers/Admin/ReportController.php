@@ -29,13 +29,11 @@ class ReportController extends ApiController
         return view('admin.reports.index', compact('reports'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(RequestReportDTO $dto): RedirectResponse
     {
-        $dto = RequestReportDTO::from($request->all());
-
         $this->reportService->requestGeneration((int) auth()->id(), $dto);
 
-        return back()->with('success', 'Report send to generation queue.');
+        return back()->with('success', 'Report sent to generation queue.');
     }
 
     public function download(Report $report): StreamedResponse
