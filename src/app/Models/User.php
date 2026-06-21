@@ -63,6 +63,7 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'status' => UserStatus::class,
+            'google2fa_secret' => 'encrypted',
         ];
     }
 
