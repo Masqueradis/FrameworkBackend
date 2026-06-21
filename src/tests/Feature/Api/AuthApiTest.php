@@ -288,7 +288,7 @@ class AuthApiTest extends TestCase
         $response = $this->actingAs($user, 'api')->get('/api/v1/user');
 
         $response->assertStatus(Response::HTTP_OK)
-            ->assertJsonPath('id', $user->id);
+            ->assertJsonPath('data.id', $user->id);
     }
 
     #[Test]

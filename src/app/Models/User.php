@@ -35,9 +35,7 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
         'name',
         'email',
         'password',
-        'email_verified_at',
         'avatar_path',
-        'status',
         'google2fa_secret',
     ];
 

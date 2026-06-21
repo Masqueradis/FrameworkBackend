@@ -81,9 +81,9 @@ class UserRepository
 
     public function update2faSecret(int $userId, ?string $secret): bool
     {
-        return User::where('id', $userId)->update([
-            'google2fa_secret' => $secret,
-        ]) > 0;
+        $user = User::find($userId);
+
+        return $user->update(['google2fa_secret' => $secret]);
     }
 
     /**
