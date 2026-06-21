@@ -29,11 +29,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'not.banned' => EnsureUserIsNotBanned::class,
         ]);
     })
-    ->withMiddleware(function (Middleware $middleware) {
-        $middleware->validateCsrfTokens(except: [
-            '/api/v1/webhooks',
-        ]);
-    })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \Laravel\Passport\Http\Middleware\CreateFreshApiToken::class,
