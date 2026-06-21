@@ -1,6 +1,8 @@
 services:
     app:
-        image: masqueradisu/laravel-php:latest
+        build:
+            context: .
+            dockerfile: php/Dockerfile
         platform: linux/amd64
         extra_hosts:
             - 'host.docker.internal:host-gateway'
