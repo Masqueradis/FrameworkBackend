@@ -8,11 +8,15 @@ use InvalidArgumentException;
 
 class Money
 {
-    public function __construct(private int $cents)
-    {
+    public function __construct(
+        private int $cents,
+        private string $currency = 'USD'
+    ) {
         if ($cents < 0) {
             throw new InvalidArgumentException('Amount cannot be negative.');
         }
+
+        $this->currency = strtoupper($currency);
     }
 
     public function getCents(): int
@@ -25,9 +29,16 @@ class Money
         return $this->cents / 100;
     }
 
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
+
     public function getFormated(): string
     {
-        return '$' . number_format($this->getDollars(), 2);
+        $symbol = $this->currency === 'USD' ? '$' : $this->currency . ' ';
+
+        return $symbol . number_format($this->getDollars(), 2);
     }
 
     public function add(Money $other): self

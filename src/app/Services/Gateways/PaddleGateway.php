@@ -30,7 +30,7 @@ class PaddleGateway implements GatewayStrategyInterface
                 'custom_data' => ['order_id' => $order->id],
                 'customer_info' => ['email' => $order->customer_email],
                 'checkout' => [
-                    'success_url' => route('checkout.result'), '?status=success',
+                    'success_url' => route('checkout.result') . '?status=success',
                 ],
             ]);
 
@@ -90,7 +90,7 @@ class PaddleGateway implements GatewayStrategyInterface
                     'description' => $item->product->name ?? 'Unknown product',
                     'unit_price' => [
                         'amount' => (string) $priceObj->getCents(),
-                        'currency_code' => 'USD',
+                        'currency_code' => strtoupper($priceObj->getCurrency()),
                     ],
                     'product' => [
                         'name' => $item->product->name ?? 'Unknown product',

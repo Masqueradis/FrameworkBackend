@@ -81,7 +81,7 @@ class StripeGateway implements GatewayStrategyInterface
             $priceObj = $item->price_cents;
             $items[] = [
                 'price_data' => [
-                    'currency' => 'usd',
+                    'currency' => strtolower($priceObj->getCurrency()),
                     'unit_amount' => $priceObj->getCents(),
                     'product_data' => [
                         'name' => $item->product->name ?? 'Unknown Product',
