@@ -67,18 +67,16 @@ class ProductApiTest extends TestCase
                 'success',
                 'message',
                 'data' => [
-                    'data' => [
-                        '*' => [
-                            'id',
-                            'name',
-                            'price',
-                            'category' => ['id', 'name'],
-                        ],
+                    '*' => [
+                        'id',
+                        'name',
+                        'price',
+                        'category' => ['id', 'name'],
                     ],
-                    'meta' => ['current_page', 'last_page', 'total'],
                 ],
+                'meta' => ['current_page', 'last_page', 'total'],
             ]);
-        $this->assertCount(9, $response->json('data.data'));
+        $this->assertCount(9, $response->json('data'));
     }
 
     #[Test]
@@ -92,8 +90,8 @@ class ProductApiTest extends TestCase
         $response = $this->actingAs($this->admin, 'api')->getJson('/api/v1/products?min_price=1000');
         $response->assertStatus(Response::HTTP_OK);
 
-        $this->assertCount(1, $response->json('data.data'));
-        $this->assertEquals(5000, $response->json('data.data.0.price'));
+        $this->assertCount(1, $response->json('data'));
+        $this->assertEquals(5000, $response->json('data.0.price'));
     }
 
     #[Test]

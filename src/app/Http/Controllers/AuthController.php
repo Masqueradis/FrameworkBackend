@@ -352,8 +352,8 @@ class AuthController extends ApiController
             ),
         ]
     )]
-    public function user(Request $request): JsonResponse|RedirectResponse
+    public function user(Request $request): UserResource
     {
-        return response()->json($request->user());
+        return new UserResource($request->user());
     }
 }

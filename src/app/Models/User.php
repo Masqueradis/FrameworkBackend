@@ -49,6 +49,7 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'google2fa_secret',
     ];
 
     /**

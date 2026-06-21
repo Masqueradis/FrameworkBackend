@@ -49,7 +49,8 @@ abstract class ApiController extends Controller
         return response()->json([
             'success' => true,
             'message' => $message,
-            'data' => $paginatedData['data']
+            'data' => $paginatedData['data'],
+            'meta' => $paginatedData['meta'] ?? null,
         ], $code);
     }
 }
