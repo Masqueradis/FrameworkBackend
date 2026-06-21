@@ -36,12 +36,7 @@ class ProductFilter extends QueryFilter
 
     public function search(string $search): void
     {
-        $term = '%' . $search . '%';
-
-        $this->builder->where(function ($query) use ($term) {
-            $query->where('name', 'like', $term)
-                ->orWhere('description', 'like', $term);
-        });
+        $this->builder->whereFullText(['name', 'description'], $search);
     }
 
     /**
