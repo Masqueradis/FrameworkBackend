@@ -41,4 +41,15 @@ abstract class ApiController extends Controller
         }
         return response()->json($response, $code);
     }
+
+    protected function respondPaginated($resourceCollection, string $message = 'Success', int $code = Response::HTTP_OK): JsonResponse
+    {
+        $paginatedData = $resourceCollection->response()->getData(true);
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'data' => $paginatedData['data']
+        ], $code);
+    }
 }
