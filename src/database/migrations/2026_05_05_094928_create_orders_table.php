@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->string('customer_phone')->nullable();
             $table->text('shipping_address');
             $table->string('status')->default('pending');
-            $table->integer('total_amount_cents');
+            $table->unsignedBigInteger('total_amount_cents');
             $table->timestamps();
         });
     }

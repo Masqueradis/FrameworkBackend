@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->string('provider');
             $table->string('transaction_id')->nullable()->unique();
             $table->string('status')->default(PaymentStatus::Pending);
-            $table->integer('amount_cents');
+            $table->unsignedBigInteger('amount_cents');
             $table->timestamps();
         });
     }

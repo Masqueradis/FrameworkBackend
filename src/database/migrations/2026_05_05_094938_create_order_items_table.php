@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
             $table->string('product_name');
             $table->integer('quantity');
-            $table->integer('price_cents');
+            $table->unsignedBigInteger('price_cents');
             $table->timestamps();
         });
     }
