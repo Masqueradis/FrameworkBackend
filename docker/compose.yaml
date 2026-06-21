@@ -98,6 +98,24 @@ services:
             - loki
         container_name: ${APP_NAME}_grafana
 
+    prometheus:
+        image: prom/prometheus:latest
+        restart: unless-stopped
+        volumes:
+            - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+            - prometheus_data:/prometheus
+        command:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--storage.tsdb.path=/prometheus'
+            - '--web.console.libraries=/etc/prometheus/console_libraries'
+            - '--web.console.templates=/etc/prometheus/consoles'
+            - '--web.enable-lifecycle'
+        expose:
+            - 9090
+        networks:
+            - sail
+        container_name: ${APP_NAME}_prometheus
+
     minio:
         image: 'minio/minio:latest'
         ports:
@@ -189,3 +207,4 @@ volumes:
         driver: local
     sail-minio:
         driver: local
+    prometheus_data: {}

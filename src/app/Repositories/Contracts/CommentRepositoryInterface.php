@@ -27,6 +27,7 @@ interface CommentRepositoryInterface
     public function delete(Comment $comment): ?bool;
     public function findByUserAndProduct(int $userId, int $productId): ?Comment;
     public function updateStatus(Comment $comment, CommentStatus $status): bool;
+
     /**
      * @param int $productId
      * @return Collection<int, Comment>
