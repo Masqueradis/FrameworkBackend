@@ -67,9 +67,15 @@
                             </li>
 
                             @can('access-panel')
+                                @if (auth()->user()->hasPermissionTo('manage-categories'))
                                 <li>
                                     <a class="dropdown-item" href="{{ route('admin.dashboard') }}">Admin Panel</a>
                                 </li>
+                                @else
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('admin.products.index') }}">Product Panel</a>
+                                </li>
+                                @endif
                             @endcan
 
                             <li><hr class="dropdown-divider"></li>

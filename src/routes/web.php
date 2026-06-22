@@ -85,7 +85,9 @@ Route::middleware('auth')->group(function () {
         ->name('comments.destroy');
 
     Route::prefix('admin')->middleware('role:admin|manager|seller')->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/', [DashboardController::class, 'index'])
+            ->middleware('role:admin|manager')
+            ->name('admin.dashboard');
 
         Route::resource('categories', AdminCategoryController::class)
             ->middleware('can:manage,App\Models\Category')

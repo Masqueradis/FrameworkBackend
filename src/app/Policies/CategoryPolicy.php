@@ -26,7 +26,7 @@ class CategoryPolicy
 
     public function manage(User $user): bool
     {
-        return $user->hasPermissionTo('manage-category', 'web');
+        return $user->hasPermissionTo('manage-categories', 'web');
     }
 
     /**
