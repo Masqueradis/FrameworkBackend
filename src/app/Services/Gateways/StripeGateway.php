@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Gateways;
 
 use App\DTO\Checkout\PaymentWebhookDTO;
+use App\Enums\PaymentProvider;
+use App\Enums\PaymentStatus;
 use App\Services\Gateways\Strategy\GatewayStrategyInterface;
 use App\ValueObjects\Cart\Money;
 use Exception;
@@ -40,12 +42,12 @@ class StripeGateway implements GatewayStrategyInterface
         return $session->url ?? '';
     }
 
-    public function verifyWebhook(Request $request): PaymentWebhookDTO
+    public function verifyWebhook(string $payload, string $signature): PaymentWebhookDTO
     {
         try {
             $event = Webhook::constructEvent(
-                $request->getContent(),
-                (string) $request->header('Stripe-Signature'),
+                $payload,
+                $signature,
                 config('services.stripe.webhook_secret')
             );
         } catch (SignatureVerificationException $e) {
@@ -62,8 +64,8 @@ class StripeGateway implements GatewayStrategyInterface
         return new PaymentWebhookDTO(
             orderId: (int) ($session->metadata->order_id ?? 0),
             transactionId: (string) ($session->payment_intent ?? $session->id),
-            provider: 'stripe',
-            status: 'success'
+            provider: PaymentProvider::Stripe,
+            status: PaymentStatus::Success
         );
     }
 

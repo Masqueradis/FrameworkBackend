@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTO\Checkout;
 
+use App\Enums\PaymentProvider;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
 use Spatie\LaravelData\Attributes\Validation\Email;
@@ -21,7 +22,6 @@ class CheckoutDTO extends Data
         public readonly string $customerEmail,
         public readonly ?string $customerPhone,
         public readonly string $shippingAddress,
-        #[In(['stripe', 'paddle'])]
-        public readonly string $paymentProvider,
+        public readonly PaymentProvider $paymentProvider,
     ) {}
 }

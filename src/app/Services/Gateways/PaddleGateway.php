@@ -3,6 +3,8 @@
 namespace App\Services\Gateways;
 
 use App\DTO\Checkout\PaymentWebhookDTO;
+use App\Enums\PaymentProvider;
+use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Services\Gateways\Strategy\GatewayStrategyInterface;
 use App\ValueObjects\Cart\Money;
@@ -41,18 +43,21 @@ class PaddleGateway implements GatewayStrategyInterface
         return $response->json('data.id');
     }
 
-    public function verifyWebhook(Request $request): PaymentWebhookDTO
+    public function verifyWebhook(string $payload, string $signature): PaymentWebhookDTO
     {
-        $signatureHeader = $request->header('Paddle-Signature');
-
-        if (!$signatureHeader) {
+        if (!$signature) {
             throw new Exception('Invalid Paddle signature', Response::HTTP_BAD_REQUEST);
         }
 
-        $parts = explode(';', $signatureHeader);
+        $parts = explode(';', $signature);
+        if (count($parts) < 2) {
+            throw new Exception('Malformed Paddle signature', Response::HTTP_BAD_REQUEST);
+        }
+
         $ts = str_replace('ts=', '', $parts[0]);
         $h1 = str_replace('h1=', '', $parts[1]);
-        $signedPayload = $ts . ':' . $request->getContent();
+
+        $signedPayload = $ts . ':' . $payload;
         $secret = config('services.paddle.webhook_secret');
         $expectedH1 = hash_hmac('sha256', $signedPayload, $secret);
 
@@ -60,16 +65,17 @@ class PaddleGateway implements GatewayStrategyInterface
             throw new Exception('Invalid Paddle signature', Response::HTTP_BAD_REQUEST);
         }
 
-        $payload = $request->all();
-        if ($payload['event_type'] !== 'transaction.completed') {
+        $data = json_decode($payload, true);
+
+        if (($data['event_type'] ?? '') !== 'transaction.completed') {
             throw new Exception('Ignored event type', Response::HTTP_OK);
         }
 
         return new PaymentWebhookDTO(
-            orderId: (int) $payload['data']['custom_data']['order_id'],
-            transactionId: $payload['data']['id'],
-            provider: 'paddle',
-            status: 'success'
+            orderId: (int) $data['data']['custom_data']['order_id'],
+            transactionId: (string) $data['data']['id'],
+            provider: PaymentProvider::Paddle,
+            status: PaymentStatus::Success
         );
     }
 

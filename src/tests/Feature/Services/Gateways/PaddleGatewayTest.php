@@ -102,27 +102,20 @@ class PaddleGatewayTest extends TestCase
         $h1 = hash_hmac('sha256', $ts . ':' . $payload, 'test_secret');
         $signatureHeader = "ts={$ts};h1={$h1}";
 
-        $request = Request::create('/webhook/paddle', 'POST', [], [], [], [], $payload);
-        $request->headers->set('Paddle-Signature', $signatureHeader);
-        $request->headers->set('Content-Type', 'application/json');
-
-        $dto = $this->gateway->verifyWebhook($request);
+        $dto = $this->gateway->verifyWebhook($payload, $signatureHeader);
 
         $this->assertEquals(15, $dto->orderId);
         $this->assertEquals('txn_999', $dto->transactionId);
-        $this->assertEquals('paddle', $dto->provider);
+        $this->assertEquals(\App\Enums\PaymentProvider::Paddle, $dto->provider);
         $this->assertTrue($dto->isSuccess());
     }
 
     #[Test]
     public function testThrowsExceptionOnInvalidSignature(): void
     {
-        $request = Request::create('/webhook/paddle', 'POST');
-        $request->headers->set('Paddle-Signature', 'ts=123;h1=invalid_hash');
-
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Invalid Paddle signature');
-        $this->gateway->verifyWebhook($request);
+        $this->gateway->verifyWebhook('', 'ts=123;h1=invalid_hash');
     }
 
     #[Test]
@@ -136,11 +129,10 @@ class PaddleGatewayTest extends TestCase
     #[Test]
     public function testThrowsExceptionOnMissingSignature(): void
     {
-        $request = Request::create('/webhook/paddle', 'POST');
-
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Invalid Paddle signature');
-        $this->gateway->verifyWebhook($request);
+
+        $this->gateway->verifyWebhook('', '');
     }
 
     #[Test]
@@ -150,12 +142,9 @@ class PaddleGatewayTest extends TestCase
         $ts = time();
         $h1 = hash_hmac('sha256', $ts . ':' . $payload, 'test_secret');
 
-        $request = Request::create('/webhook/paddle', 'POST', [], [], [], [], $payload);
-        $request->headers->set('Paddle-Signature', "ts={$ts};h1={$h1}");
-        $request->headers->set('Content-Type', 'application/json');
-
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Ignored event type');
-        $this->gateway->verifyWebhook($request);
+
+        $this->gateway->verifyWebhook($payload, "ts={$ts};h1={$h1}");
     }
 }

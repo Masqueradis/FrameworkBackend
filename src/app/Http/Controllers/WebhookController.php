@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\PaymentProvider;
 use App\Models\Order;
+use App\Services\Gateways\StripeGateway;
 use App\Services\OrderService;
 use App\Services\Gateways\GatewayFactory;
 use Illuminate\Http\JsonResponse;
@@ -54,9 +56,16 @@ class WebhookController extends ApiController
     public function handle(Request $request, string $provider, OrderService $checkoutService): JsonResponse
     {
         try {
-            $gateway = GatewayFactory::make($provider);
+            $paymentProvider = PaymentProvider::from($provider);
 
-            $dto = $gateway->verifyWebhook($request);
+            $gateway = GatewayFactory::make($paymentProvider);
+
+            $signature = match ($paymentProvider) {
+                PaymentProvider::Stripe => (string) $request->header('Stripe-Signature'),
+                PaymentProvider::Paddle => (string) $request->header('Paddle-Signature'),
+            };
+
+            $dto = $gateway->verifyWebhook($request->getContent(), $signature);
         } catch (Exception $exception) {
             $code = $exception->getCode() === Response::HTTP_BAD_REQUEST
                 ? Response::HTTP_BAD_REQUEST
@@ -69,7 +78,7 @@ class WebhookController extends ApiController
                 $order,
                 $dto->isSuccess(),
                 $dto->transactionId,
-                $dto->provider,
+                $dto->provider->value,
             );
             if ($dto->isSuccess()) {
                 \App\Events\OrderCreated::dispatch($order);

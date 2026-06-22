@@ -4,6 +4,8 @@ namespace Tests\Feature\Controllers;
 
 use App\DTO\Checkout\PaymentWebhookDTO;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentProvider;
+use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\Gateways\StripeGateway;
@@ -37,7 +39,7 @@ class WebhookControllerTest extends TestCase
             'status' => OrderStatus::Pending,
             'total_amount_cents' => 4500,
         ]);
-        $dto = new PaymentWebhookDTO($order->id, 'txn_123', 'stripe', 'success');
+        $dto = new PaymentWebhookDTO($order->id, 'txn_123', PaymentProvider::Stripe, PaymentStatus::Success);
 
         $mockGateway = Mockery::mock(StripeGateway::class);
         $mockGateway->shouldReceive('verifyWebhook')->andReturn($dto);

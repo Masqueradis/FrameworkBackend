@@ -6,6 +6,7 @@ namespace Tests\Feature\Services;
 
 use App\DTO\Checkout\CheckoutDTO;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentProvider;
 use App\Enums\PaymentStatus;
 use App\Events\OrderCreated;
 use App\Exceptions\EmptyCartException;
@@ -43,7 +44,7 @@ class CheckoutServiceTest extends TestCase
             'test@example.com',
             '123',
             'Address',
-            'stripe'
+            PaymentProvider::Stripe,
         );
 
         $this->expectException(EmptyCartException::class);
@@ -67,7 +68,7 @@ class CheckoutServiceTest extends TestCase
             'test@example.com',
             '123',
             'Address',
-            'stripe'
+            PaymentProvider::Stripe,
         );
 
         $order = $this->checkoutService->process($dto, $cart);
@@ -162,7 +163,7 @@ class CheckoutServiceTest extends TestCase
             'test@example.com',
             '123',
             'Address',
-            'stripe'
+            PaymentProvider::Stripe,
         );
 
         $this->expectException(ValidationException::class);
@@ -189,7 +190,7 @@ class CheckoutServiceTest extends TestCase
             'test@example.com',
             '123',
             'Address',
-            'stripe',
+            PaymentProvider::Stripe,
         );
 
         $order = $this->checkoutService->process($dto, $cart);

@@ -73,12 +73,13 @@ class StripeGatewayTest extends TestCase
     #[Test]
     public function testThrowsExceptionOnInvalidWebhookSignature(): void
     {
-        $request = Request::create('/webhooks/stripe', 'POST', [], [], [], [], '{"type":"checkout.session.completed"}');
-        $request->headers->set('Stripe-Signature', 'invalid_signature');
+        $payload = '{"type":"checkout.session.completed"}';
+        $signature = 'invalid_signature';
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Invalid Stripe signature');
-        $this->gateway->verifyWebhook($request);
+
+        $this->gateway->verifyWebhook($payload, $signature);
     }
 
     #[Test]
@@ -124,10 +125,9 @@ class StripeGatewayTest extends TestCase
             ],
         ]);
 
-        $request = Request::create('/webhooks/stripe', 'POST', [], [], [], [], $payload);
-        $request->headers->set('Stripe-Signature', $this->generateStripeSignature($payload));
+        $signature = $this->generateStripeSignature($payload);
 
-        $dto = $this->gateway->verifyWebhook($request);
+        $dto = $this->gateway->verifyWebhook($payload, $signature);
 
         $this->assertEquals(10, $dto->orderId);
         $this->assertEquals('pi_123', $dto->transactionId);
@@ -142,12 +142,12 @@ class StripeGatewayTest extends TestCase
             'data' => ['object' => []],
         ]);
 
-        $request = Request::create('/webhooks/stripe', 'POST', [], [], [], [], $payload);
-        $request->headers->set('Stripe-Signature', $this->generateStripeSignature($payload));
+        $signature = $this->generateStripeSignature($payload);
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Ignored event type');
-        $this->gateway->verifyWebhook($request);
+
+        $this->gateway->verifyWebhook($payload, $signature);
     }
 
     private function generateStripeSignature(string $payload): string
