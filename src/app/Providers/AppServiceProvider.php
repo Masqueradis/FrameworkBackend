@@ -56,10 +56,6 @@ class AppServiceProvider extends ServiceProvider
             return $user->hasRole(['admin', 'seller', 'manager']);
         });
 
-        Gate::define('manage-categories', function (User $user) {
-            return $user->hasRole(['admin', 'manager']);
-        });
-
         Gate::define('manage-users', function (User $user) {
             return $user->hasRole(['admin', 'manager']);
         });

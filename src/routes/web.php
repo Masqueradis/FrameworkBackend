@@ -88,7 +88,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::resource('categories', AdminCategoryController::class)
-            ->middleware('can:manage-categories')
+            ->middleware('can:manage,App\Models\Category')
             ->names('admin.categories')->except(['show']);
 
         Route::resource('products', AdminProductController::class)
