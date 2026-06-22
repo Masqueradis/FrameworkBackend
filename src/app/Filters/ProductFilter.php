@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filters;
 
+use App\Enums\ProductAttribute;
 use App\Models\Product;
 use App\ValueObjects\Id\CategoryId;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,6 +15,14 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ProductFilter extends QueryFilter
 {
+    protected array $allowedFilters = [
+        'category_id',
+        'min_price',
+        'max_price',
+        'search',
+        'attributes',
+    ];
+
     /**
      * @param int|string $id
      */
@@ -45,7 +54,9 @@ class ProductFilter extends QueryFilter
     public function attributes(array $attributes): void
     {
         foreach ($attributes as $attribute => $value) {
-            $this->builder->whereIn("attributes->{$attribute}", (array) $value);
+            if(ProductAttribute::tryFrom($attribute)) {
+                $this->builder->whereIn("attributes->{$attribute}", (array)$value);
+            }
         }
     }
 }
