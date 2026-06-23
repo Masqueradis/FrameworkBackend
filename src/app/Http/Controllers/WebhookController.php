@@ -68,10 +68,11 @@ class WebhookController extends ApiController
 
             $dto = $gateway->verifyWebhook($request->getContent(), $signature);
         } catch (Exception $exception) {
-            $code = $exception->getCode() === Response::HTTP_BAD_REQUEST
-                ? Response::HTTP_BAD_REQUEST
-                : Response::HTTP_OK;
-            return response()->json(['message' => $exception->getMessage()], $code);
+            if (in_array($exception->getCode(), [Response::HTTP_BAD_REQUEST, Response::HTTP_OK])) {
+                return response()->json(['message' => $exception->getMessage()], $exception->getCode());
+            }
+
+            throw $exception;
         }
         $order = Order::find($dto->orderId);
         if ($order) {
