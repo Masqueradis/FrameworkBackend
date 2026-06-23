@@ -121,11 +121,6 @@ class CheckoutController extends ApiController
                 'status' => 'error',
                 'message' => 'Your cart is empty.',
             ], Response::HTTP_BAD_REQUEST);
-        } catch (\Exception $exception) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $exception->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         } finally {
             $lock->release();
         }
