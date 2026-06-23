@@ -48,7 +48,7 @@ readonly class CartService
             throw ValidationException::withMessages(['quantity' => 'Not enough stock available.']);
         }
 
-        $price = new Money((int) $product->price);
+        $price = new Money((int) round($product->price * 100));
 
         $this->cartRepository->addOrUpdateItem($cart, $product->id, $newQuantity, $price);
     }
