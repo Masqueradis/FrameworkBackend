@@ -37,6 +37,8 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
         'password',
         'avatar_path',
         'google2fa_secret',
+        'google2fa_last_window',
+        '2fa_two_factor_recovery_codes',
     ];
 
     /**
@@ -48,6 +50,7 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
         'password',
         'remember_token',
         'google2fa_secret',
+        '2fa_two_factor_recovery_codes',
     ];
 
     /**
@@ -62,6 +65,7 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
             'password' => 'hashed',
             'status' => UserStatus::class,
             'google2fa_secret' => 'encrypted',
+            'google2fa_last_window' => 'integer',
         ];
     }
 

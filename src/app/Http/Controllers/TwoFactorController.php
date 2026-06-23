@@ -47,11 +47,14 @@ class TwoFactorController extends ApiController
         $user = auth()->user();
         assert($user instanceof User);
 
-        $isActivated = $this->twoFactorAuthService->enable2fa($user, $secret, $dto->otp);
+        $codes = $this->twoFactorAuthService->enable2fa($user, $secret, $dto->otp);
 
-        if ($isActivated) {
+        if ($codes) {
             $request->session()->forget(['2fa_secret', '2fa_qr']);
-            return back()->with('success', 'Two factor authentication successfully enabled.');
+
+            return back()
+                ->with('success', 'Two factor authentication successfully enabled.')
+                ->with('recovery_codes', $codes);
         }
 
         return back()->withErrors(['otp' => 'Invalid verification code. Please try again.']);

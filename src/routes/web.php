@@ -38,7 +38,9 @@ Route::middleware('guest')->controller(AuthController::class)->group(function ()
     Route::get('/verify/{token}', 'verifyEmail')->name('verification.verify.custom');
 
     Route::get('/login/2fa', [TwoFactorController::class, 'showVerifyForm'])->name('login.2fa');
-    Route::post('/login/2fa', [TwoFactorController::class, 'verifyLogin'])->name('login.2fa.post');
+    Route::post('/login/2fa', [TwoFactorController::class, 'verifyLogin'])
+        ->middleware('throttle:5,1')
+        ->name('login.2fa.post');
 });
 
 Route::prefix('cart')->name('cart.')->group(function () {

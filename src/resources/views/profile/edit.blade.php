@@ -132,4 +132,40 @@
             </div>
         </div>
     </div>
+    @if(session('recovery_codes'))
+        <div class="modal fade" id="recoveryCodesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content border-success">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title fw-bold">2FA Enabled Successfully!</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <strong><i class="bi bi-exclamation-triangle"></i> IMPORTANT:</strong>
+                            Please save these recovery codes in a secure location (like a password manager).
+                            <strong>They will only be shown to you this one time!</strong>
+                        </div>
+                        <p class="text-muted text-center mb-3">If you lose access to your phone, you can use these to log in.</p>
+
+                        <div class="bg-light p-3 rounded text-center font-monospace fs-4 border shadow-sm">
+                            @foreach(session('recovery_codes') as $code)
+                                <div class="mb-1 tracking-wider">{{ $code }}</div>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-success fw-bold px-4" data-bs-dismiss="modal">I have saved my codes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var recoveryModal = new bootstrap.Modal(document.getElementById('recoveryCodesModal'));
+                recoveryModal.show();
+            });
+        </script>
+    @endif
 @endsection

@@ -79,11 +79,14 @@ class UserRepository
         ]) > 0;
     }
 
-    public function update2faSecret(int $userId, ?string $secret): bool
+    public function update2faSecret(int $userId, ?string $secret, ?string $secretCode = null): bool
     {
         $user = User::find($userId);
 
-        return $user->update(['google2fa_secret' => $secret]);
+        return $user->update([
+            'google2fa_secret' => $secret,
+            '2fa_two_factor_recovery_codes' => $secretCode,
+        ]);
     }
 
     /**
