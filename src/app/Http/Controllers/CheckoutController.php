@@ -15,6 +15,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 use OpenApi\Attributes as OA;
@@ -93,14 +94,26 @@ class CheckoutController extends ApiController
         $userId = auth()->id() ? (int) auth()->id() : null;
         $cart = $this->cartRepository->findOrCreate($userId, session()->getId());
 
+        $lock = Cache::lock('checkout_cart_' . $cart->id, 10);
+
+        if (!$lock->get()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Checkout is already in progress. Please wait.',
+            ], Response::HTTP_TOO_MANY_REQUESTS);
+        }
+
         try {
             $order = $this->checkoutService->process($data, $cart);
+
+            $this->cartRepository->clearCart($cart->id);
+
             $gateway = GatewayFactory::make($data->paymentProvider);
             $result = $gateway->createCheckoutUrl($order);
 
             return response()->json([
                 'status' => 'success',
-                'provider' => $data->paymentProvider,
+                'provider' => $data->paymentProvider->value,
                 'action' => $result,
             ]);
         } catch (EmptyCartException $exception) {
@@ -109,21 +122,19 @@ class CheckoutController extends ApiController
                 'message' => 'Your cart is empty.',
             ], Response::HTTP_BAD_REQUEST);
         } catch (\Exception $exception) {
-            return response()->json(
-                [
-                    'status' => 'error',
-                    'message' => $exception->getMessage()],
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
+            return response()->json([
+                'status' => 'error',
+                'message' => $exception->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } finally {
+            $lock->release();
         }
     }
 
     public function result(Request $request): View|RedirectResponse
     {
-        $userId = auth()->id() ? (int) auth()->id() : null;
-        $cart = $this->cartRepository->findOrCreate($userId, session()->getId());
-        $this->cartRepository->clearCart($cart->id);
+        $status = $request->query('status', 'pending');
 
-        return view('checkout.result', ['status' => 'success']);
+        return view('checkout.result', ['status' => $status]);
     }
 }
