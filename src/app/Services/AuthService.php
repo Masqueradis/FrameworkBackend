@@ -72,7 +72,7 @@ readonly class AuthService
         return new AuthResultDTO($user, $apiToken);
     }
 
-    public function login(LoginUserDTO $data): AuthResultDTO
+    public function login(LoginUserDTO $data): User
     {
         $user = $this->userRepository->findByEmail($data->email);
 
@@ -81,9 +81,8 @@ readonly class AuthService
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
-        $token = $user->createToken('ApiAccess')->accessToken;
 
-        return new AuthResultDTO($user, $token);
+        return $user;
     }
 
     public function logout(User $user): void

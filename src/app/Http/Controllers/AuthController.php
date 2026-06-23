@@ -216,31 +216,33 @@ class AuthController extends ApiController
     )]
     public function login(LoginUserDTO $request): JsonResponse|RedirectResponse
     {
-        $resultData = $this->authService->login($request);
+        $user = $this->authService->login($request);
 
-        if ($resultData->user->google2fa_secret) {
+        if ($user->google2fa_secret) {
             if (request()->expectsJson()) {
                 return $this->respondSuccess(
-                    data: ['require_2fa' => true, 'user_id' => $resultData->user->id],
-                    message: 'Two factor authentication was successful.',
+                    data: ['require_2fa' => true, 'user_id' => $user->id],
+                    message: 'Two factor authentication required.',
                 );
             }
 
-            request()->session()->put('2fa:user_id', $resultData->user->id);
+            request()->session()->put('2fa:user_id', $user->id);
             return redirect()->route('login.2fa');
         }
+
+        $token = $user->createToken('ApiAccess')->accessToken;
 
         if (request()->expectsJson()) {
             return $this->respondSuccess(
                 data: [
-                    'user' => new UserResource($resultData->user),
-                    'token' => $resultData->accessToken,
+                    'user' => new UserResource($user),
+                    'token' => $token,
                 ],
                 message: 'Login successfully.',
             );
         }
 
-        Auth::login($resultData->user);
+        Auth::login($user);
         request()->session()->regenerate();
 
         return redirect()->intended('/profile');
