@@ -16,6 +16,7 @@ use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 readonly class OrderService
 {
@@ -55,20 +56,29 @@ readonly class OrderService
 
     public function handleWebhook(Order $order, bool $isSuccess, string $transactionId, string $provider): void
     {
-        $this->orderRepository->addPayment($order, [
-            'provider' => $provider,
-            'transaction_id' => $transactionId,
-            'amount_cents' => $order->total_amount_cents,
-            'status' => $isSuccess ? PaymentStatus::Paid->value : PaymentStatus::Failed->value,
-        ]);
+        DB::transaction(function () use ($order, $isSuccess, $transactionId, $provider) {
 
-        if ($isSuccess) {
-            $this->orderRepository->updateStatus($order, OrderStatus::Completed->value);
-            return;
-        }
+            if ($order->payments()->where('transaction_id', $transactionId)->exists()) {
+                return;
+            }
 
-        $this->orderRepository->updateStatus($order, OrderStatus::Cancelled->value);
-        $this->orderRepository->restoreStock($order);
+            $this->orderRepository->addPayment($order, [
+                'provider' => $provider,
+                'transaction_id' => $transactionId,
+                'amount_cents' => $order->total_amount_cents,
+                'status' => $isSuccess ? PaymentStatus::Paid->value : PaymentStatus::Failed->value,
+            ]);
+
+            if ($isSuccess) {
+                $this->orderRepository->updateStatus($order, OrderStatus::Completed->value);
+                return;
+            }
+
+            if ($order->status !== OrderStatus::Cancelled->value) {
+                $this->orderRepository->updateStatus($order, OrderStatus::Cancelled->value);
+                $this->orderRepository->restoreStock($order);
+            }
+        });
     }
 
     /**

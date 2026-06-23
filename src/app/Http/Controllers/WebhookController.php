@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\PaymentProvider;
+use App\Events\OrderCreated;
 use App\Models\Order;
 use App\Services\Gateways\StripeGateway;
 use App\Services\OrderService;
@@ -80,9 +81,6 @@ class WebhookController extends ApiController
                 $dto->transactionId,
                 $dto->provider->value,
             );
-            if ($dto->isSuccess()) {
-                \App\Events\OrderCreated::dispatch($order);
-            }
         }
 
         return response()->json(['status' => 'success']);
