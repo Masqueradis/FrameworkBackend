@@ -54,18 +54,37 @@ class StripeGateway implements GatewayStrategyInterface
             throw new Exception('Invalid Stripe signature', Response::HTTP_BAD_REQUEST);
         }
 
-        if ($event->type !== 'checkout.session.completed') {
+        /** @var Session $session */
+        $session = $event->data->object;
+        $type = $event->type;
+        $orderId = (int) ($session->metadata->order_id ?? 0);
+
+        if (in_array($type, ['checkout.session.completed', 'checkout.session.async_payment_succeeded'])) {
+
+            if ($session->payment_status !== 'paid') {
+                throw new Exception('Payment not completed yet', Response::HTTP_OK);
+            }
+
+            $status = PaymentStatus::Success;
+
+        } elseif (in_array($type, ['checkout.session.expired', 'checkout.session.async_payment_failed'])) {
+            $status = PaymentStatus::Failed;
+        } else {
             throw new Exception('Ignored event type', Response::HTTP_OK);
         }
 
-        /** @var Session $session */
-        $session = $event->data->object;
+        if ($status === PaymentStatus::Success) {
+            $order = Order::find($orderId);
+            if ($order && $session->amount_total !== $order->total_amount_cents) {
+                $status = PaymentStatus::Failed;
+            }
+        }
 
         return new PaymentWebhookDTO(
-            orderId: (int) ($session->metadata->order_id ?? 0),
+            orderId: $orderId,
             transactionId: (string) ($session->payment_intent ?? $session->id),
             provider: PaymentProvider::Stripe,
-            status: PaymentStatus::Success
+            status: $status
         );
     }
 

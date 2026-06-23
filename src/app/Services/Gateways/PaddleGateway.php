@@ -66,16 +66,22 @@ class PaddleGateway implements GatewayStrategyInterface
         }
 
         $data = json_decode($payload, true);
+        $eventType = $data['event_type'] ?? '';
+        $orderId = (int) $data['data']['custom_data']['order_id'];
 
-        if (($data['event_type'] ?? '') !== 'transaction.completed') {
+        if ($eventType === 'transaction.completed') {
+            $status = PaymentStatus::Success;
+        } elseif (in_array($eventType, ['transaction.canceled', 'transaction.payment_failed'])) {
+            $status = PaymentStatus::Failed;
+        } else {
             throw new Exception('Ignored event type', Response::HTTP_OK);
         }
 
         return new PaymentWebhookDTO(
-            orderId: (int) $data['data']['custom_data']['order_id'],
+            orderId: $orderId,
             transactionId: (string) $data['data']['id'],
             provider: PaymentProvider::Paddle,
-            status: PaymentStatus::Success
+            status: $status
         );
     }
 
