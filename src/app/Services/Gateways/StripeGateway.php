@@ -74,7 +74,7 @@ class StripeGateway implements GatewayStrategyInterface
 
         if ($status === PaymentStatus::Success) {
             $order = Order::find($orderId);
-            if ($order && $session->amount_total !== $order->total_amount_cents) {
+            if ($order && (int) $session->amount_total !== $order->total_amount_cents->getCents()) {
                 $status = PaymentStatus::Failed;
             }
         }

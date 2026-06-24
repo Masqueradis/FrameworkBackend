@@ -136,7 +136,7 @@
         <div class="modal fade" id="recoveryCodesModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content border-success">
-                    <div class="modal-header bg-success text-white">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title fw-bold">2FA Enabled Successfully!</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -155,7 +155,7 @@
                         </div>
                     </div>
                     <div class="modal-footer justify-content-center">
-                        <button type="button" class="btn btn-success fw-bold px-4" data-bs-dismiss="modal">I have saved my codes</button>
+                        <button type="button" class="btn btn-primary fw-bold px-4" data-bs-dismiss="modal">I have saved my codes</button>
                     </div>
                 </div>
             </div>

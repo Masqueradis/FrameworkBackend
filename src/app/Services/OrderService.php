@@ -63,7 +63,7 @@ readonly class OrderService
                 'provider' => $provider,
                 'transaction_id' => $transactionId,
                 'amount_cents' => $order->total_amount_cents,
-                'status' => $isSuccess ? PaymentStatus::Paid->value : PaymentStatus::Failed->value,
+                'status' => $isSuccess ? PaymentStatus::Success->value : PaymentStatus::Failed->value,
             ]);
 
             if ($isSuccess) {

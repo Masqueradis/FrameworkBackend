@@ -46,12 +46,19 @@ return Application::configure(basePath: dirname(__DIR__))
             return redirect()->route('catalog.index')->with('error_alert', 'You have no access for this page.');
         });
 
+        $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException $exception, Request $request) {
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return response()->json(['message' => 'Access denied'], Response::HTTP_FORBIDDEN);
+            }
+            return redirect()->route('catalog.index')->with('error_alert', 'You have no access for this page.');
+        });
+
         $exceptions->render(function (NotFoundHttpException $exception, Request $request) {
             if ($request->wantsJson() || $request->is('api/*')) {
                 return response()->json(['message' => 'Not Found'], Response::HTTP_NOT_FOUND);
             }
 
-            return redirect()->back()->with('error_alert', 'The resource you are looking for does not exist.');
+            return redirect()->route('catalog.index')->with('error_alert', 'The resource you are looking for does not exist.');
         });
 
         $exceptions->render(function (Throwable $exception, Request $request) {
@@ -64,7 +71,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['message' => 'Server error'], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
-            return redirect()->back()->with('error_alert', 'Something went wrong.');
+            return redirect()->route('catalog.index')->with('error_alert', 'Something went wrong.');
         });
 
     })->create();

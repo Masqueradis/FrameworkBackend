@@ -95,8 +95,27 @@
     </div>
 </nav>
 
-<main class="flex-grow-1">
-    @yield('content')
+<main class="grow">
+    <main class="grow">
+
+        @if (session('error_alert'))
+            <div class="container mt-4">
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                    <strong>Error:</strong> {{ session('error_alert') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
+
+        @if (session('status'))
+            <div class="container mt-4">
+                <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                    {{ session('status') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
+            @yield('content')
 </main>
 
 <footer class="bg-dark text-white py-4 mt-5">
@@ -107,11 +126,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-@if(session('error_alert'))
-    <script>
-        alert("{{ session('error_alert') }}");
-    </script>
-@endif
 @stack ('scripts')
 </body>
 </html>
