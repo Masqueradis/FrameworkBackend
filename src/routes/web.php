@@ -53,6 +53,10 @@ Route::prefix('cart')->name('cart.')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    Route::get('/checkout/cancel/{order}', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
+    Route::post('/checkout/retry/{order}', [CheckoutController::class, 'retry'])->name('checkout.retry');
+    Route::delete('/checkout/decline/{order}', [CheckoutController::class, 'decline'])->name('checkout.decline');
+
     Route::prefix('email')->controller(AuthController::class)->group(function () {
         Route::get('/verify', 'showVerificationNotice')->name('verification.notice');
 

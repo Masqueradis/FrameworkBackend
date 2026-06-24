@@ -31,7 +31,7 @@ class StripeGateway implements GatewayStrategyInterface
             'line_items' => $this->buildLineItems($order),
             'mode' => 'payment',
             'success_url' => route('checkout.result').'?status=success',
-            'cancel_url' => route('checkout.index'),
+            'cancel_url' => route('checkout.cancel', ['order' => $order->id]),
             'metadata' => [
                 'order_id' => (string) $order->id,
             ],

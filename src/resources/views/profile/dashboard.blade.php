@@ -95,8 +95,27 @@
                                                     <span class="badge bg-success">Completed</span>
 
                                                 @elseif($statusStr === 'pending' || $statusStr === 'processing')
-                                                    <span class="badge bg-warning text-dark">Processing</span>
+                                                    <div class="d-flex flex-column align-items-start">
+                                                        <span class="badge bg-warning text-dark mb-2">Processing</span>
 
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <form action="{{ route('checkout.retry', $order->id) }}" method="POST" class="m-0">
+                                                                @csrf
+                                                                <input type="hidden" name="provider" value="stripe">
+                                                                <button type="submit" class="btn btn-primary shadow-sm" style="padding: 2px 10px; font-size: 12px; line-height: 1.5; border-radius: 4px;">
+                                                                    Pay
+                                                                </button>
+                                                            </form>
+
+                                                            <form action="{{ route('checkout.decline', $order->id) }}" method="POST" class="m-0" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-outline-danger shadow-sm" style="padding: 2px 10px; font-size: 12px; line-height: 1.5; border-radius: 4px;">
+                                                                    Cancel
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
                                                 @elseif($statusStr === 'cancelled')
                                                     <span class="badge bg-danger">Cancelled</span>
 

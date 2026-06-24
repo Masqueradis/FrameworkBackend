@@ -32,6 +32,7 @@ class PaddleGateway implements GatewayStrategyInterface
                 'customer_info' => ['email' => $order->customer_email],
                 'checkout' => [
                     'success_url' => route('checkout.result').'?status=success',
+                    'cancel_url' => route('checkout.cancel', ['order' => $order->id]),
                 ],
             ]);
 

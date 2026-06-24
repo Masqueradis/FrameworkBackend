@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\DTO\Checkout\CheckoutDTO;
+use App\Enums\OrderStatus;
+use App\Enums\PaymentProvider;
 use App\Exceptions\EmptyCartException;
+use App\Models\Order;
 use App\Repositories\Contracts\CartRepositoryInterface;
+use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Services\CartService;
 use App\Services\Gateways\GatewayFactory;
 use App\Services\OrderService;
@@ -129,5 +133,66 @@ class CheckoutController extends ApiController
         $status = $request->query('status', 'pending');
 
         return view('checkout.result', ['status' => $status]);
+    }
+
+    public function cancel(Order $order, OrderRepositoryInterface $orderRepository): RedirectResponse
+    {
+        $statusStr = $order->status instanceof \BackedEnum ? $order->status->value : (string) $order->status;
+
+        if ((int) $order->user_id === (int) auth()->id() && $statusStr === OrderStatus::Pending->value) {
+
+            $cart = $this->cartRepository->findOrCreate((int) auth()->id(), session()->getId());
+
+            $order->load('items');
+            foreach ($order->items as $item) {
+                $this->cartRepository->addOrUpdateItem($cart, (int) $item->product_id, $item->quantity, $item->price_cents);
+            }
+
+            $order->update(['status' => OrderStatus::Cancelled->value]);
+            $orderRepository->restoreStock($order);
+        }
+
+        return redirect()->route('checkout.index')->with('error_alert', 'Payment was cancelled. Your cart has been restored.');
+    }
+
+    public function retry(Order $order): JsonResponse|RedirectResponse
+    {
+        $statusStr = $order->status instanceof \BackedEnum ? $order->status->value : (string) $order->status;
+
+        if ((int) $order->user_id !== (int) auth()->id() || $statusStr !== OrderStatus::Pending->value) {
+            return redirect()->route('catalog.index')->with('error_alert', 'This order cannot be paid.');
+        }
+
+        try {
+            $providerName = request('provider', 'stripe');
+            $provider = PaymentProvider::from($providerName);
+
+            $gateway = GatewayFactory::make($provider);
+            $url = $gateway->createCheckoutUrl($order);
+
+            if (request()->wantsJson()) {
+                return response()->json(['status' => 'success', 'action' => $url]);
+            }
+
+            return redirect()->away($url);
+
+        } catch (\Exception $exception) {
+            return redirect()->back()->with('error_alert', 'Gateway error: ' . $exception->getMessage());
+        }
+    }
+
+    public function decline(Order $order, OrderRepositoryInterface $orderRepository): RedirectResponse
+    {
+        $statusStr = $order->status instanceof \BackedEnum ? $order->status->value : (string) $order->status;
+
+        if ((int) $order->user_id !== (int) auth()->id() || $statusStr !== OrderStatus::Pending->value) {
+            return redirect()->back()->with('error_alert', 'This order cannot be cancelled.');
+        }
+
+        $order->update(['status' => OrderStatus::Cancelled->value]);
+
+        $orderRepository->restoreStock($order);
+
+        return redirect()->back()->with('status', 'Order #' . $order->id . ' was successfully cancelled.');
     }
 }

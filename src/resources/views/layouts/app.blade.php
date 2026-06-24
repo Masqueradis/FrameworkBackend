@@ -95,27 +95,28 @@
     </div>
 </nav>
 
-<main class="grow">
-    <main class="grow">
+<main class="flex-grow-1">
 
-        @if (session('error_alert'))
-            <div class="container mt-4">
-                <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-                    <strong>Error:</strong> {{ session('error_alert') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+    @if (session('error_alert'))
+        <div class="container mt-4">
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <strong>Error:</strong> {{ session('error_alert') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        @endif
+        </div>
+    @endif
 
-        @if (session('status'))
-            <div class="container mt-4">
-                <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-                    {{ session('status') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+    @if (session('status'))
+        <div class="container mt-4">
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                {{ session('status') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        @endif
-            @yield('content')
+        </div>
+    @endif
+
+    @yield('content')
+
 </main>
 
 <footer class="bg-dark text-white py-4 mt-5">
