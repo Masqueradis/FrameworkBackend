@@ -13,17 +13,15 @@ use Spatie\LaravelData\Support\Types\NamedType;
 class DataValueObjectIdCast implements Cast
 {
     /**
-     * @param DataProperty $property
-     * @param mixed $value
-     * @param array<string, mixed> $context
-     * @param CreationContext<BaseData<mixed, mixed, int|string>> $creationContext
-     * @return mixed
+     * @param  array<string, mixed>  $context
+     * @param  CreationContext<BaseData<mixed, mixed, int|string>>  $creationContext
      */
     public function cast(DataProperty $property, mixed $value, array $context, CreationContext $creationContext): mixed
     {
         $type = $property->type->type;
         if ($type instanceof NamedType) {
             $className = $type->name;
+
             return new $className((int) $value);
         }
 

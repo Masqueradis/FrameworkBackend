@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Tests\Feature\Services\Gateways;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentProvider;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Gateways\PaddleGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class PaddleGatewayTest extends TestCase
 {
@@ -33,7 +33,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testCreatesCheckoutUrlSuccessfully(): void
+    public function test_creates_checkout_url_successfully(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -66,7 +66,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionIfPaddleApiFails(): void
+    public function test_throws_exception_if_paddle_api_fails(): void
     {
         $user = User::factory()->create();
         Http::fake([
@@ -88,7 +88,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testVerifiesValidWebhook(): void
+    public function test_verifies_valid_webhook(): void
     {
         $payload = json_encode([
             'event_type' => 'transaction.completed',
@@ -99,19 +99,19 @@ class PaddleGatewayTest extends TestCase
         ]);
 
         $ts = time();
-        $h1 = hash_hmac('sha256', $ts . ':' . $payload, 'test_secret');
+        $h1 = hash_hmac('sha256', $ts.':'.$payload, 'test_secret');
         $signatureHeader = "ts={$ts};h1={$h1}";
 
         $dto = $this->gateway->verifyWebhook($payload, $signatureHeader);
 
         $this->assertEquals(15, $dto->orderId);
         $this->assertEquals('txn_999', $dto->transactionId);
-        $this->assertEquals(\App\Enums\PaymentProvider::Paddle, $dto->provider);
+        $this->assertEquals(PaymentProvider::Paddle, $dto->provider);
         $this->assertTrue($dto->isSuccess());
     }
 
     #[Test]
-    public function testThrowsExceptionOnInvalidSignature(): void
+    public function test_throws_exception_on_invalid_signature(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Invalid Paddle signature');
@@ -119,7 +119,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testUsesProductionUrlWhenEnvIsProduction(): void
+    public function test_uses_production_url_when_env_is_production(): void
     {
         Config::set('services.paddle.env', 'production');
         $gateway = $this->app->make(PaddleGateway::class);
@@ -127,7 +127,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionOnMissingSignature(): void
+    public function test_throws_exception_on_missing_signature(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Invalid Paddle signature');
@@ -136,11 +136,11 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionOnIgnoredEventType(): void
+    public function test_throws_exception_on_ignored_event_type(): void
     {
         $payload = json_encode(['event_type' => 'subscription.created', 'data' => []]);
         $ts = time();
-        $h1 = hash_hmac('sha256', $ts . ':' . $payload, 'test_secret');
+        $h1 = hash_hmac('sha256', $ts.':'.$payload, 'test_secret');
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Ignored event type');

@@ -6,7 +6,6 @@ namespace App\DTO\Checkout;
 
 use App\Enums\PaymentProvider;
 use App\Enums\PaymentStatus;
-use Spatie\LaravelData\Attributes\Validation\In;
 use Spatie\LaravelData\Data;
 
 class PaymentWebhookDTO extends Data

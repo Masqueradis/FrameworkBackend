@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 class CartValueObjectsTest extends TestCase
 {
     #[Test]
-    public function testMoneyStoresCentsAndOutputsDollars(): void
+    public function test_money_stores_cents_and_outputs_dollars(): void
     {
         $money = new Money(1550);
 
@@ -23,7 +23,7 @@ class CartValueObjectsTest extends TestCase
     }
 
     #[Test]
-    public function testMoneyThrowsExceptionOnNegativeAmount(): void
+    public function test_money_throws_exception_on_negative_amount(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Amount cannot be negative.');
@@ -32,7 +32,7 @@ class CartValueObjectsTest extends TestCase
     }
 
     #[Test]
-    public function testMoneyCanBeAdded(): void
+    public function test_money_can_be_added(): void
     {
         $money = new Money(1000);
         $newMoney = $money->add(new Money(500));
@@ -42,7 +42,7 @@ class CartValueObjectsTest extends TestCase
     }
 
     #[Test]
-    public function testMoneyCanBeMultiplied(): void
+    public function test_money_can_be_multiplied(): void
     {
         $money = new Money(1000);
         $newMoney = $money->multiply(2);
@@ -51,14 +51,14 @@ class CartValueObjectsTest extends TestCase
     }
 
     #[Test]
-    public function testCartQuantityStoresValidAmount(): void
+    public function test_cart_quantity_stores_valid_amount(): void
     {
         $quantity = new CartQuantity(5);
         $this->assertEquals(5, $quantity->getValue());
     }
 
     #[Test]
-    public function testCartQuantityThrowsExceptionIfLessThanOne(): void
+    public function test_cart_quantity_throws_exception_if_less_than_one(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Quantity must be between 1 and 99.');
@@ -67,7 +67,7 @@ class CartValueObjectsTest extends TestCase
     }
 
     #[Test]
-    public function testCartQuantityThrowsExceptionIfMoreThanNinetyNine(): void
+    public function test_cart_quantity_throws_exception_if_more_than_ninety_nine(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Quantity must be between 1 and 99.');
@@ -76,7 +76,7 @@ class CartValueObjectsTest extends TestCase
     }
 
     #[Test]
-    public function testCartQuantityCanBeAdded(): void
+    public function test_cart_quantity_can_be_added(): void
     {
         $quantity = new CartQuantity(5);
         $newQuantity = $quantity->add(10);
@@ -85,7 +85,7 @@ class CartValueObjectsTest extends TestCase
     }
 
     #[Test]
-    public function testMoneyThrowsExceptionIfNegativeAmount(): void
+    public function test_money_throws_exception_if_negative_amount(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Amount cannot be negative.');
@@ -94,10 +94,10 @@ class CartValueObjectsTest extends TestCase
     }
 
     #[Test]
-    public function testMoneyCastReturnsNullWhenSettingNull(): void
+    public function test_money_cast_returns_null_when_setting_null(): void
     {
-        $cast = new MoneyCast();
-        $model = new CartItem();
+        $cast = new MoneyCast;
+        $model = new CartItem;
 
         $result = $cast->set($model, 'price', null, []);
 

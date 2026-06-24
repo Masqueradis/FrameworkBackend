@@ -7,8 +7,6 @@ namespace App\Filters;
 use App\Enums\ProductAttribute;
 use App\Models\Product;
 use App\ValueObjects\Id\CategoryId;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends QueryFilter<Product>
@@ -23,9 +21,6 @@ class ProductFilter extends QueryFilter
         'attributes',
     ];
 
-    /**
-     * @param int|string $id
-     */
     public function categoryId(int|string $id): void
     {
         $categoryIdVO = new CategoryId((int) $id);
@@ -49,13 +44,13 @@ class ProductFilter extends QueryFilter
     }
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      */
     public function attributes(array $attributes): void
     {
         foreach ($attributes as $attribute => $value) {
-            if(ProductAttribute::tryFrom($attribute)) {
-                $this->builder->whereIn("attributes->{$attribute}", (array)$value);
+            if (ProductAttribute::tryFrom($attribute)) {
+                $this->builder->whereIn("attributes->{$attribute}", (array) $value);
             }
         }
     }

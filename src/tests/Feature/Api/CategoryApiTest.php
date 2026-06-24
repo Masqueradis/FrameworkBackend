@@ -4,23 +4,25 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
+use App\Models\Category;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
-use Spatie\Permission\PermissionRegistrar;
-use Tests\TestCase;
-use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\HttpFoundation\Response;
+use Tests\TestCase;
 
 class CategoryApiTest extends TestCase
 {
-    use refreshDatabase;
+    use RefreshDatabase;
 
     private User $admin;
+
     private User $customer;
-    public function setUp(): void
+
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -47,7 +49,7 @@ class CategoryApiTest extends TestCase
     }
 
     #[Test]
-    public function testCanGetAllCategories(): void
+    public function test_can_get_all_categories(): void
     {
         Category::factory()->count(3)->create();
 
@@ -66,7 +68,7 @@ class CategoryApiTest extends TestCase
     }
 
     #[Test]
-    public function testCanGetSpecificCategory(): void
+    public function test_can_get_specific_category(): void
     {
         $category = Category::factory()->create(['name' => 'Category']);
 
@@ -78,7 +80,7 @@ class CategoryApiTest extends TestCase
     }
 
     #[Test]
-    public function testCanCreateCategory(): void
+    public function test_can_create_category(): void
     {
         $payload = [
             'name' => 'New Category',
@@ -93,7 +95,7 @@ class CategoryApiTest extends TestCase
     }
 
     #[Test]
-    public function testCanUpdateCategory(): void
+    public function test_can_update_category(): void
     {
         $category = Category::factory()->create(['name' => 'Old Category']);
 
@@ -113,7 +115,7 @@ class CategoryApiTest extends TestCase
     }
 
     #[Test]
-    public function testCanDeleteCategory(): void
+    public function test_can_delete_category(): void
     {
         $category = Category::factory()->create();
 

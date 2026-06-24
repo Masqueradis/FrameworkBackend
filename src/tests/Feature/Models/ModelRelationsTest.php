@@ -11,13 +11,13 @@ use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class ModelRelationsTest extends TestCase
 {
     #[Test]
-    public function testHasCorrectRelations(): void
+    public function test_has_correct_relations(): void
     {
         $this->assertInstanceOf(BelongsTo::class, new Order()->user());
         $this->assertInstanceOf(BelongsTo::class, new OrderItem()->order());
@@ -27,7 +27,7 @@ class ModelRelationsTest extends TestCase
     }
 
     #[Test]
-    public function testUserHasOrdersRelation(): void
+    public function test_user_has_orders_relation(): void
     {
         $user = User::factory()->create();
 

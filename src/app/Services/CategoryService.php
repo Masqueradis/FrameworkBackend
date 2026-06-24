@@ -34,7 +34,7 @@ readonly class CategoryService
     {
         return $this->categoryRepository->create([
             'name' => $data->name,
-            'slug' => Str::slug($data->name) . '-' . uniqid(),
+            'slug' => Str::slug($data->name).'-'.uniqid(),
             'parent_id' => $data->parent_id,
         ]);
     }
@@ -53,7 +53,6 @@ readonly class CategoryService
     }
 
     /**
-     * @param int $perPage
      * @return LengthAwarePaginator<int, Category>
      */
     public function getPaginatedCategoriesWithParent(int $perPage = 15): LengthAwarePaginator
@@ -62,7 +61,6 @@ readonly class CategoryService
     }
 
     /**
-     * @param CategoryId|null $excludeId
      * @return Collection<int, Category>
      */
     public function getCategoriesForDropdown(?CategoryId $excludeId = null): Collection

@@ -18,7 +18,6 @@ class DashboardService
     ) {}
 
     /**
-     * @param User $user
      * @return array<string, int>
      */
     public function getStatsForDashboard(User $user): array

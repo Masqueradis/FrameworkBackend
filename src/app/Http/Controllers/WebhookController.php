@@ -5,16 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\PaymentProvider;
-use App\Events\OrderCreated;
 use App\Models\Order;
-use App\Services\Gateways\StripeGateway;
-use App\Services\OrderService;
 use App\Services\Gateways\GatewayFactory;
+use App\Services\OrderService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Exception;
-use Symfony\Component\HttpFoundation\Response;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response;
 
 class WebhookController extends ApiController
 {

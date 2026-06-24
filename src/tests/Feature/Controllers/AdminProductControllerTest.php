@@ -24,6 +24,7 @@ class AdminProductControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private Category $category;
 
     protected function setUp(): void
@@ -47,7 +48,7 @@ class AdminProductControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDisplaysProductsIndexForAdmin(): void
+    public function test_displays_products_index_for_admin(): void
     {
         Product::factory()->count(10)->create(['category_id' => $this->category->id]);
 
@@ -60,7 +61,7 @@ class AdminProductControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDisplaysProductsIndexForSeller(): void
+    public function test_displays_products_index_for_seller(): void
     {
         Product::factory()->count(10)->create(['category_id' => $this->category->id]);
 
@@ -73,7 +74,7 @@ class AdminProductControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDisplaysProductsCreateForm(): void
+    public function test_displays_products_create_form(): void
     {
         $response = $this->actingAs($this->admin)
             ->get(route('admin.products.create', $this->category));
@@ -84,7 +85,7 @@ class AdminProductControllerTest extends TestCase
     }
 
     #[Test]
-    public function testStoresNewProduct(): void
+    public function test_stores_new_product(): void
     {
         $payload = [
             'name' => 'New Product',
@@ -111,7 +112,7 @@ class AdminProductControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDisplaysProductEditForm(): void
+    public function test_displays_product_edit_form(): void
     {
         $product = Product::factory()->create(['category_id' => $this->category->id]);
 
@@ -124,7 +125,7 @@ class AdminProductControllerTest extends TestCase
     }
 
     #[Test]
-    public function testUpdatesProduct(): void
+    public function test_updates_product(): void
     {
         $product = Product::factory()->create(['category_id' => $this->category->id, 'name' => 'Old Product']);
 
@@ -152,7 +153,7 @@ class AdminProductControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDeletesProduct(): void
+    public function test_deletes_product(): void
     {
         $product = Product::factory()->create(['category_id' => $this->category->id]);
 
@@ -166,7 +167,7 @@ class AdminProductControllerTest extends TestCase
     }
 
     #[Test]
-    public function testSellerDeletesProduct(): void
+    public function test_seller_deletes_product(): void
     {
         $product = Product::factory()->create([
             'category_id' => $this->category->id,
@@ -183,7 +184,7 @@ class AdminProductControllerTest extends TestCase
     }
 
     #[Test]
-    public function testShowsPublicProductPageWithSortedImages(): void
+    public function test_shows_public_product_page_with_sorted_images(): void
     {
         $product = Product::factory()->create(['available' => true]);
 
@@ -201,7 +202,7 @@ class AdminProductControllerTest extends TestCase
     }
 
     #[Test]
-    public function testAuthenticatedUserCanViewProductPageAndItLoadsTheirComment(): void
+    public function test_authenticated_user_can_view_product_page_and_it_loads_their_comment(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();
@@ -221,7 +222,7 @@ class AdminProductControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDestroyAllImagesRemovesFilesFromStorageAndDatabase(): void
+    public function test_destroy_all_images_removes_files_from_storage_and_database(): void
     {
         Storage::fake('minio');
 
@@ -247,7 +248,6 @@ class AdminProductControllerTest extends TestCase
         $response->assertSessionHasNoErrors();
         $response->assertRedirect(route('admin.products.edit', $product));
         $response->assertSessionHas('success', 'All images have been successfully removed.');
-
 
         $this->assertDatabaseMissing('product_images', ['product_id' => $product->id]);
         Storage::disk('minio')->assertMissing($file1);

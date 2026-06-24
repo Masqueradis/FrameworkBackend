@@ -18,7 +18,7 @@ class TwoFactorAuthService
     public function __construct(
         private readonly UserRepository $userRepository,
     ) {
-        $this->google2fa = new Google2FA();
+        $this->google2fa = new Google2FA;
     }
 
     public function generateSecret(): string
@@ -70,7 +70,7 @@ class TwoFactorAuthService
     {
         $user = User::find($userId);
 
-        if (!$user || !$user->google2fa_secret) {
+        if (! $user || ! $user->google2fa_secret) {
             return false;
         }
 
@@ -83,10 +83,11 @@ class TwoFactorAuthService
                     unset($savedCodes[$index]);
 
                     $user->update([
-                        '2fa_two_factor_recovery_codes' => json_encode(array_values($savedCodes))
+                        '2fa_two_factor_recovery_codes' => json_encode(array_values($savedCodes)),
                     ]);
 
                     Auth::login($user);
+
                     return true;
                 }
             }
@@ -102,6 +103,7 @@ class TwoFactorAuthService
             $user->update(['google2fa_last_window' => $timestamp]);
 
             Auth::login($user);
+
             return true;
         }
 

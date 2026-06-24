@@ -6,19 +6,19 @@ use App\Models\Category;
 use App\Models\User;
 use App\Policies\CategoryPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class CategoryPolicyTest extends TestCase
 {
     use RefreshDatabase;
 
     #[Test]
-    public function testUnsupportedActionsAlwaysReturnFalse(): void
+    public function test_unsupported_actions_always_return_false(): void
     {
         $user = User::factory()->create();
         $category = Category::factory()->create();
-        $policy = new CategoryPolicy();
+        $policy = new CategoryPolicy;
 
         $this->assertTrue($policy->viewAny($user));
         $this->assertTrue($policy->view($user, $category));

@@ -9,11 +9,10 @@ use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class SendOrderConfirmationMailTest extends TestCase
 {
-    public function testDoesNotSendEmailIfOrderIsPending(): void
+    public function test_does_not_send_email_if_order_is_pending(): void
     {
         Mail::fake();
 
@@ -28,7 +27,7 @@ class SendOrderConfirmationMailTest extends TestCase
         ]);
 
         $event = new OrderCreated($order);
-        $listener = new SendOrderConfirmationEmail();
+        $listener = new SendOrderConfirmationEmail;
 
         $listener->handle($event);
 

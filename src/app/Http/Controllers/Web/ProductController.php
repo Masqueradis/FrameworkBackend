@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Repositories\Contracts\CommentRepositoryInterface;
-use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Repositories\Contracts\CommentRepositoryInterface;
 use Illuminate\View\View;
 
 class ProductController

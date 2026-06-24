@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature\Api;
 
 use App\DTO\User\AuthResultDTO;
-use App\Http\Controllers\AuthController;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\AuthService;
@@ -14,6 +13,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Laravel\Passport\Token;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
@@ -36,7 +37,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function userCanRegister(): void
+    public function user_can_register(): void
     {
         Event::fake();
 
@@ -56,7 +57,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function userCanLogin(): void
+    public function user_can_login(): void
     {
         $user = User::factory()->create([
             'email' => 'test@email.com',
@@ -79,14 +80,14 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function userCanLogout(): void
+    public function user_can_logout(): void
     {
         $user = User::factory()->create();
 
         $token = $user->createToken('Test Token')->accessToken;
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson('/api/v1/logout');
 
         $response->assertStatus(Response::HTTP_OK)->assertJson([
@@ -101,7 +102,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function wrongRespond(): void
+    public function wrong_respond(): void
     {
         $user = User::factory()->create([
             'email' => 'test@email.com',
@@ -117,20 +118,20 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function authServiceCanRevokeToken(): void
+    public function auth_service_can_revoke_token(): void
     {
-        /** @var \Mockery\MockInterface&\Laravel\Passport\Token $tokenMock */
-        $tokenMock = \Mockery::mock(\Laravel\Passport\Token::class . ', \Laravel\Passport\Contracts\ScopeAuthorizable');
+        /** @var MockInterface&Token $tokenMock */
+        $tokenMock = \Mockery::mock(Token::class.', \Laravel\Passport\Contracts\ScopeAuthorizable');
         $tokenMock->expects('revoke');
-        /** @var \Mockery\MockInterface&\App\Models\User $userMock */
-        $userMock = \Mockery::mock(\App\Models\User::class)->makePartial();
+        /** @var MockInterface&User $userMock */
+        $userMock = \Mockery::mock(User::class)->makePartial();
         $userMock->shouldReceive('token')->andReturn($tokenMock);
-        $authService = app(\App\Services\AuthService::class);
+        $authService = app(AuthService::class);
         $authService->logout($userMock);
     }
 
     #[Test]
-    public function testShowsLoginForm(): void
+    public function test_shows_login_form(): void
     {
         $response = $this->get('login');
 
@@ -139,7 +140,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testShowsRegisterForm(): void
+    public function test_shows_register_form(): void
     {
         $response = $this->get('register');
 
@@ -148,7 +149,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testRegisterWeb(): void
+    public function test_register_web(): void
     {
         $response = $this->post('/register', [
             'name' => 'Test User',
@@ -163,7 +164,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testLoginWeb(): void
+    public function test_login_web(): void
     {
         $user = User::factory()->create(['password' => bcrypt('password')]);
         $response = $this->post('/login', [
@@ -176,7 +177,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testLogoutWeb(): void
+    public function test_logout_web(): void
     {
         $user = User::factory()->create();
 
@@ -187,7 +188,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testRegisterRemovesOldTokenIfExists(): void
+    public function test_register_removes_old_token_if_exists(): void
     {
         Cache::put('pending_email_test@email.com', 'old-token', now()->addMinutes(30));
 
@@ -201,13 +202,13 @@ class AuthApiTest extends TestCase
         $this->assertNull(Cache::get('pending_email_old-token'));
     }
 
-    public function testVerifyRegistrationSuccessfully(): void
+    public function test_verify_registration_successfully(): void
     {
         $service = app(AuthService::class);
         $token = 'valid-test-token';
         $email = 'test@email.com';
 
-        Cache::put('pending_email_' . $token, [
+        Cache::put('pending_email_'.$token, [
             'name' => 'Verify User',
             'email' => $email,
             'password' => 'password',
@@ -220,11 +221,11 @@ class AuthApiTest extends TestCase
         $this->assertInstanceOf(AuthResultDTO::class, $result);
         $this->assertDatabaseHas('users', ['email' => $email]);
         $this->assertTrue($result->user->hasRole('customer', 'web'));
-        $this->assertNull(Cache::get('pending_email_' . $token));
+        $this->assertNull(Cache::get('pending_email_'.$token));
     }
 
     #[Test]
-    public function testVerifyRegistrationFailsWithInvalidToken(): void
+    public function test_verify_registration_fails_with_invalid_token(): void
     {
         $service = app(AuthService::class);
 
@@ -234,7 +235,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testProfileIndexReturnsDashboard(): void
+    public function test_profile_index_returns_dashboard(): void
     {
         $user = User::factory()->create();
 
@@ -245,7 +246,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testVerifyEmailApiFailsWithInvalidToken(): void
+    public function test_verify_email_api_fails_with_invalid_token(): void
     {
         $response = $this->getJson('/api/v1/verify/invalid-token');
 
@@ -254,7 +255,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testVerifyEmailWebFailsWithInvalidToken(): void
+    public function test_verify_email_web_fails_with_invalid_token(): void
     {
         $response = $this->get('/verify/invalid-token');
 
@@ -263,10 +264,10 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testVerifyEmailWebSuccessRedirectsToProfile(): void
+    public function test_verify_email_web_success_redirects_to_profile(): void
     {
         $token = 'web-valid-token';
-        Cache::put('pending_email_' . $token, [
+        Cache::put('pending_email_'.$token, [
             'name' => 'Web user',
             'email' => 'test@email.com',
             'password' => 'password',
@@ -281,7 +282,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testGetApiUserReturnsUserData(): void
+    public function test_get_api_user_returns_user_data(): void
     {
         $user = User::factory()->create();
 
@@ -292,7 +293,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testLogoutWithoutUserAborts(): void
+    public function test_logout_without_user_aborts(): void
     {
         $response = $this->postJson('/api/v1/logout');
 
@@ -300,7 +301,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testShowsVerificationNoticeView(): void
+    public function test_shows_verification_notice_view(): void
     {
         $user = User::factory()->create();
 
@@ -311,7 +312,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testResendsVerificationEmail(): void
+    public function test_resends_verification_email(): void
     {
         $user = User::factory()->create();
 
@@ -322,12 +323,12 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testVerifyEmailApiSuccessReturnsJsonAndToken(): void
+    public function test_verify_email_api_success_returns_json_and_token(): void
     {
         $token = 'valid-token';
         $email = 'test@email.com';
 
-        Cache::put('pending_email_' . $token, [
+        Cache::put('pending_email_'.$token, [
             'name' => 'Verify User',
             'email' => $email,
             'password' => 'password',
@@ -350,11 +351,11 @@ class AuthApiTest extends TestCase
                     'token',
                 ],
             ]);
-        $this->assertNull(Cache::get('pending_email_' . $token));
+        $this->assertNull(Cache::get('pending_email_'.$token));
     }
 
     #[Test]
-    public function testLoginApiRequires2faIfSecretIsSet(): void
+    public function test_login_api_requires2fa_if_secret_is_set(): void
     {
         $password = 'Password123!';
         $user = User::factory()->create([
@@ -374,7 +375,7 @@ class AuthApiTest extends TestCase
     }
 
     #[Test]
-    public function testLoginWebRequires2faIfSecretIsSet(): void
+    public function test_login_web_requires2fa_if_secret_is_set(): void
     {
         $password = 'Password123!';
         $user = User::factory()->create([

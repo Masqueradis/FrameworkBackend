@@ -39,7 +39,7 @@ class GenerateReportJob implements ShouldQueue
             $report->update(['status' => ReportStatus::Processing]);
             $csvContent = $this->generateCsvContent($report, $orderRepository, $productRepository);
 
-            $fileName = "reports/{$report->type}_" . now()->format('Y_m_d_H_i_s') . "_{$report->id}.csv";
+            $fileName = "reports/{$report->type}_".now()->format('Y_m_d_H_i_s')."_{$report->id}.csv";
             Storage::disk('minio')->put($fileName, $csvContent);
 
             $report->update([

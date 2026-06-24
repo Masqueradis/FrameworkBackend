@@ -8,10 +8,10 @@ use App\Jobs\GenerateReportJob;
 use App\Models\Report;
 use App\Models\User;
 use App\Services\ReportService;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use PHPUnit\Framework\Attributes\Test;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class ReportServiceTest extends TestCase
@@ -19,7 +19,7 @@ class ReportServiceTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function testRequestGenerationCreatesRecordAndDispatchesJob(): void
+    public function test_request_generation_creates_record_and_dispatches_job(): void
     {
         Queue::fake();
 
@@ -42,7 +42,7 @@ class ReportServiceTest extends TestCase
     }
 
     #[Test]
-    public function testGetDownloadPathThrowsForbiddenForWrongUser(): void
+    public function test_get_download_path_throws_forbidden_for_wrong_user(): void
     {
         $admin = User::factory()->create();
         $report = Report::create([

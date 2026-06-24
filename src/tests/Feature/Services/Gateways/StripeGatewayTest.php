@@ -10,15 +10,12 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\Gateways\StripeGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Mockery;
-use Stripe\ApiRequestor;
-use Stripe\Checkout\Session;
-use Stripe\HttpClient\ClientInterface;
-use Stripe\Webhook;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Stripe\ApiRequestor;
+use Stripe\HttpClient\ClientInterface;
+use Tests\TestCase;
 
 class StripeGatewayTest extends TestCase
 {
@@ -34,7 +31,7 @@ class StripeGatewayTest extends TestCase
         $this->gateway = $this->app->make(StripeGateway::class);
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         Mockery::close();
         ApiRequestor::setHttpClient(null);
@@ -42,7 +39,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testBuildsLineItemsCorrectly(): void
+    public function test_builds_line_items_correctly(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create(['name' => 'Test Product', 'price' => 1500]);
@@ -71,7 +68,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionOnInvalidWebhookSignature(): void
+    public function test_throws_exception_on_invalid_webhook_signature(): void
     {
         $payload = '{"type":"checkout.session.completed"}';
         $signature = 'invalid_signature';
@@ -83,7 +80,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testCreatesCheckoutUrl(): void
+    public function test_creates_checkout_url(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -113,7 +110,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testVerifiesValidWebhook(): void
+    public function test_verifies_valid_webhook(): void
     {
         $payload = json_encode([
             'type' => 'checkout.session.completed',
@@ -135,7 +132,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testIgnoresOtherWebhookEvents(): void
+    public function test_ignores_other_webhook_events(): void
     {
         $payload = json_encode([
             'type' => 'payment_intent.succeeded',

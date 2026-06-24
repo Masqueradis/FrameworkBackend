@@ -27,7 +27,7 @@ class CategoryServiceTest extends TestCase
     }
 
     #[Test]
-    public function testCanCreateCategory(): void
+    public function test_can_create_category(): void
     {
         $data = CategorySaveDTO::from([
             'name' => 'New Category',
@@ -46,7 +46,7 @@ class CategoryServiceTest extends TestCase
     }
 
     #[Test]
-    public function testCanUpdateCategory(): void
+    public function test_can_update_category(): void
     {
         $category = Category::factory()->create(['name' => 'Old Category']);
         $parent = Category::factory()->create(['name' => 'Parent']);
@@ -62,7 +62,7 @@ class CategoryServiceTest extends TestCase
         ]);
     }
 
-    public function testCanDeleteCategory(): void
+    public function test_can_delete_category(): void
     {
         $category = Category::factory()->create(['name' => 'Category']);
 
@@ -74,7 +74,7 @@ class CategoryServiceTest extends TestCase
     }
 
     #[Test]
-    public function testReturnsPaginatedCategoriesWithParent(): void
+    public function test_returns_paginated_categories_with_parent(): void
     {
         Category::query()->delete();
         $parent = Category::factory()->create(['name' => 'Parent']);
@@ -89,7 +89,7 @@ class CategoryServiceTest extends TestCase
     }
 
     #[Test]
-    public function testReturnsCategoriesForDropdownAndExclude(): void
+    public function test_returns_categories_for_dropdown_and_exclude(): void
     {
         Category::query()->delete();
         $firstCategory = Category::factory()->create(['name' => 'First Category']);
@@ -106,7 +106,7 @@ class CategoryServiceTest extends TestCase
     }
 
     #[Test]
-    public function testGetRootsReturnsOnlyCategoriesWithoutParents(): void
+    public function test_get_roots_returns_only_categories_without_parents(): void
     {
         Category::query()->delete();
         $repository = app(CategoryRepository::class);

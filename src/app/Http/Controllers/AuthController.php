@@ -33,6 +33,7 @@ class AuthController extends ApiController
     {
         return view('auth.register');
     }
+
     #[OA\Post(
         path: '/api/register',
         description: 'Request email and password, return user-object and token',
@@ -155,6 +156,7 @@ class AuthController extends ApiController
             if (request()->expectsJson()) {
                 return $this->respondError($e->getMessage(), Response::HTTP_BAD_REQUEST);
             }
+
             return redirect()->route('register')
                 ->withErrors(['email' => 'The link is expired or invalid. Please register again.']);
         }
@@ -227,6 +229,7 @@ class AuthController extends ApiController
             }
 
             request()->session()->put('2fa:user_id', $user->id);
+
             return redirect()->route('login.2fa');
         }
 

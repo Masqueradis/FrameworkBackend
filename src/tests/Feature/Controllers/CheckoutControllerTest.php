@@ -10,9 +10,9 @@ use App\Services\Gateways\StripeGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Mockery;
+use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class CheckoutControllerTest extends TestCase
 {
@@ -25,7 +25,7 @@ class CheckoutControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDisplaysCheckoutPage(): void
+    public function test_displays_checkout_page(): void
     {
         $user = User::factory()->create();
         $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);
@@ -43,7 +43,7 @@ class CheckoutControllerTest extends TestCase
     }
 
     #[Test]
-    public function testProcessesCheckoutAndReturnsGatewayUrl(): void
+    public function test_processes_checkout_and_returns_gateway_url(): void
     {
         Event::fake();
 
@@ -76,7 +76,7 @@ class CheckoutControllerTest extends TestCase
     }
 
     #[Test]
-    public function testReturns400ForEmptyCart(): void
+    public function test_returns400_for_empty_cart(): void
     {
         $user = User::factory()->create();
         Cart::create(['user_id' => $user->id, 'session_id' => '123']);
@@ -97,7 +97,7 @@ class CheckoutControllerTest extends TestCase
     }
 
     #[Test]
-    public function testReturns500OnGenericException(): void
+    public function test_returns500_on_generic_exception(): void
     {
         Event::fake();
 
@@ -132,7 +132,7 @@ class CheckoutControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDisplaysResultAndClearsCart(): void
+    public function test_displays_result_and_clears_cart(): void
     {
         $user = User::factory()->create();
         $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);

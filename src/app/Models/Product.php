@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Casts\ValueObjectIdCast;
 use App\Filters\QueryFilter;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,6 +17,7 @@ class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
+
     use SoftDeletes;
 
     protected $fillable = [
@@ -50,8 +50,8 @@ class Product extends Model
     }
 
     /**
-     * @param Builder<Product> $query
-     * @param QueryFilter<Product> $filter
+     * @param  Builder<Product>  $query
+     * @param  QueryFilter<Product>  $filter
      * @return Builder<Product>
      */
     public function scopeFilter(Builder $query, QueryFilter $filter): Builder

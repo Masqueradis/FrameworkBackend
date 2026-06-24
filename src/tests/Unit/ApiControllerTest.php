@@ -6,16 +6,17 @@ namespace Tests\Unit;
 
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use PHPUnit\Framework\Attributes\Test;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class ApiControllerTest extends TestCase
 {
     #[Test]
-    public function returnErrorResponse(): void
+    public function return_error_response(): void
     {
-        $controller = new class extends \App\Http\Controllers\ApiController {
+        $controller = new class extends ApiController
+        {
             public function callRespondError(string $message, int $code, mixed $errors = null): JsonResponse
             {
                 return $this->respondError($message, $code, $errors);

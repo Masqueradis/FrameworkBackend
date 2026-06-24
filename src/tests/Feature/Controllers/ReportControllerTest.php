@@ -12,10 +12,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\Response;
+use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class ReportControllerTest extends TestCase
 {
@@ -37,7 +36,7 @@ class ReportControllerTest extends TestCase
     }
 
     #[Test]
-    public function testAdminCanRequestReportGeneration(): void
+    public function test_admin_can_request_report_generation(): void
     {
         Queue::fake();
 
@@ -58,7 +57,7 @@ class ReportControllerTest extends TestCase
     }
 
     #[Test]
-    public function testAdminCanViewReportsList(): void
+    public function test_admin_can_view_reports_list(): void
     {
         Report::create([
             'admin_id' => $this->admin->id,
@@ -75,7 +74,7 @@ class ReportControllerTest extends TestCase
     }
 
     #[Test]
-    public function testAdminCanDownloadCompletedReport(): void
+    public function test_admin_can_download_completed_report(): void
     {
         Storage::fake('minio');
         $filePath = 'reports/test_report.csv';
@@ -96,7 +95,7 @@ class ReportControllerTest extends TestCase
     }
 
     #[Test]
-    public function testAdminCannotDownloadPendingReport(): void
+    public function test_admin_cannot_download_pending_report(): void
     {
         $this->withoutExceptionHandling();
 

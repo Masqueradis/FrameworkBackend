@@ -13,9 +13,9 @@ use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Repositories\Contracts\ReportRepositoryInterface;
 use App\Repositories\OrderRepository;
 use App\Repositories\ReportRepository;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator;
 use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider

@@ -8,13 +8,13 @@ use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class SendOrderConfirmationEmailTest extends TestCase
 {
     #[Test]
-    public function testIsAttachedToOrderCreatedEvent(): void
+    public function test_is_attached_to_order_created_event(): void
     {
         Event::fake();
 
@@ -25,7 +25,7 @@ class SendOrderConfirmationEmailTest extends TestCase
     }
 
     #[Test]
-    public function testSendsEmailWhenHandled(): void
+    public function test_sends_email_when_handled(): void
     {
         Mail::fake();
 
@@ -36,7 +36,7 @@ class SendOrderConfirmationEmailTest extends TestCase
         ]);
 
         $event = new OrderCreated($order);
-        $listener = new SendOrderConfirmationEmail();
+        $listener = new SendOrderConfirmationEmail;
 
         $listener->handle($event);
 

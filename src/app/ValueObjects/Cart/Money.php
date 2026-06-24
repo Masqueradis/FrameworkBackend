@@ -36,9 +36,9 @@ class Money
 
     public function getFormated(): string
     {
-        $symbol = $this->currency === 'USD' ? '$' : $this->currency . ' ';
+        $symbol = $this->currency === 'USD' ? '$' : $this->currency.' ';
 
-        return $symbol . number_format($this->getDollars(), 2);
+        return $symbol.number_format($this->getDollars(), 2);
     }
 
     public function add(Money $other): self

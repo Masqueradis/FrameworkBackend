@@ -23,7 +23,7 @@ abstract class QueryFilter
     public function __construct(protected array $request) {}
 
     /**
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      * @return Builder<TModel>
      */
     public function apply(Builder $builder): Builder

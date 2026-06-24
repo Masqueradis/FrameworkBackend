@@ -10,7 +10,6 @@ use App\Models\Report;
 use App\Repositories\Contracts\ReportRepositoryInterface;
 use App\Services\ReportService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;

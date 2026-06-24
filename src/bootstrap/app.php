@@ -1,21 +1,24 @@
 <?php
 
 use App\Http\Middleware\EnsureUserIsNotBanned;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Laravel\Passport\Http\Middleware\CreateFreshApiToken;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        api: __DIR__ . '/../routes/api.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -31,7 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            \Laravel\Passport\Http\Middleware\CreateFreshApiToken::class,
+            CreateFreshApiToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -51,9 +54,9 @@ return Application::configure(basePath: dirname(__DIR__))
             return redirect()->back()->with('error_alert', 'The resource you are looking for does not exist.');
         });
 
-        $exceptions->render(function (\Throwable $exception, Request $request) {
-            if ($exception instanceof \Illuminate\Validation\ValidationException
-                || $exception instanceof \Illuminate\Auth\AuthenticationException) {
+        $exceptions->render(function (Throwable $exception, Request $request) {
+            if ($exception instanceof ValidationException
+                || $exception instanceof AuthenticationException) {
                 return null;
             }
 

@@ -9,7 +9,6 @@ use App\Models\Order;
 use App\Services\Gateways\Strategy\GatewayStrategyInterface;
 use App\ValueObjects\Cart\Money;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,12 +31,12 @@ class PaddleGateway implements GatewayStrategyInterface
                 'custom_data' => ['order_id' => $order->id],
                 'customer_info' => ['email' => $order->customer_email],
                 'checkout' => [
-                    'success_url' => route('checkout.result') . '?status=success',
+                    'success_url' => route('checkout.result').'?status=success',
                 ],
             ]);
 
-        if (!$response->successful()) {
-            throw new Exception('Paddle Error: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('Paddle Error: '.$response->body());
         }
 
         return $response->json('data.id');
@@ -45,7 +44,7 @@ class PaddleGateway implements GatewayStrategyInterface
 
     public function verifyWebhook(string $payload, string $signature): PaymentWebhookDTO
     {
-        if (!$signature) {
+        if (! $signature) {
             throw new Exception('Invalid Paddle signature', Response::HTTP_BAD_REQUEST);
         }
 
@@ -57,11 +56,11 @@ class PaddleGateway implements GatewayStrategyInterface
         $ts = str_replace('ts=', '', $parts[0]);
         $h1 = str_replace('h1=', '', $parts[1]);
 
-        $signedPayload = $ts . ':' . $payload;
+        $signedPayload = $ts.':'.$payload;
         $secret = config('services.paddle.webhook_secret');
         $expectedH1 = hash_hmac('sha256', $signedPayload, $secret);
 
-        if (!hash_equals($h1, $expectedH1)) {
+        if (! hash_equals($h1, $expectedH1)) {
             throw new Exception('Invalid Paddle signature', Response::HTTP_BAD_REQUEST);
         }
 
@@ -86,7 +85,6 @@ class PaddleGateway implements GatewayStrategyInterface
     }
 
     /**
-     * @param Order $order
      * @return array<int, mixed>
      */
     private function buildItems(Order $order): array
@@ -112,6 +110,7 @@ class PaddleGateway implements GatewayStrategyInterface
                 'quantity' => $item->quantity,
             ];
         }
+
         return $items;
     }
 }

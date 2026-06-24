@@ -18,7 +18,7 @@ class UserReviewControllerTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function testIndexDisplaysUserComments(): void
+    public function test_index_displays_user_comments(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();
@@ -39,7 +39,7 @@ class UserReviewControllerTest extends TestCase
     }
 
     #[Test]
-    public function testUpdateModifiesCommentAndRedirects(): void
+    public function test_update_modifies_comment_and_redirects(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();

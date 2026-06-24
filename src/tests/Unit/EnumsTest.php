@@ -9,13 +9,13 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 class EnumsTest extends TestCase
 {
     #[Test]
-    public function testOrderStatusHasCorrectValues(): void
+    public function test_order_status_has_correct_values(): void
     {
         $this->assertEquals('pending', OrderStatus::Pending->value);
         $this->assertEquals('processing', OrderStatus::Processing->value);
@@ -24,7 +24,7 @@ class EnumsTest extends TestCase
     }
 
     #[Test]
-    public function testPaymentStatusHasCorrectValues(): void
+    public function test_payment_status_has_correct_values(): void
     {
         $this->assertEquals('pending', PaymentStatus::Pending->value);
         $this->assertEquals('paid', PaymentStatus::Paid->value);
@@ -32,7 +32,7 @@ class EnumsTest extends TestCase
     }
 
     #[Test]
-    public function testCorrectlyIdentifiesPendingStatus(): void
+    public function test_correctly_identifies_pending_status(): void
     {
         $status = CommentStatus::Pending;
 
@@ -42,7 +42,7 @@ class EnumsTest extends TestCase
     }
 
     #[Test]
-    public function testCorrectlyIdentifiesApprovedStatus(): void
+    public function test_correctly_identifies_approved_status(): void
     {
         $status = CommentStatus::Approved;
 
@@ -51,7 +51,7 @@ class EnumsTest extends TestCase
     }
 
     #[Test]
-    public function testCorrectlyIdentifiesRejectedStatus(): void
+    public function test_correctly_identifies_rejected_status(): void
     {
         $status = CommentStatus::Rejected;
 
@@ -60,7 +60,7 @@ class EnumsTest extends TestCase
     }
 
     #[Test]
-    public function testUserRoleContainsExpectedValues(): void
+    public function test_user_role_contains_expected_values(): void
     {
         $this->assertEquals('admin', UserRole::Admin->value);
         $this->assertEquals('seller', UserRole::Seller->value);
@@ -68,7 +68,7 @@ class EnumsTest extends TestCase
     }
 
     #[Test]
-    public function testUserStatusContainsExpectedValues(): void
+    public function test_user_status_contains_expected_values(): void
     {
         $this->assertEquals('active', UserStatus::Active->value);
         $this->assertEquals('banned', UserStatus::Banned->value);

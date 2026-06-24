@@ -16,7 +16,7 @@ class CatalogTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function testCatalogIndexLoadsWithFilters(): void
+    public function test_catalog_index_loads_with_filters(): void
     {
         $parentCategory = Category::factory()->create();
         $childCategory = Category::factory()->create(['parent_id' => $parentCategory->id]);

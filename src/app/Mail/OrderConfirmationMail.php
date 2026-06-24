@@ -6,7 +6,6 @@ namespace App\Mail;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -23,7 +22,7 @@ class OrderConfirmationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Confirmation Mail #' . $this->order->id,
+            subject: 'Order Confirmation Mail #'.$this->order->id,
         );
     }
 
@@ -35,7 +34,6 @@ class OrderConfirmationMail extends Mailable
     }
 
     /**
-     *
      * @return array<int, Attachment>
      */
     public function attachments(): array

@@ -32,7 +32,7 @@ class MoneyCast implements CastsAttributes
             return null;
         }
 
-        if (!$value instanceof Money) {
+        if (! $value instanceof Money) {
             $value = new Money((int) $value);
         }
 

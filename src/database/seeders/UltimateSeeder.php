@@ -185,7 +185,7 @@ class UltimateSeeder extends Seeder
                 'name' => $p['name'],
                 'slug' => Str::slug($p['name']),
                 'sku' => strtoupper(Str::random(8)),
-                'description' => 'High-performance hardware: ' . $p['name'],
+                'description' => 'High-performance hardware: '.$p['name'],
                 'price' => $p['price'],
                 'stock' => rand(10, 50),
                 'available' => true,
@@ -198,7 +198,7 @@ class UltimateSeeder extends Seeder
                 $imageContent = file_get_contents($imageUrl);
 
                 if ($imageContent) {
-                    $filename = 'products/' . Str::random(40) . '.png';
+                    $filename = 'products/'.Str::random(40).'.png';
                     Storage::disk('minio')->put($filename, $imageContent);
 
                     ProductImage::create([
@@ -209,7 +209,7 @@ class UltimateSeeder extends Seeder
                     ]);
                 }
             } catch (\Exception $e) {
-                $this->command->warn('Failed to download image for: ' . $p['name']);
+                $this->command->warn('Failed to download image for: '.$p['name']);
             }
         }
     }

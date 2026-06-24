@@ -33,6 +33,7 @@ class CleanupImages extends Command
 
         if (empty($filesInStorage)) {
             $this->info('There are no files in the database.');
+
             return self::SUCCESS;
         }
 
@@ -41,20 +42,21 @@ class CleanupImages extends Command
 
         if (empty($files)) {
             $this->info('All files are synced.');
+
             return self::SUCCESS;
         }
 
-        $this->warn(sprintf("Found %d orphaned files. Deleting...", count($files)));
+        $this->warn(sprintf('Found %d orphaned files. Deleting...', count($files)));
 
         $deletedCount = 0;
         foreach ($files as $file) {
             if ($disk->delete($file)) {
-                $this->line('Deleting ' . $file);
+                $this->line('Deleting '.$file);
                 $deletedCount++;
             }
         }
 
-        $this->info('Deleted ' . $deletedCount . ' files.');
+        $this->info('Deleted '.$deletedCount.' files.');
 
         return self::SUCCESS;
     }

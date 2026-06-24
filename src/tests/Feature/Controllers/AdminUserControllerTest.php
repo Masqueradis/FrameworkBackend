@@ -10,8 +10,8 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class AdminUserControllerTest extends TestCase
 {
@@ -33,7 +33,7 @@ class AdminUserControllerTest extends TestCase
     }
 
     #[Test]
-    public function testIndexDisplaysUsersList(): void
+    public function test_index_displays_users_list(): void
     {
         User::factory()->count(3)->create();
 
@@ -46,7 +46,7 @@ class AdminUserControllerTest extends TestCase
     }
 
     #[Test]
-    public function testBanUserRedirectsWithSuccessMessage(): void
+    public function test_ban_user_redirects_with_success_message(): void
     {
         $user = User::factory()->create(['status' => UserStatus::Active]);
 
@@ -60,7 +60,7 @@ class AdminUserControllerTest extends TestCase
     }
 
     #[Test]
-    public function testUnbanUserRedirectsWithSuccessMessage(): void
+    public function test_unban_user_redirects_with_success_message(): void
     {
         $user = User::factory()->create(['status' => UserStatus::Banned]);
 
@@ -74,7 +74,7 @@ class AdminUserControllerTest extends TestCase
     }
 
     #[Test]
-    public function testAssignRoleUpdatesUserRoleAndRedirects(): void
+    public function test_assign_role_updates_user_role_and_redirects(): void
     {
         $user = User::factory()->create();
 

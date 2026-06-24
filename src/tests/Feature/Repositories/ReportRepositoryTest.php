@@ -7,8 +7,8 @@ use App\Models\Report;
 use App\Models\User;
 use App\Repositories\ReportRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class ReportRepositoryTest extends TestCase
 {
@@ -17,11 +17,11 @@ class ReportRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new ReportRepository();
+        $this->repository = new ReportRepository;
     }
 
     #[Test]
-    public function testCanCreateAReport(): void
+    public function test_can_create_a_report(): void
     {
         $admin = User::factory()->create();
 
@@ -41,7 +41,7 @@ class ReportRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testCanGetReportsForAdmin(): void
+    public function test_can_get_reports_for_admin(): void
     {
         $admin = User::factory()->create();
         $otherAdmin = User::factory()->create();
@@ -56,7 +56,7 @@ class ReportRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testUpdateStatusChangesReportStatus(): void
+    public function test_update_status_changes_report_status(): void
     {
         $admin = User::factory()->create();
         $report = Report::create([

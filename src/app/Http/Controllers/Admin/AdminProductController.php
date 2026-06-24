@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use OpenApi\Attributes as OA;
 use App\DTO\Product\ProductSaveDTO;
 use App\DTO\Product\UploadImageDTO;
 use App\Models\Product;
@@ -14,13 +13,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\View\View;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 readonly class AdminProductController implements HasMiddleware
 {
     public function __construct(
-        private ProductService  $productService,
+        private ProductService $productService,
         private CategoryService $categoryService,
     ) {}
 
@@ -37,18 +37,21 @@ readonly class AdminProductController implements HasMiddleware
     public function index(): View
     {
         $products = $this->productService->getPaginatedProductsForAdmin(15);
+
         return view('admin.products.index', compact('products'));
     }
 
     public function create(): View
     {
         $categories = $this->categoryService->getCategoriesForDropdown();
+
         return view('admin.products.form', compact('categories'));
     }
 
     public function store(ProductSaveDTO $data): RedirectResponse
     {
         $this->productService->createProduct($data);
+
         return redirect()->route('admin.products.index')
             ->with('success', 'Product created successfully.');
     }
@@ -56,12 +59,14 @@ readonly class AdminProductController implements HasMiddleware
     public function edit(Product $product): View
     {
         $categories = $this->categoryService->getCategoriesForDropdown();
+
         return view('admin.products.form', compact('product', 'categories'));
     }
 
     public function update(ProductSaveDTO $data, Product $product): RedirectResponse
     {
         $this->productService->updateProduct($product, $data);
+
         return redirect()->route('admin.products.index')
             ->with('success', 'Product updated successfully.');
     }
@@ -69,6 +74,7 @@ readonly class AdminProductController implements HasMiddleware
     public function destroy(Product $product): RedirectResponse
     {
         $this->productService->deleteProduct($product);
+
         return redirect()->route('admin.products.index')
             ->with('success', 'Product deleted successfully.');
     }

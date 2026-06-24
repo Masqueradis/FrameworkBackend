@@ -23,7 +23,7 @@ readonly class ProfileService
             'avatar_path' => $this->resolveAvatarPath($user, $dto->avatar),
         ])->filter()->toArray();
 
-        return !empty($attributesToUpdate) && $this->userRepository->update($user, $attributesToUpdate);
+        return ! empty($attributesToUpdate) && $this->userRepository->update($user, $attributesToUpdate);
     }
 
     public function deleteAccount(User $user): ?bool
@@ -35,12 +35,12 @@ readonly class ProfileService
 
     private function resolveAvatarPath(User $user, ?UploadedFile $newAvatar): ?string
     {
-        if (!$newAvatar) {
+        if (! $newAvatar) {
             return null;
         }
 
-        if (!$newAvatar->isValid()) {
-            throw new \RuntimeException('Upload error: ' . $newAvatar->getErrorMessage());
+        if (! $newAvatar->isValid()) {
+            throw new \RuntimeException('Upload error: '.$newAvatar->getErrorMessage());
         }
 
         $this->deleteAvatar($user);
@@ -56,7 +56,7 @@ readonly class ProfileService
 
     public function deleteAvatar(User $user): void
     {
-        if (!$user->avatar_path) {
+        if (! $user->avatar_path) {
             return;
         }
 

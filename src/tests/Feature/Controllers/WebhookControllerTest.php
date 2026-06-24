@@ -11,23 +11,22 @@ use App\Models\User;
 use App\Services\Gateways\StripeGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
-use Stripe\Exception\SignatureVerificationException;
+use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class WebhookControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         Mockery::close();
         parent::tearDown();
     }
 
     #[Test]
-    public function testHandlesSuccessfulWebhook(): void
+    public function test_handles_successful_webhook(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -51,7 +50,7 @@ class WebhookControllerTest extends TestCase
     }
 
     #[Test]
-    public function testReturns400OnSignatureVerificationException(): void
+    public function test_returns400_on_signature_verification_exception(): void
     {
         $mockGateway = Mockery::mock(StripeGateway::class);
         $mockGateway->shouldReceive('verifyWebhook')
@@ -65,7 +64,7 @@ class WebhookControllerTest extends TestCase
     }
 
     #[Test]
-    public function testReturns200OnIgnoredEventException(): void
+    public function test_returns200_on_ignored_event_exception(): void
     {
         $mockGateway = Mockery::mock(StripeGateway::class);
         $mockGateway->shouldReceive('verifyWebhook')

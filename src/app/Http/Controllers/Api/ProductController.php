@@ -100,6 +100,7 @@ class ProductController extends ApiController
     public function index(ProductIndexDTO $request): JsonResponse
     {
         $products = $this->productService->getFilteredProducts($request);
+
         return $this->respondPaginated(
             resourceCollection: ProductResource::collection($products),
             message: 'Products retrieved successfully'

@@ -16,10 +16,10 @@ class ProductRepositoryTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function testFindsProductsById(): void
+    public function test_finds_products_by_id(): void
     {
         $product = Product::factory()->create();
-        $repository = new ProductRepository();
+        $repository = new ProductRepository;
 
         $foundProduct = $repository->findById(new ProductId($product->id));
 
@@ -28,9 +28,9 @@ class ProductRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testReturnsNullIfProductNotFound(): void
+    public function test_returns_null_if_product_not_found(): void
     {
-        $repository = new ProductRepository();
+        $repository = new ProductRepository;
 
         $foundProduct = $repository->findById(new ProductId(1));
 
@@ -38,7 +38,7 @@ class ProductRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testChunkAllProductsProcessesAllRecoirds(): void
+    public function test_chunk_all_products_processes_all_recoirds(): void
     {
         Product::factory()->count(10)->create();
         $repository = app(ProductRepository::class);

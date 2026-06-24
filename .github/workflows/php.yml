@@ -100,7 +100,7 @@ jobs:
         working-directory: ./src
 
       - name: Run test suite
-        run: php artisan test --coverage --min=80
+        run: php artisan test --coverage --min=100
         working-directory: ./src
         env:
           DB_HOST: 127.0.0.1

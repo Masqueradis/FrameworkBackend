@@ -21,8 +21,7 @@ class ProductRepository
     }
 
     /**
-     * @param array<string, mixed> $filters
-     * @param int $perPage
+     * @param  array<string, mixed>  $filters
      * @return LengthAwarePaginator<int, Product>
      */
     public function getFiltered(array $filters, int $perPage = 9): LengthAwarePaginator
@@ -35,7 +34,6 @@ class ProductRepository
     }
 
     /**
-     * @param CategoryId|null $categoryId
      * @return Collection<int, Product>
      */
     public function getActiveProductsByCategory(?CategoryId $categoryId): Collection
@@ -53,7 +51,7 @@ class ProductRepository
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function create(array $data): Product
     {
@@ -61,11 +59,12 @@ class ProductRepository
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function update(Product $product, array $data): Product
     {
         $product->update($data);
+
         return $product;
     }
 
@@ -75,7 +74,6 @@ class ProductRepository
     }
 
     /**
-     * @param int $perPage
      * @return LengthAwarePaginator<int, Product>
      */
     public function getPaginatedForAdmin(int $perPage = 15): LengthAwarePaginator
@@ -84,7 +82,7 @@ class ProductRepository
         /** @var User $user */
         $user = auth()->user();
 
-        if (!$user->hasRole(['admin', 'manager']) || !$user->hasPermissionTo('manage-all-products')) {
+        if (! $user->hasRole(['admin', 'manager']) || ! $user->hasPermissionTo('manage-all-products')) {
             $query->where('user_id', auth()->id());
         }
 

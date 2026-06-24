@@ -18,7 +18,7 @@ class UploadImageDTO extends Data
     ) {}
 
     /**
-     * @param array<string, mixed> $properties
+     * @param  array<string, mixed>  $properties
      * @return array<string, mixed>
      */
     public static function prepareForPipeline(array $properties): array

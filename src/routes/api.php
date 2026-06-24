@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\WebhookController;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
 
 Route::prefix('v1')->group(function () {
     Route::controller(AuthController::class)->group(function () {

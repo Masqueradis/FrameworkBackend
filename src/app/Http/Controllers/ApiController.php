@@ -6,8 +6,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
-use Symfony\Component\HttpFoundation\Response;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response;
 
 #[OA\Info(
     version: '1.0',
@@ -37,8 +37,9 @@ abstract class ApiController extends Controller
         ];
 
         if ($errors) {
-            $response ['errors'] = $errors;
+            $response['errors'] = $errors;
         }
+
         return response()->json($response, $code);
     }
 

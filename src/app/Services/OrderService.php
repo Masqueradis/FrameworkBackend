@@ -11,10 +11,7 @@ use App\Events\OrderCreated;
 use App\Exceptions\EmptyCartException;
 use App\Models\Cart;
 use App\Models\Order;
-use App\Models\User;
-use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
-use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +27,7 @@ readonly class OrderService
     public function process(CheckoutDTO $data, Cart $cart): Order
     {
         if ($cart->items->isEmpty()) {
-            throw new EmptyCartException();
+            throw new EmptyCartException;
         }
 
         $totalCents = $cart->items->sum(function ($item) {
@@ -71,6 +68,7 @@ readonly class OrderService
 
             if ($isSuccess) {
                 $this->orderRepository->updateStatus($order, OrderStatus::Completed->value);
+
                 return;
             }
 
@@ -82,8 +80,6 @@ readonly class OrderService
     }
 
     /**
-     * @param int $userId
-     * @param int $perPage
      * @return LengthAwarePaginator<int, Order>
      */
     public function getUserOrdersHistory(int $userId, int $perPage = 5): LengthAwarePaginator

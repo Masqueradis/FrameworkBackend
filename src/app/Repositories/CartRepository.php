@@ -29,6 +29,7 @@ class CartRepository implements CartRepositoryInterface
                 'quantity' => $quantity,
                 'price' => $price,
             ]);
+
             return $item;
         }
 

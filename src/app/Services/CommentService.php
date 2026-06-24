@@ -32,6 +32,7 @@ readonly class CommentService
 
         if ($comment) {
             $this->commentRepository->update($comment, $payload);
+
             return $comment->refresh();
         }
 
@@ -73,7 +74,6 @@ readonly class CommentService
     }
 
     /**
-     * @param int $userId
      * @return Collection<int, Comment>
      */
     public function getUserComments(int $userId): Collection
@@ -82,7 +82,6 @@ readonly class CommentService
     }
 
     /**
-     * @param int $perPage
      * @return LengthAwarePaginator<int, Product>
      */
     public function getProductsWithPendingComments(int $perPage = 15): LengthAwarePaginator

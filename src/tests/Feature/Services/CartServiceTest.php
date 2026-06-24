@@ -11,12 +11,11 @@ use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\CartService;
-use App\ValueObjects\Cart\CartQuantity;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class CartServiceTest extends TestCase
 {
@@ -31,7 +30,7 @@ class CartServiceTest extends TestCase
     }
 
     #[Test]
-    public function testAddsItemToCartSuccessfully(): void
+    public function test_adds_item_to_cart_successfully(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -52,13 +51,13 @@ class CartServiceTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionIfInsufficientStock(): void
+    public function test_throws_exception_if_insufficient_stock(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
 
         $product = Product::factory()->create(['stock' => 1]);
-        $data = new AddToCartDto($product->id, 5);
+        $data = new AddToCartDTO($product->id, 5);
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Not enough stock available.');
@@ -66,7 +65,7 @@ class CartServiceTest extends TestCase
     }
 
     #[Test]
-    public function testCalculateCartTotalCorrectly(): void
+    public function test_calculate_cart_total_correctly(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -74,8 +73,8 @@ class CartServiceTest extends TestCase
         $product1 = Product::factory()->create(['price' => 1000, 'stock' => 10]);
         $product2 = Product::factory()->create(['price' => 2000, 'stock' => 10]);
 
-        $this->cartService->addItem(new AddToCartDto($product1->id, 2));
-        $this->cartService->addItem(new AddToCartDto($product2->id, 1));
+        $this->cartService->addItem(new AddToCartDTO($product1->id, 2));
+        $this->cartService->addItem(new AddToCartDTO($product2->id, 1));
 
         $cart = $this->cartService->getCart();
         $total = $this->cartService->calculateTotal($cart);
@@ -84,7 +83,7 @@ class CartServiceTest extends TestCase
     }
 
     #[Test]
-    public function testUpdatesCartItemQuantity(): void
+    public function test_updates_cart_item_quantity(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -115,7 +114,7 @@ class CartServiceTest extends TestCase
     }
 
     #[Test]
-    public function testUpdateItemQuantityThrowsInvalidQuantityException(): void
+    public function test_update_item_quantity_throws_invalid_quantity_exception(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -148,7 +147,7 @@ class CartServiceTest extends TestCase
     }
 
     #[Test]
-    public function testUpdatesItemQuantityThrowsExceptionIfStockExceeded(): void
+    public function test_updates_item_quantity_throws_exception_if_stock_exceeded(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -175,7 +174,7 @@ class CartServiceTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionIfProductDoesNotExist(): void
+    public function test_throws_exception_if_product_does_not_exist(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);

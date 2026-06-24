@@ -8,17 +8,15 @@ use App\DTO\Checkout\CheckoutDTO;
 use App\Exceptions\EmptyCartException;
 use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Services\CartService;
-use App\Services\OrderService;
 use App\Services\Gateways\GatewayFactory;
-use App\Services\Gateways\StripeGateway;
-use Exception;
+use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\Response;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckoutController extends ApiController
 {
@@ -94,9 +92,9 @@ class CheckoutController extends ApiController
         $userId = auth()->id() ? (int) auth()->id() : null;
         $cart = $this->cartRepository->findOrCreate($userId, session()->getId());
 
-        $lock = Cache::lock('checkout_cart_' . $cart->id, 10);
+        $lock = Cache::lock('checkout_cart_'.$cart->id, 10);
 
-        if (!$lock->get()) {
+        if (! $lock->get()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Checkout is already in progress. Please wait.',

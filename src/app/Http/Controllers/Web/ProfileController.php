@@ -9,8 +9,6 @@ use App\Http\Controllers\ApiController;
 use App\Models\User;
 use App\Services\OrderService;
 use App\Services\ProfileService;
-use App\Services\UserService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;

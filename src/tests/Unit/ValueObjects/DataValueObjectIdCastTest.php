@@ -21,7 +21,7 @@ class DummyUnionDto extends Data
 class DataValueObjectIdCastTest extends TestCase
 {
     #[Test]
-    public function testReturnsOriginalValueIfTypeIsNotNamedType(): void
+    public function test_returns_original_value_if_type_is_not_named_type(): void
     {
         $data = DummyUnionDto::from(['mixed_id' => 123]);
 

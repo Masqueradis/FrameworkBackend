@@ -14,14 +14,14 @@ use Tests\TestCase;
 class GatewayFactoryTest extends TestCase
 {
     #[Test]
-    public function isCreatesStripeGateway(): void
+    public function is_creates_stripe_gateway(): void
     {
         $gateway = GatewayFactory::make(PaymentProvider::Stripe);
         $this->assertInstanceOf(StripeGateway::class, $gateway);
     }
 
     #[Test]
-    public function testCreatesPaddleGateway(): void
+    public function test_creates_paddle_gateway(): void
     {
         $gateway = GatewayFactory::make(PaymentProvider::Paddle);
         $this->assertInstanceOf(PaddleGateway::class, $gateway);

@@ -7,18 +7,15 @@ namespace Tests\Feature\Services;
 use App\DTO\Product\ProductIndexDTO;
 use App\DTO\Product\ProductSaveDTO;
 use App\DTO\Product\UploadImageDTO;
-use App\Events\OrderCreated;
 use App\Models\Category;
 use App\Models\Permission;
 use App\Models\Product;
 use App\Models\User;
-use App\Services\OrderService;
 use App\Services\ProductService;
 use App\ValueObjects\Id\CategoryId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
@@ -31,13 +28,13 @@ class ProductServiceTest extends TestCase
 
     private ProductService $productService;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->productService = app(ProductService::class);
     }
 
-    public function testFilterProductsByMaxPrice(): void
+    public function test_filter_products_by_max_price(): void
     {
         Product::query()->delete();
         Product::factory()->create(['price' => 100, 'available' => true]);
@@ -52,7 +49,7 @@ class ProductServiceTest extends TestCase
     }
 
     #[Test]
-    public function testFiltersProductsBySearch(): void
+    public function test_filters_products_by_search(): void
     {
         Product::factory()->create(['name' => 'First', 'description' => 'First description', 'available' => true]);
         Product::factory()->create(['name' => 'Second', 'description' => 'Second description', 'available' => true]);
@@ -66,7 +63,7 @@ class ProductServiceTest extends TestCase
     }
 
     #[Test]
-    public function testFiltersProductsByAttributes(): void
+    public function test_filters_products_by_attributes(): void
     {
         Product::factory()->create(['available' => true,
             'attributes' => [
@@ -91,7 +88,7 @@ class ProductServiceTest extends TestCase
     }
 
     #[Test]
-    public function testUpdateProductWithExplicitSKU(): void
+    public function test_update_product_with_explicit_sku(): void
     {
         $category = Category::factory()->create();
         $product = Product::factory()->create(['sku' => 'OLD-SKU']);
@@ -117,7 +114,7 @@ class ProductServiceTest extends TestCase
     }
 
     #[Test]
-    public function testReturnsPaginatedProductsForAdminWithRelations(): void
+    public function test_returns_paginated_products_for_admin_with_relations(): void
     {
         Product::query()->delete();
 
@@ -143,7 +140,7 @@ class ProductServiceTest extends TestCase
     }
 
     #[Test]
-    public function testHandlesImageUploadsAndRespectsMaxLimits(): void
+    public function test_handles_image_uploads_and_respects_max_limits(): void
     {
         Storage::fake('minio');
 
@@ -193,7 +190,7 @@ class ProductServiceTest extends TestCase
         $savedImage = $updatedProduct->images->last();
         Storage::disk('minio')->assertExists($savedImage->path);
 
-        $extraImage = UploadedFile::fake()->image("extra.jpg");
+        $extraImage = UploadedFile::fake()->image('extra.jpg');
         $extraData = ProductSaveDTO::from([
             'category_id' => new CategoryId($category->id),
             'name' => 'Name',
@@ -207,7 +204,7 @@ class ProductServiceTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionIfImageUploadFails(): void
+    public function test_throws_exception_if_image_upload_fails(): void
     {
         $service = app(ProductService::class);
         $product = Product::factory()->create();
@@ -224,7 +221,7 @@ class ProductServiceTest extends TestCase
     }
 
     #[Test]
-    public function testHandleImagesSkipsNullValuesInArray(): void
+    public function test_handle_images_skips_null_values_in_array(): void
     {
         Storage::fake('minio');
 
@@ -239,7 +236,7 @@ class ProductServiceTest extends TestCase
             'name' => 'Name',
             'price' => 100,
             'images' => [
-                UploadedFile::fake()->image("valid.jpg"),
+                UploadedFile::fake()->image('valid.jpg'),
                 null,
             ],
         ]);

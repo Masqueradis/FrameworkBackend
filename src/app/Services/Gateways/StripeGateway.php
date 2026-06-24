@@ -7,14 +7,13 @@ namespace App\Services\Gateways;
 use App\DTO\Checkout\PaymentWebhookDTO;
 use App\Enums\PaymentProvider;
 use App\Enums\PaymentStatus;
+use App\Models\Order;
 use App\Services\Gateways\Strategy\GatewayStrategyInterface;
 use App\ValueObjects\Cart\Money;
 use Exception;
-use Illuminate\Http\Request;
 use Stripe\Checkout\Session;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Stripe;
-use App\Models\Order;
 use Stripe\Webhook;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -31,7 +30,7 @@ class StripeGateway implements GatewayStrategyInterface
             'payment_method_types' => ['card'],
             'line_items' => $this->buildLineItems($order),
             'mode' => 'payment',
-            'success_url' => route('checkout.result') . '?status=success',
+            'success_url' => route('checkout.result').'?status=success',
             'cancel_url' => route('checkout.index'),
             'metadata' => [
                 'order_id' => (string) $order->id,
@@ -89,7 +88,6 @@ class StripeGateway implements GatewayStrategyInterface
     }
 
     /**
-     * @param Order $order
      * @return array<int, mixed>
      */
     public function buildLineItems(Order $order): array
@@ -111,6 +109,7 @@ class StripeGateway implements GatewayStrategyInterface
                 'quantity' => $item->quantity,
             ];
         }
+
         return $items;
     }
 }

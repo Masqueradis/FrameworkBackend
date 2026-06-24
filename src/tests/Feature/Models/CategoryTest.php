@@ -8,15 +8,15 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class CategoryTest extends TestCase
 {
     use RefreshDatabase;
 
     #[Test]
-    public function testCategoryHasManyProducts(): void
+    public function test_category_has_many_products(): void
     {
         $category = Category::factory()->create();
 

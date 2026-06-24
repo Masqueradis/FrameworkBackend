@@ -21,10 +21,11 @@ use Tests\TestCase;
 
 class CommentServiceTest extends TestCase
 {
-    use RefreshDatabase;
     use MockeryPHPUnitIntegration;
+    use RefreshDatabase;
 
     private CommentRepositoryInterface $repositoryMock;
+
     private CommentService $service;
 
     protected function setUp(): void
@@ -36,7 +37,7 @@ class CommentServiceTest extends TestCase
     }
 
     #[Test]
-    public function testAddCommentWithPendingStatusByDefault(): void
+    public function test_add_comment_with_pending_status_by_default(): void
     {
         $user = User::factory()->make(['id' => 1]);
         $product = Product::factory()->make(['id' => 1]);
@@ -66,7 +67,7 @@ class CommentServiceTest extends TestCase
     }
 
     #[Test]
-    public function testApproveAComment(): void
+    public function test_approve_a_comment(): void
     {
         $comment = Comment::make(['status' => CommentStatus::Pending]);
 
@@ -79,7 +80,7 @@ class CommentServiceTest extends TestCase
     }
 
     #[Test]
-    public function testRejectAComment(): void
+    public function test_reject_a_comment(): void
     {
         $comment = Comment::make(['status' => CommentStatus::Pending]);
 
@@ -92,7 +93,7 @@ class CommentServiceTest extends TestCase
     }
 
     #[Test]
-    public function testUpdateExistingCommentAndResetsStatusToPending(): void
+    public function test_update_existing_comment_and_resets_status_to_pending(): void
     {
         $user = User::factory()->make(['id' => 1]);
         $product = Product::factory()->make(['id' => 1]);
@@ -118,13 +119,13 @@ class CommentServiceTest extends TestCase
                 'rating' => $dto->rating,
                 'status' => CommentStatus::Pending->value,
             ])
-        ->andReturn(true);
+            ->andReturn(true);
 
         $this->service->saveComment($user, $product, $dto);
     }
 
     #[Test]
-    public function testUpdateCommentFromProfileResetsStatusToPending(): void
+    public function test_update_comment_from_profile_resets_status_to_pending(): void
     {
         $user = User::factory()->make();
         $product = Product::factory()->make(['id' => 1]);
@@ -152,7 +153,7 @@ class CommentServiceTest extends TestCase
     }
 
     #[Test]
-    public function testUpdateCommentReturnsFalseIfNoAttributesToUpdate(): void
+    public function test_update_comment_returns_false_if_no_attributes_to_update(): void
     {
         $comment = Comment::factory()->create();
 
@@ -164,7 +165,7 @@ class CommentServiceTest extends TestCase
     }
 
     #[Test]
-    public function testGetUserComments(): void
+    public function test_get_user_comments(): void
     {
         $userId = 1;
 

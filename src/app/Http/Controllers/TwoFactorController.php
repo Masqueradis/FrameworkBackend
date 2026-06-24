@@ -7,12 +7,12 @@ namespace App\Http\Controllers;
 use App\DTO\User\VerifyTwoFactorDTO;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use OpenApi\Attributes as OA;
 use App\Services\TwoFactorAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
 
 class TwoFactorController extends ApiController
@@ -42,7 +42,7 @@ class TwoFactorController extends ApiController
     {
         $secret = $request->session()->get('2fa_secret');
 
-        if (!$secret) {
+        if (! $secret) {
             return back()->withErrors(['otp' => 'Session expired. Please generate a new QR code.']);
         }
 
@@ -74,7 +74,7 @@ class TwoFactorController extends ApiController
 
     public function showVerifyForm(Request $request): RedirectResponse|View
     {
-        if (!$request->session()->has('2fa:user_id')) {
+        if (! $request->session()->has('2fa:user_id')) {
             return redirect()->route('login');
         }
 
@@ -157,10 +157,11 @@ class TwoFactorController extends ApiController
             ? $request->input('user_id')
             : $request->session()->get('2fa:user_id');
 
-        if (!$userId) {
+        if (! $userId) {
             if (request()->expectsJson()) {
                 return $this->respondError('User ID is required.', Response::HTTP_BAD_REQUEST);
             }
+
             return redirect()->route('login');
         }
 
@@ -180,6 +181,7 @@ class TwoFactorController extends ApiController
             }
 
             $request->session()->forget('2fa:user_id');
+
             return redirect()->intended('/profile');
         }
 

@@ -14,6 +14,7 @@ class SendOrderConfirmationEmail implements ShouldQueue
     use InteractsWithQueue;
 
     public string $connection = 'rabbitmq';
+
     public string $queue = 'emails_queue';
 
     public function handle(OrderCreated $event): void

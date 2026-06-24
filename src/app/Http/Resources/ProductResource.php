@@ -33,7 +33,7 @@ class ProductResource extends JsonResource
                     ->sortByDesc('is_primary')
                     ->sortBy('position')
                     ->values()
-                    ->map(fn($image) => [
+                    ->map(fn ($image) => [
                         'id' => $image->id,
                         'url' => Storage::disk('minio')->url($image->path),
                         'is_primary' => $image->is_primary,

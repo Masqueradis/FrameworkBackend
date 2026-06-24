@@ -18,7 +18,7 @@ class AdminDashboardControllerTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function testAdminDashboardLoadsCorrectly(): void
+    public function test_admin_dashboard_loads_correctly(): void
     {
         $admin = User::factory()->create();
         Role::firstOrCreate(['name' => 'admin']);
@@ -36,7 +36,7 @@ class AdminDashboardControllerTest extends TestCase
     }
 
     #[Test]
-    public function testSellerDashboardLoadsCorrectly(): void
+    public function test_seller_dashboard_loads_correctly(): void
     {
         $seller = User::factory()->create();
         Role::firstOrCreate(['name' => 'seller']);
@@ -54,7 +54,7 @@ class AdminDashboardControllerTest extends TestCase
     }
 
     #[Test]
-    public function testGuestCannotViewDashboard(): void
+    public function test_guest_cannot_view_dashboard(): void
     {
         $response = $this->get(route('admin.dashboard'));
         $response->assertRedirect(route('login'));

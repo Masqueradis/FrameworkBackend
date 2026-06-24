@@ -15,13 +15,10 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use App\Repositories\Contracts\CartRepositoryInterface;
-use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Services\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
-use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -36,7 +33,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function processThrowsExceptionIfCartIsEmpty(): void
+    public function process_throws_exception_if_cart_is_empty(): void
     {
         $cart = Cart::create();
         $dto = new CheckoutDTO(
@@ -52,7 +49,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function processCreatesOrderAndCalculatesTotal(): void
+    public function process_creates_order_and_calculates_total(): void
     {
         $cart = Cart::create();
         $product = Product::factory()->create(['price' => 1000]);
@@ -80,7 +77,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function handleWebhookSuccessUpdatesStatus(): void
+    public function handle_webhook_success_updates_status(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -114,7 +111,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function handleWebhookFailureCancelsOrder(): void
+    public function handle_webhook_failure_cancels_order(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -145,7 +142,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionIfNotEnoughStock(): void
+    public function test_throws_exception_if_not_enough_stock(): void
     {
         $cart = Cart::create();
         $product = Product::factory()->create(['price' => 1000, 'stock' => 1]);
@@ -172,7 +169,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function testDispatchesOrderCreatedEventOnSuccessfulCheckout(): void
+    public function test_dispatches_order_created_event_on_successful_checkout(): void
     {
         Event::fake();
 
