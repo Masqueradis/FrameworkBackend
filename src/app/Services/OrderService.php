@@ -69,6 +69,8 @@ readonly class OrderService
             if ($isSuccess) {
                 $this->orderRepository->updateStatus($order, OrderStatus::Completed->value);
 
+                OrderCreated::dispatch($order);
+
                 return;
             }
 
