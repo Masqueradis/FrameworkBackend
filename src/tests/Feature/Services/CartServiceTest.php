@@ -10,6 +10,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Services\CartService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -46,7 +47,7 @@ class CartServiceTest extends TestCase
         $this->assertDatabaseHas('cart_items', [
             'product_id' => $product->id,
             'quantity' => 2,
-            'price' => 1000,
+            'price' => 100000,
         ]);
     }
 
@@ -79,7 +80,7 @@ class CartServiceTest extends TestCase
         $cart = $this->cartService->getCart();
         $total = $this->cartService->calculateTotal($cart);
 
-        $this->assertEquals(4000, $total->getCents());
+        $this->assertEquals(400000, $total->getCents());
     }
 
     #[Test]
@@ -183,5 +184,32 @@ class CartServiceTest extends TestCase
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Product no longer exists.');
         $this->cartService->addItem($data);
+    }
+
+    #[Test]
+    public function test_update_item_quantity_throws_exception_if_product_missing(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $cart = Cart::create(['user_id' => $user->id]);
+
+        $item = new CartItem(['id' => 1, 'cart_id' => $cart->id, 'product_id' => 99999]);
+
+        $mockRepo = \Mockery::mock(CartRepositoryInterface::class);
+        $mockRepo->shouldReceive('findOrCreate')->andReturn($cart);
+        $mockRepo->shouldReceive('findItemById')->andReturn($item);
+
+        $service = new CartService($mockRepo);
+
+        $data = UpdateCartItemDTO::from([
+            'cartItemId' => 1,
+            'quantity' => 2
+        ]);
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Product no longer exists.');
+
+        $service->updateItemQuantity($data);
     }
 }

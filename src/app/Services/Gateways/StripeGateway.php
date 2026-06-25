@@ -30,6 +30,7 @@ class StripeGateway implements GatewayStrategyInterface
             'payment_method_types' => ['card'],
             'line_items' => $this->buildLineItems($order),
             'mode' => 'payment',
+            'expires_at' => time() + 1800,
             'success_url' => route('checkout.result').'?status=success',
             'cancel_url' => route('checkout.cancel', ['order' => $order->id]),
             'metadata' => [

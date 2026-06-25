@@ -6,14 +6,28 @@ namespace Tests\Feature\Controllers;
 
 use App\Http\Controllers\TwoFactorController;
 use App\Models\User;
+use App\Services\TwoFactorAuthService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PragmaRX\Google2FA\Google2FA;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class TwoFactorControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->artisan('passport:client', [
+            '--personal' => true,
+            '--name' => 'Test Client',
+            '--provider' => 'users',
+        ]);
+    }
 
     #[Test]
     public function test_generate_puts_secret_and_qr_in_session(): void
@@ -159,5 +173,70 @@ class TwoFactorControllerTest extends TestCase
         $response->assertRedirect('/2fa');
         $response->assertSessionHasErrors(['otp' => 'Invalid verification code. Please try again.']);
         $this->assertGuest();
+    }
+    #[Test]
+    public function test_verify_login_api_fails_without_user_id(): void
+    {
+        $response = $this->postJson(action([TwoFactorController::class, 'verifyLogin']), [
+            'otp' => '123456'
+        ]);
+
+        $response->assertStatus(Response::HTTP_BAD_REQUEST);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'User ID is required.'
+        ]);
+    }
+
+    #[Test]
+    public function test_verify_login_api_succeeds_with_valid_otp(): void
+    {
+        $user = User::factory()->create();
+
+        $this->mock(TwoFactorAuthService::class, function (MockInterface $mock) use ($user) {
+            $mock->shouldReceive('verifyLogin')
+                ->once()
+                ->with($user->id, '123456')
+                ->andReturn(true);
+        });
+
+        $response = $this->postJson(action([TwoFactorController::class, 'verifyLogin']), [
+            'user_id' => $user->id,
+            'otp' => '123456'
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonStructure([
+            'success',
+            'message',
+            'data' => [
+                'user' => ['id', 'name', 'email'],
+                'token'
+            ]
+        ]);
+    }
+
+    #[Test]
+    public function test_verify_login_api_fails_with_invalid_otp(): void
+    {
+        $user = User::factory()->create();
+
+        $this->mock(TwoFactorAuthService::class, function (MockInterface $mock) use ($user) {
+            $mock->shouldReceive('verifyLogin')
+                ->once()
+                ->with($user->id, 'wrong_otp')
+                ->andReturn(false);
+        });
+
+        $response = $this->postJson(action([TwoFactorController::class, 'verifyLogin']), [
+            'user_id' => $user->id,
+            'otp' => 'wrong_otp'
+        ]);
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'Invalid verification code.'
+        ]);
     }
 }

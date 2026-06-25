@@ -22,7 +22,7 @@ class CancelAbandonedOrders extends Command
      *
      * @var string
      */
-    protected $description = 'Cancelled old unpaid  orders and returns them to catalog';
+    protected $description = 'Cancelled old unpaid orders and returns them to catalog';
 
     /**
      * Execute the console command.

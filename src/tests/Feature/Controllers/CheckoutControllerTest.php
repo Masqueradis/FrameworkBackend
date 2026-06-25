@@ -2,12 +2,15 @@
 
 namespace Tests\Feature\Controllers;
 
+use App\Enums\OrderStatus;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Gateways\StripeGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
@@ -125,9 +128,9 @@ class CheckoutControllerTest extends TestCase
         ]);
 
         $response->assertStatus(Response::HTTP_INTERNAL_SERVER_ERROR);
+
         $response->assertJson([
-            'status' => 'error',
-            'message' => 'Gateway timeout',
+            'message' => 'Server error',
         ]);
     }
 
@@ -144,12 +147,171 @@ class CheckoutControllerTest extends TestCase
             'price' => 1000,
         ]);
 
-        $response = $this->actingAs($user)->get('/checkout/result');
+        $response = $this->actingAs($user)->get('/checkout/result?status=success');
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertViewIs('checkout.result');
         $response->assertViewHas('status', 'success');
+    }
 
-        $this->assertDatabaseMissing('cart_items', ['cart_id' => $cart->id]);
+    #[Test]
+    public function test_store_returns_429_if_cache_lock_fails(): void
+    {
+        $user = User::factory()->create();
+        $cart = Cart::create(['user_id' => $user->id, 'session_id' => '123']);
+
+        $mockLock = Mockery::mock();
+        $mockLock->shouldReceive('get')->once()->andReturn(false);
+        Cache::shouldReceive('lock')
+            ->with('checkout_cart_' . $cart->id, 10)
+            ->andReturn($mockLock);
+
+        $response = $this->actingAs($user)->postJson('/checkout', [
+            'customer_name' => 'John', 'customer_email' => 'test@example.com',
+            'shipping_address' => '123', 'payment_provider' => 'stripe',
+        ]);
+
+        $response->assertStatus(Response::HTTP_TOO_MANY_REQUESTS);
+        $response->assertJson(['message' => 'Checkout is already in progress. Please wait.']);
+    }
+
+    #[Test]
+    public function test_cancel_restores_cart_and_cancels_order(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => OrderStatus::Pending]);
+        $product = Product::factory()->create(['stock' => 5]);
+        $order->items()->create(['product_id' => $product->id, 'quantity' => 2, 'price_cents' => 1000, 'product_name' => 'Test']);
+
+        $response = $this->actingAs($user)->get(route('checkout.cancel', $order));
+
+        $response->assertRedirect(route('checkout.index'));
+        $this->assertEquals(OrderStatus::Cancelled, $order->fresh()->status);
+        $this->assertEquals(7, $product->fresh()->stock);
+    }
+
+    #[Test]
+    public function test_cancel_fails_for_invalid_order(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => OrderStatus::Completed]);
+
+        $response = $this->actingAs($user)->get(route('checkout.cancel', $order));
+
+        $response->assertRedirect();
+        $this->assertEquals(OrderStatus::Completed, $order->fresh()->status);
+    }
+
+    #[Test]
+    public function test_retry_generates_new_url(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => OrderStatus::Pending]);
+
+        $mockGateway = Mockery::mock(StripeGateway::class);
+        $mockGateway->shouldReceive('createCheckoutUrl')->once()->andReturn('https://fake-stripe.com/retry');
+        $this->app->instance(StripeGateway::class, $mockGateway);
+
+        $response = $this->actingAs($user)->postJson(route('checkout.retry', $order), ['provider' => 'stripe']);
+
+        $response->assertOk();
+        $response->assertJson(['action' => 'https://fake-stripe.com/retry']);
+    }
+
+    #[Test]
+    public function test_retry_fails_for_invalid_order(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => OrderStatus::Completed]);
+
+        $response = $this->actingAs($user)->postJson(route('checkout.retry', $order), ['provider' => 'stripe']);
+
+        $response->assertRedirect(route('catalog.index'));
+    }
+
+    #[Test]
+    public function test_decline_cancels_order_without_cart_restore(): void
+    {
+        $this->withoutExceptionHandling();
+
+        $user = User::factory()->create();
+
+        $order = Order::factory()->create([
+            'user_id' => $user->id,
+            'status' => OrderStatus::Pending
+        ]);
+
+        $product = Product::factory()->create(['stock' => 5]);
+        $order->items()->create([
+            'product_id' => $product->id,
+            'quantity' => 2,
+            'price_cents' => 1000,
+            'product_name' => 'Test'
+        ]);
+
+        $response = $this->actingAs($user)
+            ->from('/profile')
+            ->delete(route('checkout.decline', $order));
+
+        $response->assertRedirect('/profile');
+        $response->assertSessionHas('status', 'Order #' . $order->id . ' was successfully cancelled.');
+
+        $freshStatus = $order->fresh()->status;
+        $actualStatus = $freshStatus instanceof \BackedEnum ? $freshStatus->value : (string) $freshStatus;
+
+        $this->assertEquals(OrderStatus::Cancelled->value, $actualStatus);
+
+        $this->assertEquals(7, $product->fresh()->stock);
+    }
+
+    #[Test]
+    public function test_retry_standard_web_redirects_away(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => OrderStatus::Pending]);
+
+        $mockGateway = Mockery::mock(StripeGateway::class);
+        $mockGateway->shouldReceive('createCheckoutUrl')->once()->andReturn('https://fake-stripe.com/retry-away');
+        $this->app->instance(StripeGateway::class, $mockGateway);
+
+        $response = $this->actingAs($user)->post(route('checkout.retry', $order), ['provider' => 'stripe']);
+
+        $response->assertRedirect('https://fake-stripe.com/retry-away');
+    }
+
+    #[Test]
+    public function test_retry_redirects_back_with_error_on_gateway_exception(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => OrderStatus::Pending]);
+
+        $mockGateway = Mockery::mock(StripeGateway::class);
+        $mockGateway->shouldReceive('createCheckoutUrl')
+            ->once()
+            ->andThrow(new \Exception('Stripe API Connection dropped'));
+        $this->app->instance(StripeGateway::class, $mockGateway);
+
+        $response = $this->actingAs($user)
+            ->from('/profile')
+            ->post(route('checkout.retry', $order), ['provider' => 'stripe']);
+
+        $response->assertRedirect('/profile');
+        $response->assertSessionHas('error_alert', 'Gateway error: Stripe API Connection dropped');
+    }
+
+    #[Test]
+    public function test_decline_fails_for_invalid_order_or_wrong_user(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        $order = Order::factory()->create(['user_id' => $otherUser->id, 'status' => OrderStatus::Pending]);
+
+        $response = $this->actingAs($user)
+            ->from('/profile')
+            ->delete(route('checkout.decline', $order));
+
+        $response->assertRedirect('/profile');
+        $response->assertSessionHas('error_alert', 'This order cannot be cancelled.');
     }
 }

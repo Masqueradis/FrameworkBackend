@@ -45,6 +45,9 @@ class AdminProductControllerTest extends TestCase
         $sellerRole = Role::firstOrCreate(['name' => 'seller']);
         $sellerRole->givePermissionTo('manage-own-products');
         $this->seller->assignRole('seller');
+
+        Permission::firstOrCreate(['name' => 'access-panel']);
+        Permission::firstOrCreate(['name' => 'manage-categories']);
     }
 
     #[Test]

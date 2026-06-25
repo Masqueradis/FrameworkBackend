@@ -6,6 +6,7 @@ namespace Tests\Feature\Services\Gateways;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentProvider;
+use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -138,12 +139,71 @@ class PaddleGatewayTest extends TestCase
     #[Test]
     public function test_throws_exception_on_ignored_event_type(): void
     {
-        $payload = json_encode(['event_type' => 'subscription.created', 'data' => []]);
+        $payload = json_encode([
+            'event_type' => 'subscription.created',
+            'data' => [
+                'custom_data' => [
+                    'order_id' => 1
+                ]
+            ]
+        ]);
+
         $ts = time();
         $h1 = hash_hmac('sha256', $ts.':'.$payload, 'test_secret');
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Ignored event type');
+
+        $this->gateway->verifyWebhook($payload, "ts={$ts};h1={$h1}");
+    }
+
+    #[Test]
+    public function test_throws_exception_on_malformed_signature(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Malformed Paddle signature');
+        $this->gateway->verifyWebhook('{}', 'invalid_signature_without_semicolon');
+    }
+
+    #[Test]
+    public function test_verifies_failed_webhook(): void
+    {
+        $payload = json_encode([
+            'event_type' => 'transaction.canceled',
+            'data' => [
+                'id' => 'txn_failed_999',
+                'custom_data' => ['order_id' => 15],
+            ],
+        ]);
+
+        $ts = time();
+        $h1 = hash_hmac('sha256', $ts.':'.$payload, config('services.paddle.webhook_secret'));
+
+        $dto = $this->gateway->verifyWebhook($payload, "ts={$ts};h1={$h1}");
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    #[Test]
+    public function test_throws_exception_for_zombie_payment(): void
+    {
+        $order = Order::factory()->create([
+            'status' => OrderStatus::Cancelled,
+        ]);
+
+        $payload = json_encode([
+            'event_type' => 'transaction.completed',
+            'data' => [
+                'id' => 'txn_zombie_999',
+                'custom_data' => ['order_id' => $order->id],
+            ],
+        ]);
+
+        $ts = time();
+        $h1 = hash_hmac('sha256', $ts.':'.$payload, config('services.paddle.webhook_secret'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Payment received for cancelled order. Flagged for refund.');
 
         $this->gateway->verifyWebhook($payload, "ts={$ts};h1={$h1}");
     }

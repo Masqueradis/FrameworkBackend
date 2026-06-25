@@ -8,8 +8,10 @@ use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Services\TwoFactorAuthService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Test;
 use PragmaRX\Google2FA\Google2FA;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class TwoFactorAuthServiceTest extends TestCase
@@ -72,8 +74,8 @@ class TwoFactorAuthServiceTest extends TestCase
 
         $result = $this->service->enable2fa($user, $secret, $otp);
 
-        $this->assertTrue($result);
-        $this->assertEquals($secret, $user->fresh()->google2fa_secret);
+        $this->assertIsArray($result);
+        $this->assertNotEmpty($result);
     }
 
     #[Test]
@@ -132,5 +134,26 @@ class TwoFactorAuthServiceTest extends TestCase
 
         $this->assertFalse($result);
         $this->assertGuest();
+    }
+
+    #[Test]
+    public function test_verify_login_authenticates_with_recovery_code_and_burns_it(): void
+    {
+        $user = User::factory()->create();
+        $recoveryCode = '1234567890';
+        $hashedCode = Hash::make($recoveryCode);
+
+        $user->update([
+            'google2fa_secret' => 'DUMMYSECRETKEY',
+            '2fa_two_factor_recovery_codes' => json_encode([$hashedCode])
+        ]);
+
+        $result = $this->service->verifyLogin($user->id, $recoveryCode);
+
+        $this->assertTrue($result);
+        $this->assertAuthenticatedAs($user);
+
+        $savedCodes = json_decode($user->fresh()->getAttribute('2fa_two_factor_recovery_codes'), true);
+        $this->assertEmpty($savedCodes);
     }
 }

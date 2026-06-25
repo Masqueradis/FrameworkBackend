@@ -3,6 +3,7 @@
 namespace App\Services\Gateways;
 
 use App\DTO\Checkout\PaymentWebhookDTO;
+use App\Enums\OrderStatus;
 use App\Enums\PaymentProvider;
 use App\Enums\PaymentStatus;
 use App\Models\Order;
@@ -10,6 +11,7 @@ use App\Services\Gateways\Strategy\GatewayStrategyInterface;
 use App\ValueObjects\Cart\Money;
 use Exception;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class PaddleGateway implements GatewayStrategyInterface
@@ -75,6 +77,18 @@ class PaddleGateway implements GatewayStrategyInterface
             $status = PaymentStatus::Failed;
         } else {
             throw new Exception('Ignored event type', Response::HTTP_OK);
+        }
+
+        if ($status === PaymentStatus::Success) {
+            $order = Order::find($orderId);
+
+            $statusStr = $order && $order->status instanceof \BackedEnum ? $order->status->value : (string) ($order->status ?? '');
+
+            if ($order && $statusStr === OrderStatus::Cancelled->value) {
+                Log::critical("Order #{$orderId} was paid via Paddle after being cancelled. Please issue a refund.");
+
+                throw new Exception('Payment received for cancelled order. Flagged for refund.', Response::HTTP_OK);
+            }
         }
 
         return new PaymentWebhookDTO(

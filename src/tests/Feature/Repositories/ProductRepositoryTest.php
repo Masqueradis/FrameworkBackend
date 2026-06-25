@@ -54,4 +54,16 @@ class ProductRepositoryTest extends TestCase
         $this->assertEquals(5, $chunkCount);
         $this->assertEquals(10, $processedProducts);
     }
+
+    #[Test]
+    public function test_count_all_returns_total_products(): void
+    {
+        Product::factory()->count(5)->create();
+
+        $repository = app(ProductRepository::class);
+
+        $count = $repository->countAll();
+
+        $this->assertEquals(5, $count);
+    }
 }

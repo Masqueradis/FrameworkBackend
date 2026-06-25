@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Controllers;
 
 use App\Models\Category;
+use App\Models\Permission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -22,9 +23,16 @@ class AdminCategoryControllerTest extends TestCase
     {
         parent::setUp();
         $this->admin = User::factory()->create();
+        Permission::firstOrCreate(['name' => 'access-panel']);
+        Permission::firstOrCreate(['name' => 'manage-categories']);
         Role::firstOrCreate(['name' => 'admin']);
+
         $this->admin->assignRole('admin');
+        $this->admin->givePermissionTo('access-panel');
+        $this->admin->givePermissionTo('manage-categories');
         $this->category = Category::factory()->create();
+
+
     }
 
     #[Test]

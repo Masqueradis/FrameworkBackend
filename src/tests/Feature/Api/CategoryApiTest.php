@@ -37,7 +37,7 @@ class CategoryApiTest extends TestCase
         $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'web']);
         $customerRole = Role::create(['name' => 'customer', 'guard_name' => 'web']);
 
-        $manageCategoriesPermission = Permission::create(['name' => 'manage categories', 'guard_name' => 'web']);
+        $manageCategoriesPermission = Permission::create(['name' => 'manage-categories', 'guard_name' => 'web']);
 
         $adminRole->givePermissionTo($manageCategoriesPermission);
 
@@ -46,6 +46,8 @@ class CategoryApiTest extends TestCase
 
         $this->customer = User::factory()->create();
         $this->customer->assignRole($customerRole);
+
+        Permission::firstOrCreate(['name' => 'access-panel', 'guard_name' => 'web']);
     }
 
     #[Test]

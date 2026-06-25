@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Services\Gateways;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -118,6 +119,8 @@ class StripeGatewayTest extends TestCase
                 'object' => [
                     'metadata' => ['order_id' => '10'],
                     'payment_intent' => 'pi_123',
+                    'payment_status' => 'paid',
+                    'amount_total' => 4500,
                 ],
             ],
         ]);
@@ -156,5 +159,55 @@ class StripeGatewayTest extends TestCase
         $signature = hash_hmac('sha256', $signedPayload, $secret);
 
         return "t={$timestamp},v1={$signature}";
+    }
+
+    #[Test]
+    public function test_throws_exception_if_payment_not_completed(): void
+    {
+        $payload = json_encode([
+            'type' => 'checkout.session.completed',
+            'data' => ['object' => ['metadata' => ['order_id' => '10'], 'payment_status' => 'unpaid']],
+        ]);
+        $signature = $this->generateStripeSignature($payload);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Payment not completed yet');
+        $this->gateway->verifyWebhook($payload, $signature);
+    }
+
+    #[Test]
+    public function test_verifies_failed_webhook(): void
+    {
+        $payload = json_encode([
+            'type' => 'checkout.session.expired',
+            'data' => ['object' => ['metadata' => ['order_id' => '10'], 'payment_intent' => 'pi_failed']],
+        ]);
+        $signature = $this->generateStripeSignature($payload);
+
+        $dto = $this->gateway->verifyWebhook($payload, $signature);
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    #[Test]
+    public function test_fails_if_amount_mismatch(): void
+    {
+        $order = Order::factory()->create(['total_amount_cents' => 5000]);
+
+        $payload = json_encode([
+            'type' => 'checkout.session.completed',
+            'data' => [
+                'object' => [
+                    'metadata' => ['order_id' => (string) $order->id],
+                    'payment_status' => 'paid',
+                    'amount_total' => 1000,
+                    'id' => 'cs_123'
+                ]
+            ],
+        ]);
+        $signature = $this->generateStripeSignature($payload);
+
+        $dto = $this->gateway->verifyWebhook($payload, $signature);
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
     }
 }

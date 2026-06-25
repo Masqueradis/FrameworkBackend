@@ -371,7 +371,7 @@ class AuthApiTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.require_2fa', true);
         $response->assertJsonPath('data.user_id', $user->id);
-        $response->assertJsonPath('message', 'Two factor authentication was successful.');
+        $response->assertJsonPath('message', 'Two factor authentication required.');
     }
 
     #[Test]
