@@ -34,7 +34,7 @@ class PaddleGateway implements GatewayStrategyInterface
                 'customer_info' => ['email' => $order->customer_email],
                 'checkout' => [
                     'success_url' => route('checkout.result').'?status=success',
-                    'cancel_url' => route('checkout.cancel', ['order' => $order->id]),
+                    'cancel_url' => url('/profile'),
                 ],
             ]);
 
@@ -82,7 +82,9 @@ class PaddleGateway implements GatewayStrategyInterface
         if ($status === PaymentStatus::Success) {
             $order = Order::find($orderId);
 
-            $statusStr = $order && $order->status instanceof \BackedEnum ? $order->status->value : (string) ($order->status ?? '');
+            /** @var mixed $rawStatus */
+            $rawStatus = $order?->status;
+            $statusStr = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
 
             if ($order && $statusStr === OrderStatus::Cancelled->value) {
                 Log::critical("Order #{$orderId} was paid via Paddle after being cancelled. Please issue a refund.");

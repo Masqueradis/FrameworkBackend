@@ -17,7 +17,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/verify/{token}', 'verifyEmail');
     });
 
-    Route::post('/webhooks/{provider}', [WebhookController::class, 'handle']);
+    Route::post('/webhooks/{provider}', [WebhookController::class, 'handle'])
+        ->middleware(['throttle:60,1']);
 
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
     Route::apiResource('products', ProductController::class)->only(['index', 'show']);

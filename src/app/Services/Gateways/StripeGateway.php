@@ -32,7 +32,7 @@ class StripeGateway implements GatewayStrategyInterface
             'mode' => 'payment',
             'expires_at' => time() + 1800,
             'success_url' => route('checkout.result').'?status=success',
-            'cancel_url' => route('checkout.cancel', ['order' => $order->id]),
+            'cancel_url' => url('/profile'),
             'metadata' => [
                 'order_id' => (string) $order->id,
             ],
@@ -75,8 +75,18 @@ class StripeGateway implements GatewayStrategyInterface
 
         if ($status === PaymentStatus::Success) {
             $order = Order::find($orderId);
-            if ($order && (int) $session->amount_total !== $order->total_amount_cents->getCents()) {
-                $status = PaymentStatus::Failed;
+
+            if ($order) {
+                /** @var mixed $rawTotal */
+                $rawTotal = $order->total_amount_cents;
+
+                $orderTotalCents = $rawTotal instanceof Money
+                    ? $rawTotal->getCents()
+                    : (int) $rawTotal;
+
+                if ((int) $session->amount_total !== $orderTotalCents) {
+                    $status = PaymentStatus::Failed;
+                }
             }
         }
 

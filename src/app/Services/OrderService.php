@@ -46,6 +46,13 @@ readonly class OrderService
 
         $order = $this->orderRepository->createWithItemsAndDeductStock($orderData, $cart->items);
 
+        $this->orderRepository->addPayment($order, [
+            'provider' => $data->paymentProvider->value,
+            'transaction_id' => null,
+            'amount_cents' => $totalCents,
+            'status' => PaymentStatus::Pending->value,
+        ]);
+
         OrderCreated::dispatch($order);
 
         return $order;

@@ -32,7 +32,6 @@ class AdminCategoryControllerTest extends TestCase
         $this->admin->givePermissionTo('manage-categories');
         $this->category = Category::factory()->create();
 
-
     }
 
     #[Test]

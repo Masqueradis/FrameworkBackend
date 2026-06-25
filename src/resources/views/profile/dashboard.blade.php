@@ -99,10 +99,9 @@
                                                         <span class="badge bg-warning text-dark mb-2">Processing</span>
 
                                                         <div class="d-flex align-items-center gap-2">
-                                                            <form action="{{ route('checkout.retry', $order->id) }}" method="POST" class="m-0">
+                                                            <form action="{{ route('checkout.retry', $order->id) }}" method="POST" class="m-0 retry-payment-form">
                                                                 @csrf
-                                                                <input type="hidden" name="provider" value="stripe">
-                                                                <button type="submit" class="btn btn-primary shadow-sm" style="padding: 2px 10px; font-size: 12px; line-height: 1.5; border-radius: 4px;">
+                                                                <button type="submit" class="btn btn-primary shadow-sm retry-btn" style="padding: 2px 10px; font-size: 12px; line-height: 1.5; border-radius: 4px;">
                                                                     Pay
                                                                 </button>
                                                             </form>
@@ -152,4 +151,65 @@
 
         </div>
     </div>
+
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Paddle.Environment.set('sandbox');
+            Paddle.Initialize({
+                token: '{{ config('services.paddle.client_token') }}',
+                eventCallback: function(data) {
+                    if (data.name === 'checkout.completed') {
+                        window.location.href = "{{ route('checkout.result') }}?status=success";
+                    }
+                }
+            });
+
+            const forms = document.querySelectorAll('.retry-payment-form');
+
+            forms.forEach(form => {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const submitBtn = form.querySelector('.retry-btn');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '...';
+
+                    try {
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            body: new FormData(form),
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Payment error');
+                        }
+
+                        if (data.provider === 'stripe') {
+                            window.location.href = data.action;
+                        } else if (data.provider === 'paddle') {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+
+                            Paddle.Checkout.open({
+                                transactionId: data.action
+                            });
+                        }
+                    } catch (error) {
+                        alert('Error: ' + error.message);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

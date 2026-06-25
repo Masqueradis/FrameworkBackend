@@ -9,6 +9,7 @@ use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use JsonException;
 use PragmaRX\Google2FA\Google2FA;
 
 class TwoFactorAuthService
@@ -40,6 +41,11 @@ class TwoFactorAuthService
         return $this->google2fa->verifyKey($secret, $otp);
     }
 
+    /**
+     * @return array<int, string>|false
+     *
+     * @throws JsonException
+     */
     public function enable2fa(User $user, string $secret, string $otp): array|false
     {
         if ($this->verify($secret, $otp)) {
@@ -52,7 +58,7 @@ class TwoFactorAuthService
                 $hashedCodes[] = Hash::make($code);
             }
 
-            $this->userRepository->update2faSecret($user->id, $secret, json_encode($hashedCodes));
+            $this->userRepository->update2faSecret($user->id, $secret, json_encode($hashedCodes, JSON_THROW_ON_ERROR));
 
             return $plainCodes;
         }

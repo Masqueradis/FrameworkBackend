@@ -174,17 +174,18 @@ class TwoFactorControllerTest extends TestCase
         $response->assertSessionHasErrors(['otp' => 'Invalid verification code. Please try again.']);
         $this->assertGuest();
     }
+
     #[Test]
     public function test_verify_login_api_fails_without_user_id(): void
     {
         $response = $this->postJson(action([TwoFactorController::class, 'verifyLogin']), [
-            'otp' => '123456'
+            'otp' => '123456',
         ]);
 
         $response->assertStatus(Response::HTTP_BAD_REQUEST);
         $response->assertJson([
             'success' => false,
-            'message' => 'User ID is required.'
+            'message' => 'User ID is required.',
         ]);
     }
 
@@ -202,7 +203,7 @@ class TwoFactorControllerTest extends TestCase
 
         $response = $this->postJson(action([TwoFactorController::class, 'verifyLogin']), [
             'user_id' => $user->id,
-            'otp' => '123456'
+            'otp' => '123456',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -211,8 +212,8 @@ class TwoFactorControllerTest extends TestCase
             'message',
             'data' => [
                 'user' => ['id', 'name', 'email'],
-                'token'
-            ]
+                'token',
+            ],
         ]);
     }
 
@@ -230,13 +231,13 @@ class TwoFactorControllerTest extends TestCase
 
         $response = $this->postJson(action([TwoFactorController::class, 'verifyLogin']), [
             'user_id' => $user->id,
-            'otp' => 'wrong_otp'
+            'otp' => 'wrong_otp',
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
             'success' => false,
-            'message' => 'Invalid verification code.'
+            'message' => 'Invalid verification code.',
         ]);
     }
 }

@@ -200,8 +200,78 @@ class StripeGatewayTest extends TestCase
                     'metadata' => ['order_id' => (string) $order->id],
                     'payment_status' => 'paid',
                     'amount_total' => 1000,
-                    'id' => 'cs_123'
-                ]
+                    'id' => 'cs_123',
+                ],
+            ],
+        ]);
+        $signature = $this->generateStripeSignature($payload);
+
+        $dto = $this->gateway->verifyWebhook($payload, $signature);
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    public function test_throws_exception_on_invalid_stripe_signature(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Invalid Stripe signature');
+
+        $gateway = new StripeGateway;
+        $gateway->verifyWebhook('bad_payload', 'bad_signature');
+    }
+
+    public function test_throws_exception_if_payment_status_not_paid(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Payment not completed yet');
+
+        $payload = json_encode([
+            'type' => 'checkout.session.completed',
+            'data' => ['object' => ['payment_status' => 'unpaid', 'metadata' => ['order_id' => '1']]],
+        ]);
+
+        $signature = $this->generateStripeSignature($payload);
+        (new StripeGateway)->verifyWebhook($payload, $signature);
+    }
+
+    public function test_handles_expired_stripe_session(): void
+    {
+        $payload = json_encode([
+            'type' => 'checkout.session.expired',
+            'data' => [
+                'object' => [
+                    'id' => 'cs_expired_123',
+                    'metadata' => ['order_id' => '1'],
+                ],
+            ],
+        ]);
+
+        $signature = $this->generateStripeSignature($payload);
+        $dto = (new StripeGateway)->verifyWebhook($payload, $signature);
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    #[Test]
+    public function test_fails_if_amount_mismatch_with_raw_integer_fallback(): void
+    {
+        $order = Order::factory()->create(['total_amount_cents' => 5000]);
+
+        Order::retrieved(function (Order $retrievedOrder) use ($order) {
+            if ($retrievedOrder->id === $order->id) {
+                $retrievedOrder->mergeCasts(['total_amount_cents' => 'integer']);
+            }
+        });
+
+        $payload = json_encode([
+            'type' => 'checkout.session.completed',
+            'data' => [
+                'object' => [
+                    'metadata' => ['order_id' => (string) $order->id],
+                    'payment_status' => 'paid',
+                    'amount_total' => 1000,
+                    'id' => 'cs_124',
+                ],
             ],
         ]);
         $signature = $this->generateStripeSignature($payload);

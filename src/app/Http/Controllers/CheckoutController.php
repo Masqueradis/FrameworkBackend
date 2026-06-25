@@ -14,6 +14,7 @@ use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Services\CartService;
 use App\Services\Gateways\GatewayFactory;
 use App\Services\OrderService;
+use App\ValueObjects\Cart\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -137,7 +138,9 @@ class CheckoutController extends ApiController
 
     public function cancel(Order $order, OrderRepositoryInterface $orderRepository): RedirectResponse
     {
-        $statusStr = $order->status instanceof \BackedEnum ? $order->status->value : (string) $order->status;
+        /** @var mixed $rawStatus */
+        $rawStatus = $order->status;
+        $statusStr = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
 
         if ((int) $order->user_id === (int) auth()->id() && $statusStr === OrderStatus::Pending->value) {
 
@@ -145,7 +148,19 @@ class CheckoutController extends ApiController
 
             $order->load('items');
             foreach ($order->items as $item) {
-                $this->cartRepository->addOrUpdateItem($cart, (int) $item->product_id, $item->quantity, $item->price_cents);
+                /** @var mixed $rawPrice */
+                $rawPrice = $item->price_cents;
+
+                $price = $rawPrice instanceof Money
+                    ? $rawPrice
+                    : new Money((int) $rawPrice);
+
+                $this->cartRepository->addOrUpdateItem(
+                    $cart,
+                    (int) $item->product_id,
+                    $item->quantity,
+                    $price
+                );
             }
 
             $order->update(['status' => OrderStatus::Cancelled->value]);
@@ -157,33 +172,42 @@ class CheckoutController extends ApiController
 
     public function retry(Order $order): JsonResponse|RedirectResponse
     {
-        $statusStr = $order->status instanceof \BackedEnum ? $order->status->value : (string) $order->status;
+        /** @var mixed $rawStatus */
+        $rawStatus = $order->status;
+        $statusStr = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
 
         if ((int) $order->user_id !== (int) auth()->id() || $statusStr !== OrderStatus::Pending->value) {
             return redirect()->route('catalog.index')->with('error_alert', 'This order cannot be paid.');
         }
 
         try {
-            $providerName = request('provider', 'stripe');
+            $lastProvider = $order->payments()->latest()->value('provider');
+            $providerName = $lastProvider ?? request('provider', 'stripe');
             $provider = PaymentProvider::from($providerName);
 
             $gateway = GatewayFactory::make($provider);
             $url = $gateway->createCheckoutUrl($order);
 
             if (request()->wantsJson()) {
-                return response()->json(['status' => 'success', 'action' => $url]);
+                return response()->json([
+                    'status' => 'success',
+                    'provider' => $provider->value,
+                    'action' => $url,
+                ]);
             }
 
             return redirect()->away($url);
 
         } catch (\Exception $exception) {
-            return redirect()->back()->with('error_alert', 'Gateway error: ' . $exception->getMessage());
+            return redirect()->back()->with('error_alert', 'Gateway error: '.$exception->getMessage());
         }
     }
 
     public function decline(Order $order, OrderRepositoryInterface $orderRepository): RedirectResponse
     {
-        $statusStr = $order->status instanceof \BackedEnum ? $order->status->value : (string) $order->status;
+        /** @var mixed $rawStatus */
+        $rawStatus = $order->status;
+        $statusStr = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
 
         if ((int) $order->user_id !== (int) auth()->id() || $statusStr !== OrderStatus::Pending->value) {
             return redirect()->back()->with('error_alert', 'This order cannot be cancelled.');
@@ -193,6 +217,6 @@ class CheckoutController extends ApiController
 
         $orderRepository->restoreStock($order);
 
-        return redirect()->back()->with('status', 'Order #' . $order->id . ' was successfully cancelled.');
+        return redirect()->back()->with('status', 'Order #'.$order->id.' was successfully cancelled.');
     }
 }

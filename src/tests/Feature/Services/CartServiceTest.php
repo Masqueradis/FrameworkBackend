@@ -204,7 +204,7 @@ class CartServiceTest extends TestCase
 
         $data = UpdateCartItemDTO::from([
             'cartItemId' => 1,
-            'quantity' => 2
+            'quantity' => 2,
         ]);
 
         $this->expectException(ValidationException::class);

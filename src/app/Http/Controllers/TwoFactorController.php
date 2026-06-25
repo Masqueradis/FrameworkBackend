@@ -168,7 +168,9 @@ class TwoFactorController extends ApiController
         if ($this->twoFactorAuthService->verifyLogin((int) $userId, $dto->otp)) {
 
             if (request()->expectsJson()) {
-                $user = User::find($userId);
+                /** @var User $user */
+                $user = User::findOrFail((int) $userId);
+
                 $token = $user->createToken('ApiAccess')->accessToken;
 
                 return $this->respondSuccess(

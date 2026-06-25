@@ -7,6 +7,9 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<OrderItem>
+ */
 class OrderItemFactory extends Factory
 {
     protected $model = OrderItem::class;

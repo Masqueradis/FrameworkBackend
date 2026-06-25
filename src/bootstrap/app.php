@@ -8,6 +8,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Laravel\Passport\Http\Middleware\CreateFreshApiToken;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,10 +47,11 @@ return Application::configure(basePath: dirname(__DIR__))
             return redirect()->route('catalog.index')->with('error_alert', 'You have no access for this page.');
         });
 
-        $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException $exception, Request $request) {
+        $exceptions->render(function (UnauthorizedException $exception, Request $request) {
             if ($request->wantsJson() || $request->is('api/*')) {
                 return response()->json(['message' => 'Access denied'], Response::HTTP_FORBIDDEN);
             }
+
             return redirect()->route('catalog.index')->with('error_alert', 'You have no access for this page.');
         });
 

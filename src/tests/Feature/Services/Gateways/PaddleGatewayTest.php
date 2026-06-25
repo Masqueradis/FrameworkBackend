@@ -143,9 +143,9 @@ class PaddleGatewayTest extends TestCase
             'event_type' => 'subscription.created',
             'data' => [
                 'custom_data' => [
-                    'order_id' => 1
-                ]
-            ]
+                    'order_id' => 1,
+                ],
+            ],
         ]);
 
         $ts = time();
@@ -206,5 +206,37 @@ class PaddleGatewayTest extends TestCase
         $this->expectExceptionMessage('Payment received for cancelled order. Flagged for refund.');
 
         $this->gateway->verifyWebhook($payload, "ts={$ts};h1={$h1}");
+    }
+
+    public function test_throws_exception_on_malformed_paddle_signature(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Malformed Paddle signature');
+
+        (new PaddleGateway)->verifyWebhook('{"data": {}}', 'ts=12345');
+    }
+
+    public function test_handles_canceled_paddle_transaction(): void
+    {
+        $payload = json_encode([
+            'event_type' => 'transaction.canceled',
+            'data' => ['id' => 'txn_123', 'custom_data' => ['order_id' => '1']],
+        ]);
+
+        $signature = $this->generatePaddleSignature($payload);
+        $dto = (new PaddleGateway)->verifyWebhook($payload, $signature);
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    protected function generatePaddleSignature(string $payload): string
+    {
+        $timestamp = time();
+        $secret = config('services.paddle.webhook_secret');
+
+        $signedPayload = "{$timestamp}:{$payload}";
+        $signature = hash_hmac('sha256', $signedPayload, $secret);
+
+        return "ts={$timestamp};h1={$signature}";
     }
 }

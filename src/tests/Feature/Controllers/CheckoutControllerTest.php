@@ -3,11 +3,14 @@
 namespace Tests\Feature\Controllers;
 
 use App\Enums\OrderStatus;
+use App\Http\Controllers\CheckoutController;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Repositories\Contracts\CartRepositoryInterface;
+use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Services\Gateways\StripeGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -163,7 +166,7 @@ class CheckoutControllerTest extends TestCase
         $mockLock = Mockery::mock();
         $mockLock->shouldReceive('get')->once()->andReturn(false);
         Cache::shouldReceive('lock')
-            ->with('checkout_cart_' . $cart->id, 10)
+            ->with('checkout_cart_'.$cart->id, 10)
             ->andReturn($mockLock);
 
         $response = $this->actingAs($user)->postJson('/checkout', [
@@ -238,7 +241,7 @@ class CheckoutControllerTest extends TestCase
 
         $order = Order::factory()->create([
             'user_id' => $user->id,
-            'status' => OrderStatus::Pending
+            'status' => OrderStatus::Pending,
         ]);
 
         $product = Product::factory()->create(['stock' => 5]);
@@ -246,7 +249,7 @@ class CheckoutControllerTest extends TestCase
             'product_id' => $product->id,
             'quantity' => 2,
             'price_cents' => 1000,
-            'product_name' => 'Test'
+            'product_name' => 'Test',
         ]);
 
         $response = $this->actingAs($user)
@@ -254,7 +257,7 @@ class CheckoutControllerTest extends TestCase
             ->delete(route('checkout.decline', $order));
 
         $response->assertRedirect('/profile');
-        $response->assertSessionHas('status', 'Order #' . $order->id . ' was successfully cancelled.');
+        $response->assertSessionHas('status', 'Order #'.$order->id.' was successfully cancelled.');
 
         $freshStatus = $order->fresh()->status;
         $actualStatus = $freshStatus instanceof \BackedEnum ? $freshStatus->value : (string) $freshStatus;
@@ -313,5 +316,34 @@ class CheckoutControllerTest extends TestCase
 
         $response->assertRedirect('/profile');
         $response->assertSessionHas('error_alert', 'This order cannot be cancelled.');
+    }
+
+    public function test_cancel_handles_raw_integer_price_fallback_for_phpstan(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $order = Mockery::mock(Order::class)->makePartial();
+        $order->user_id = $user->id;
+        $order->status = OrderStatus::Pending;
+        $order->shouldReceive('load')->with('items')->andReturnSelf();
+        $order->shouldReceive('update')->once();
+
+        $item = (object) ['product_id' => 1, 'quantity' => 1, 'price_cents' => 5000];
+        $order->items = collect([$item]);
+
+        $orderRepo = Mockery::mock(OrderRepositoryInterface::class);
+        $orderRepo->shouldReceive('restoreStock')->once();
+
+        $cartRepo = Mockery::mock(CartRepositoryInterface::class);
+        $cartRepo->shouldReceive('findOrCreate')->andReturn(new Cart(['id' => 1]));
+        $cartRepo->shouldReceive('addOrUpdateItem')->once();
+
+        $this->app->instance(CartRepositoryInterface::class, $cartRepo);
+
+        $controller = $this->app->make(CheckoutController::class);
+        $response = $controller->cancel($order, $orderRepo);
+
+        $this->assertTrue($response->isRedirect());
     }
 }

@@ -11,7 +11,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Test;
 use PragmaRX\Google2FA\Google2FA;
-use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class TwoFactorAuthServiceTest extends TestCase
@@ -145,7 +144,7 @@ class TwoFactorAuthServiceTest extends TestCase
 
         $user->update([
             'google2fa_secret' => 'DUMMYSECRETKEY',
-            '2fa_two_factor_recovery_codes' => json_encode([$hashedCode])
+            '2fa_two_factor_recovery_codes' => json_encode([$hashedCode]),
         ]);
 
         $result = $this->service->verifyLogin($user->id, $recoveryCode);

@@ -10,7 +10,6 @@ use App\Models\Order;
 use App\Models\User;
 use App\Services\Gateways\PaddleGateway;
 use App\Services\Gateways\StripeGateway;
-use App\Services\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
@@ -173,7 +172,7 @@ class WebhookControllerTest extends TestCase
         $user = User::factory()->create();
         $order = Order::factory()->create([
             'user_id' => $user->id,
-            'status' => OrderStatus::Pending->value
+            'status' => OrderStatus::Pending->value,
         ]);
 
         $dto = new PaymentWebhookDTO(
@@ -190,7 +189,7 @@ class WebhookControllerTest extends TestCase
         $this->app->instance(PaddleGateway::class, $mockGateway);
 
         $response = $this->postJson('api/v1/webhooks/paddle', [], [
-            'Paddle-Signature' => 'fake_paddle_signature_string'
+            'Paddle-Signature' => 'fake_paddle_signature_string',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);

@@ -158,7 +158,7 @@ readonly class AdminProductController implements HasMiddleware
         ], Response::HTTP_OK);
     }
 
-    public function destroyAllImages(Product $product, ProductService $productService)
+    public function destroyAllImages(Product $product, ProductService $productService): RedirectResponse
     {
         $productService->deleteAllImages($product);
 

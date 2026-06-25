@@ -78,7 +78,7 @@ class UserRepository
     {
         $user = User::find($userId);
 
-        return $user->update([
+        return (bool) $user?->update([
             'google2fa_secret' => $secret,
             '2fa_two_factor_recovery_codes' => $secretCode,
         ]);

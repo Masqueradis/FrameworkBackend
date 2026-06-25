@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Routing\Controller;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,7 +44,7 @@ abstract class ApiController extends Controller
         return response()->json($response, $code);
     }
 
-    protected function respondPaginated($resourceCollection, string $message = 'Success', int $code = Response::HTTP_OK): JsonResponse
+    protected function respondPaginated(ResourceCollection $resourceCollection, string $message = 'Success', int $code = Response::HTTP_OK): JsonResponse
     {
         $paginatedData = $resourceCollection->response()->getData(true);
 
