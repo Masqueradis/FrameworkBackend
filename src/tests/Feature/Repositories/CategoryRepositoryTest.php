@@ -16,10 +16,10 @@ class CategoryRepositoryTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function testFindsCategoryById(): void
+    public function test_finds_category_by_id(): void
     {
         $category = Category::factory()->create();
-        $repository = new CategoryRepository();
+        $repository = new CategoryRepository;
 
         $foundCategory = $repository->findById(new CategoryId($category->id));
 
@@ -28,9 +28,9 @@ class CategoryRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testReturnsNullIfCategoryNotFound(): void
+    public function test_returns_null_if_category_not_found(): void
     {
-        $repository = new CategoryRepository();
+        $repository = new CategoryRepository;
 
         $foundCategory = $repository->findById(new CategoryId(1));
 

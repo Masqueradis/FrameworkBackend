@@ -5,19 +5,23 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\DTO\Checkout\CheckoutDTO;
+use App\Enums\OrderStatus;
+use App\Enums\PaymentProvider;
 use App\Exceptions\EmptyCartException;
+use App\Models\Order;
 use App\Repositories\Contracts\CartRepositoryInterface;
+use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Services\CartService;
-use App\Services\OrderService;
 use App\Services\Gateways\GatewayFactory;
-use App\Services\Gateways\StripeGateway;
-use Exception;
+use App\Services\OrderService;
+use App\ValueObjects\Cart\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\Response;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckoutController extends ApiController
 {
@@ -93,14 +97,26 @@ class CheckoutController extends ApiController
         $userId = auth()->id() ? (int) auth()->id() : null;
         $cart = $this->cartRepository->findOrCreate($userId, session()->getId());
 
+        $lock = Cache::lock('checkout_cart_'.$cart->id, 10);
+
+        if (! $lock->get()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Checkout is already in progress. Please wait.',
+            ], Response::HTTP_TOO_MANY_REQUESTS);
+        }
+
         try {
             $order = $this->checkoutService->process($data, $cart);
+
+            $this->cartRepository->clearCart($cart->id);
+
             $gateway = GatewayFactory::make($data->paymentProvider);
             $result = $gateway->createCheckoutUrl($order);
 
             return response()->json([
                 'status' => 'success',
-                'provider' => $data->paymentProvider,
+                'provider' => $data->paymentProvider->value,
                 'action' => $result,
             ]);
         } catch (EmptyCartException $exception) {
@@ -108,22 +124,99 @@ class CheckoutController extends ApiController
                 'status' => 'error',
                 'message' => 'Your cart is empty.',
             ], Response::HTTP_BAD_REQUEST);
-        } catch (\Exception $exception) {
-            return response()->json(
-                [
-                    'status' => 'error',
-                    'message' => $exception->getMessage()],
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
+        } finally {
+            $lock->release();
         }
     }
 
     public function result(Request $request): View|RedirectResponse
     {
-        $userId = auth()->id() ? (int) auth()->id() : null;
-        $cart = $this->cartRepository->findOrCreate($userId, session()->getId());
-        $this->cartRepository->clearCart($cart->id);
+        $status = $request->query('status', 'pending');
 
-        return view('checkout.result', ['status' => 'success']);
+        return view('checkout.result', ['status' => $status]);
+    }
+
+    public function cancel(Order $order, OrderRepositoryInterface $orderRepository): RedirectResponse
+    {
+        /** @var mixed $rawStatus */
+        $rawStatus = $order->status;
+        $statusStr = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
+
+        if ((int) $order->user_id === (int) auth()->id() && $statusStr === OrderStatus::Pending->value) {
+
+            $cart = $this->cartRepository->findOrCreate((int) auth()->id(), session()->getId());
+
+            $order->load('items');
+            foreach ($order->items as $item) {
+                /** @var mixed $rawPrice */
+                $rawPrice = $item->price_cents;
+
+                $price = $rawPrice instanceof Money
+                    ? $rawPrice
+                    : new Money((int) $rawPrice);
+
+                $this->cartRepository->addOrUpdateItem(
+                    $cart,
+                    (int) $item->product_id,
+                    $item->quantity,
+                    $price
+                );
+            }
+
+            $order->update(['status' => OrderStatus::Cancelled->value]);
+            $orderRepository->restoreStock($order);
+        }
+
+        return redirect()->route('checkout.index')->with('error_alert', 'Payment was cancelled. Your cart has been restored.');
+    }
+
+    public function retry(Order $order): JsonResponse|RedirectResponse
+    {
+        /** @var mixed $rawStatus */
+        $rawStatus = $order->status;
+        $statusStr = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
+
+        if ((int) $order->user_id !== (int) auth()->id() || $statusStr !== OrderStatus::Pending->value) {
+            return redirect()->route('catalog.index')->with('error_alert', 'This order cannot be paid.');
+        }
+
+        try {
+            $lastProvider = $order->payments()->latest()->value('provider');
+            $providerName = $lastProvider ?? request('provider', 'stripe');
+            $provider = PaymentProvider::from($providerName);
+
+            $gateway = GatewayFactory::make($provider);
+            $url = $gateway->createCheckoutUrl($order);
+
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'provider' => $provider->value,
+                    'action' => $url,
+                ]);
+            }
+
+            return redirect()->away($url);
+
+        } catch (\Exception $exception) {
+            return redirect()->back()->with('error_alert', 'Gateway error: '.$exception->getMessage());
+        }
+    }
+
+    public function decline(Order $order, OrderRepositoryInterface $orderRepository): RedirectResponse
+    {
+        /** @var mixed $rawStatus */
+        $rawStatus = $order->status;
+        $statusStr = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
+
+        if ((int) $order->user_id !== (int) auth()->id() || $statusStr !== OrderStatus::Pending->value) {
+            return redirect()->back()->with('error_alert', 'This order cannot be cancelled.');
+        }
+
+        $order->update(['status' => OrderStatus::Cancelled->value]);
+
+        $orderRepository->restoreStock($order);
+
+        return redirect()->back()->with('status', 'Order #'.$order->id.' was successfully cancelled.');
     }
 }

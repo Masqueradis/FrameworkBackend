@@ -9,6 +9,7 @@ use InvalidArgumentException;
 class CartQuantity
 {
     public const MIN_QUANTITY = 1;
+
     public const MAX_QUANTITY = 99;
 
     public function __construct(private int $value)

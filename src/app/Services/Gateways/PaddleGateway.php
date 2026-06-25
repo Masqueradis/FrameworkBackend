@@ -3,12 +3,15 @@
 namespace App\Services\Gateways;
 
 use App\DTO\Checkout\PaymentWebhookDTO;
+use App\Enums\OrderStatus;
+use App\Enums\PaymentProvider;
+use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Services\Gateways\Strategy\GatewayStrategyInterface;
 use App\ValueObjects\Cart\Money;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class PaddleGateway implements GatewayStrategyInterface
@@ -30,51 +33,75 @@ class PaddleGateway implements GatewayStrategyInterface
                 'custom_data' => ['order_id' => $order->id],
                 'customer_info' => ['email' => $order->customer_email],
                 'checkout' => [
-                    'success_url' => route('checkout.result'), '?status=success',
+                    'success_url' => route('checkout.result').'?status=success',
+                    'cancel_url' => url('/profile'),
                 ],
             ]);
 
-        if (!$response->successful()) {
-            throw new Exception('Paddle Error: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('Paddle Error: '.$response->body());
         }
 
         return $response->json('data.id');
     }
 
-    public function verifyWebhook(Request $request): PaymentWebhookDTO
+    public function verifyWebhook(string $payload, string $signature): PaymentWebhookDTO
     {
-        $signatureHeader = $request->header('Paddle-Signature');
-
-        if (!$signatureHeader) {
+        if (! $signature) {
             throw new Exception('Invalid Paddle signature', Response::HTTP_BAD_REQUEST);
         }
 
-        $parts = explode(';', $signatureHeader);
+        $parts = explode(';', $signature);
+        if (count($parts) < 2) {
+            throw new Exception('Malformed Paddle signature', Response::HTTP_BAD_REQUEST);
+        }
+
         $ts = str_replace('ts=', '', $parts[0]);
         $h1 = str_replace('h1=', '', $parts[1]);
-        $signedPayload = $ts . ':' . $request->getContent();
+
+        $signedPayload = $ts.':'.$payload;
         $secret = config('services.paddle.webhook_secret');
         $expectedH1 = hash_hmac('sha256', $signedPayload, $secret);
 
-        if (!hash_equals($h1, $expectedH1)) {
+        if (! hash_equals($h1, $expectedH1)) {
             throw new Exception('Invalid Paddle signature', Response::HTTP_BAD_REQUEST);
         }
 
-        $payload = $request->all();
-        if ($payload['event_type'] !== 'transaction.completed') {
+        $data = json_decode($payload, true);
+        $eventType = $data['event_type'] ?? '';
+        $orderId = (int) $data['data']['custom_data']['order_id'];
+
+        if ($eventType === 'transaction.completed') {
+            $status = PaymentStatus::Success;
+        } elseif (in_array($eventType, ['transaction.canceled', 'transaction.payment_failed'])) {
+            $status = PaymentStatus::Failed;
+        } else {
             throw new Exception('Ignored event type', Response::HTTP_OK);
         }
 
+        if ($status === PaymentStatus::Success) {
+            $order = Order::find($orderId);
+
+            /** @var mixed $rawStatus */
+            $rawStatus = $order?->status;
+            $statusStr = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
+
+            if ($order && $statusStr === OrderStatus::Cancelled->value) {
+                Log::critical("Order #{$orderId} was paid via Paddle after being cancelled. Please issue a refund.");
+
+                throw new Exception('Payment received for cancelled order. Flagged for refund.', Response::HTTP_OK);
+            }
+        }
+
         return new PaymentWebhookDTO(
-            orderId: (int) $payload['data']['custom_data']['order_id'],
-            transactionId: $payload['data']['id'],
-            provider: 'paddle',
-            status: 'success'
+            orderId: $orderId,
+            transactionId: (string) $data['data']['id'],
+            provider: PaymentProvider::Paddle,
+            status: $status
         );
     }
 
     /**
-     * @param Order $order
      * @return array<int, mixed>
      */
     private function buildItems(Order $order): array
@@ -90,7 +117,7 @@ class PaddleGateway implements GatewayStrategyInterface
                     'description' => $item->product->name ?? 'Unknown product',
                     'unit_price' => [
                         'amount' => (string) $priceObj->getCents(),
-                        'currency_code' => 'USD',
+                        'currency_code' => strtoupper($priceObj->getCurrency()),
                     ],
                     'product' => [
                         'name' => $item->product->name ?? 'Unknown product',
@@ -100,6 +127,7 @@ class PaddleGateway implements GatewayStrategyInterface
                 'quantity' => $item->quantity,
             ];
         }
+
         return $items;
     }
 }

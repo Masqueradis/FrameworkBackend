@@ -5,11 +5,10 @@ namespace Tests\Unit;
 use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class OrderConfirmationMailTest extends TestCase
 {
-    public function testMailHasCorrectContentAndAttachments(): void
+    public function test_mail_has_correct_content_and_attachments(): void
     {
         $order = new Order(['id' => 123]);
 

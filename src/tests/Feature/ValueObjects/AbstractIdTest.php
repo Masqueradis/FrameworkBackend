@@ -13,7 +13,7 @@ class AnotherDummyId extends AbstractId {}
 class AbstractIdTest extends TestCase
 {
     #[Test]
-    public function testThrowsExceptionIfValueIsZeroOrNegative(): void
+    public function test_throws_exception_if_value_is_zero_or_negative(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('DummyId must be greater than 0');
@@ -22,7 +22,7 @@ class AbstractIdTest extends TestCase
     }
 
     #[Test]
-    public function testEqualsReturnsTrueForSameClassAndValue(): void
+    public function test_equals_returns_true_for_same_class_and_value(): void
     {
         $id1 = new DummyId(1);
         $id2 = new DummyId(1);
@@ -31,7 +31,7 @@ class AbstractIdTest extends TestCase
     }
 
     #[Test]
-    public function testEqualsReturnsFalseForDifferentClassAndValue(): void
+    public function test_equals_returns_false_for_different_class_and_value(): void
     {
         $id = new DummyId(1);
         $difValue = new DummyId(2);
@@ -42,7 +42,7 @@ class AbstractIdTest extends TestCase
     }
 
     #[Test]
-    public function testCanBeCastToString(): void
+    public function test_can_be_cast_to_string(): void
     {
         $id = new DummyId(1);
         $this->assertEquals('1', (string) $id);

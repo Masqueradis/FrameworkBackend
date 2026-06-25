@@ -6,6 +6,7 @@ namespace Tests\Feature\Services;
 
 use App\DTO\Checkout\CheckoutDTO;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentProvider;
 use App\Enums\PaymentStatus;
 use App\Events\OrderCreated;
 use App\Exceptions\EmptyCartException;
@@ -14,13 +15,10 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use App\Repositories\Contracts\CartRepositoryInterface;
-use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Services\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
-use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -35,7 +33,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function processThrowsExceptionIfCartIsEmpty(): void
+    public function process_throws_exception_if_cart_is_empty(): void
     {
         $cart = Cart::create();
         $dto = new CheckoutDTO(
@@ -43,7 +41,7 @@ class CheckoutServiceTest extends TestCase
             'test@example.com',
             '123',
             'Address',
-            'stripe'
+            PaymentProvider::Stripe,
         );
 
         $this->expectException(EmptyCartException::class);
@@ -51,10 +49,10 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function processCreatesOrderAndCalculatesTotal(): void
+    public function process_creates_order_and_calculates_total(): void
     {
         $cart = Cart::create();
-        $product = Product::factory()->create(['price' => 1000]);
+        $product = Product::factory()->create(['price' => 1000, 'stock' => 10]);
         CartItem::create([
             'cart_id' => $cart->id,
             'product_id' => $product->id,
@@ -67,7 +65,7 @@ class CheckoutServiceTest extends TestCase
             'test@example.com',
             '123',
             'Address',
-            'stripe'
+            PaymentProvider::Stripe,
         );
 
         $order = $this->checkoutService->process($dto, $cart);
@@ -79,7 +77,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function handleWebhookSuccessUpdatesStatus(): void
+    public function handle_webhook_success_updates_status(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -105,7 +103,7 @@ class CheckoutServiceTest extends TestCase
         $this->assertDatabaseHas('payments', [
             'order_id' => $order->id,
             'transaction_id' => 'txn_123',
-            'status' => PaymentStatus::Paid,
+            'status' => PaymentStatus::Success,
         ]);
 
         $this->assertEquals(OrderStatus::Completed, $order->fresh()->status);
@@ -113,7 +111,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function handleWebhookFailureCancelsOrder(): void
+    public function handle_webhook_failure_cancels_order(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -144,7 +142,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionIfNotEnoughStock(): void
+    public function test_throws_exception_if_not_enough_stock(): void
     {
         $cart = Cart::create();
         $product = Product::factory()->create(['price' => 1000, 'stock' => 1]);
@@ -162,7 +160,7 @@ class CheckoutServiceTest extends TestCase
             'test@example.com',
             '123',
             'Address',
-            'stripe'
+            PaymentProvider::Stripe,
         );
 
         $this->expectException(ValidationException::class);
@@ -171,7 +169,7 @@ class CheckoutServiceTest extends TestCase
     }
 
     #[Test]
-    public function testDispatchesOrderCreatedEventOnSuccessfulCheckout(): void
+    public function test_dispatches_order_created_event_on_successful_checkout(): void
     {
         Event::fake();
 
@@ -189,7 +187,7 @@ class CheckoutServiceTest extends TestCase
             'test@example.com',
             '123',
             'Address',
-            'stripe',
+            PaymentProvider::Stripe,
         );
 
         $order = $this->checkoutService->process($dto, $cart);
@@ -197,5 +195,23 @@ class CheckoutServiceTest extends TestCase
         Event::assertDispatched(OrderCreated::class, function ($event) use ($order) {
             return $event->order->id === $order->id;
         });
+    }
+
+    #[Test]
+    public function test_handle_webhook_returns_early_if_payment_already_exists(): void
+    {
+        $order = Order::factory()->create(['status' => OrderStatus::Pending]);
+
+        $order->payments()->create([
+            'transaction_id' => 'txn_duplicate_123',
+            'provider' => 'stripe',
+            'amount_cents' => 1000,
+            'status' => PaymentStatus::Success,
+        ]);
+
+        $this->checkoutService->handleWebhook($order, true, 'txn_duplicate_123', 'stripe');
+
+        $this->assertEquals(OrderStatus::Pending, $order->fresh()->status);
+        $this->assertEquals(1, $order->payments()->count());
     }
 }

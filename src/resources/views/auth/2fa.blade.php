@@ -18,7 +18,7 @@
 
         <div class="text-center mb-4">
             <h2 class="fw-bold">Two-Factor Auth</h2>
-            <p class="text-muted">Enter the 6-digit code from your authenticator app</p>
+            <p class="text-muted">Enter the 6-digit code from your authenticator app or your recovery code</p>
         </div>
 
         @if ($errors->any())
@@ -32,7 +32,7 @@
 
             <div class="mb-4">
                 <label class="form-label text-center w-100 fw-bold">Authentication Code</label>
-                <input type="text" name="otp" class="form-control text-center fs-4" placeholder="000 000" style="letter-spacing: 5px;" required autofocus autocomplete="off">
+                <input type="text" name="otp" class="form-control text-center fs-4" style="letter-spacing: 5px;" required autofocus autocomplete="off">
             </div>
 
             <button type="submit" class="btn btn-primary w-100 mb-3 fw-bold">Verify</button>

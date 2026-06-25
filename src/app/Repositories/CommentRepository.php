@@ -42,7 +42,8 @@ class CommentRepository implements CommentRepositoryInterface
 
     public function getApprovedForProduct(int $productId): Collection
     {
-        return Comment::where('product_id', $productId)
+        return Comment::with('user')
+            ->where('product_id', $productId)
             ->where('status', CommentStatus::Approved->value)
             ->latest()
             ->get();

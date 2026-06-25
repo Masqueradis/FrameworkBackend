@@ -11,7 +11,7 @@ abstract class AbstractId
     public function __construct(public readonly int $value)
     {
         if ($value <= 0) {
-            throw new InvalidArgumentException(class_basename($this) . " must be greater than 0");
+            throw new InvalidArgumentException(class_basename($this).' must be greater than 0');
         }
     }
 

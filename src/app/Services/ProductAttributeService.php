@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 class ProductAttributeService
 {
     /**
-     * @param Collection<int, Product> $products
+     * @param  Collection<int, Product>  $products
      * @return array<string, array<int, mixed>>
      */
     public function extractUniqueAttributes(Collection $products): array
@@ -22,8 +22,9 @@ class ProductAttributeService
                 $attributes[$key] = array_merge($attributes[$key] ?? [], (array) $value);
             }
         }
+
         return collect($attributes)
-            ->map(fn(array $values) => collect($values)->unique()->sort()->values()->all())
+            ->map(fn (array $values) => collect($values)->unique()->sort()->values()->all())
             ->all();
     }
 }

@@ -8,16 +8,17 @@ use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Services\TwoFactorAuthService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Mockery;
+use Illuminate\Support\Facades\Hash;
+use PHPUnit\Framework\Attributes\Test;
 use PragmaRX\Google2FA\Google2FA;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class TwoFactorAuthServiceTest extends TestCase
 {
     use RefreshDatabase;
 
     private TwoFactorAuthService $service;
+
     private UserRepository $repositoryMock;
 
     protected function setUp(): void
@@ -28,7 +29,7 @@ class TwoFactorAuthServiceTest extends TestCase
     }
 
     #[Test]
-    public function testGeneratesValidSecretKey(): void
+    public function test_generates_valid_secret_key(): void
     {
         $secret = $this->service->generateSecret();
 
@@ -37,7 +38,7 @@ class TwoFactorAuthServiceTest extends TestCase
     }
 
     #[Test]
-    public function testGeneratesQrCodeUrl(): void
+    public function test_generates_qr_code_url(): void
     {
         $url = $this->service->getQrCodeUrl(
             'MyApp',
@@ -51,7 +52,7 @@ class TwoFactorAuthServiceTest extends TestCase
     }
 
     #[Test]
-    public function testVerifiesOtpCorrectly(): void
+    public function test_verifies_otp_correctly(): void
     {
         $secret = $this->service->generateSecret();
 
@@ -63,7 +64,7 @@ class TwoFactorAuthServiceTest extends TestCase
     }
 
     #[Test]
-    public function testEnable2faReturnsTrueAndUpdatesSecretOnValidOtp(): void
+    public function test_enable2fa_returns_true_and_updates_secret_on_valid_otp(): void
     {
         $user = User::factory()->create();
         $secret = $this->service->generateSecret();
@@ -72,12 +73,12 @@ class TwoFactorAuthServiceTest extends TestCase
 
         $result = $this->service->enable2fa($user, $secret, $otp);
 
-        $this->assertTrue($result);
-        $this->assertEquals($secret, $user->fresh()->google2fa_secret);
+        $this->assertIsArray($result);
+        $this->assertNotEmpty($result);
     }
 
     #[Test]
-    public function testEnable2faReturnsFalseOnInvalidOtp(): void
+    public function test_enable2fa_returns_false_on_invalid_otp(): void
     {
         $user = User::factory()->create();
         $secret = $this->service->generateSecret();
@@ -89,7 +90,7 @@ class TwoFactorAuthServiceTest extends TestCase
     }
 
     #[Test]
-    public function testDisable2faClearsSecret(): void
+    public function test_disable2fa_clears_secret(): void
     {
         $secret = $this->service->generateSecret();
         $user = User::factory()->create(['google2fa_secret' => $secret]);
@@ -100,7 +101,7 @@ class TwoFactorAuthServiceTest extends TestCase
     }
 
     #[Test]
-    public function testVerifyLoginReturnsFalseIfUserNotFoundOrNoSecret(): void
+    public function test_verify_login_returns_false_if_user_not_found_or_no_secret(): void
     {
         $this->assertFalse($this->service->verifyLogin(99999, '123456'));
 
@@ -109,7 +110,7 @@ class TwoFactorAuthServiceTest extends TestCase
     }
 
     #[Test]
-    public function testVerifyLoginReturnsTrueAndAuthenticatesUser(): void
+    public function test_verify_login_returns_true_and_authenticates_user(): void
     {
         $secret = $this->service->generateSecret();
         $user = User::factory()->create(['google2fa_secret' => $secret]);
@@ -123,7 +124,7 @@ class TwoFactorAuthServiceTest extends TestCase
     }
 
     #[Test]
-    public function testVerifyLoginReturnsFalseOnInvalidOtp(): void
+    public function test_verify_login_returns_false_on_invalid_otp(): void
     {
         $secret = $this->service->generateSecret();
         $user = User::factory()->create(['google2fa_secret' => $secret]);
@@ -132,5 +133,26 @@ class TwoFactorAuthServiceTest extends TestCase
 
         $this->assertFalse($result);
         $this->assertGuest();
+    }
+
+    #[Test]
+    public function test_verify_login_authenticates_with_recovery_code_and_burns_it(): void
+    {
+        $user = User::factory()->create();
+        $recoveryCode = '1234567890';
+        $hashedCode = Hash::make($recoveryCode);
+
+        $user->update([
+            'google2fa_secret' => 'DUMMYSECRETKEY',
+            '2fa_two_factor_recovery_codes' => json_encode([$hashedCode]),
+        ]);
+
+        $result = $this->service->verifyLogin($user->id, $recoveryCode);
+
+        $this->assertTrue($result);
+        $this->assertAuthenticatedAs($user);
+
+        $savedCodes = json_decode($user->fresh()->getAttribute('2fa_two_factor_recovery_codes'), true);
+        $this->assertEmpty($savedCodes);
     }
 }

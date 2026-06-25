@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Admin\AdminCategoryController as AdminCategoryController;
-use App\Http\Controllers\Admin\AdminProductController as AdminProductController;
+use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\CommentModerationController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -38,7 +38,9 @@ Route::middleware('guest')->controller(AuthController::class)->group(function ()
     Route::get('/verify/{token}', 'verifyEmail')->name('verification.verify.custom');
 
     Route::get('/login/2fa', [TwoFactorController::class, 'showVerifyForm'])->name('login.2fa');
-    Route::post('/login/2fa', [TwoFactorController::class, 'verifyLogin'])->name('login.2fa.post');
+    Route::post('/login/2fa', [TwoFactorController::class, 'verifyLogin'])
+        ->middleware('throttle:5,1')
+        ->name('login.2fa.post');
 });
 
 Route::prefix('cart')->name('cart.')->group(function () {
@@ -50,6 +52,10 @@ Route::prefix('cart')->name('cart.')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/checkout/cancel/{order}', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
+    Route::post('/checkout/retry/{order}', [CheckoutController::class, 'retry'])->name('checkout.retry');
+    Route::delete('/checkout/decline/{order}', [CheckoutController::class, 'decline'])->name('checkout.decline');
 
     Route::prefix('email')->controller(AuthController::class)->group(function () {
         Route::get('/verify', 'showVerificationNotice')->name('verification.notice');
@@ -85,10 +91,12 @@ Route::middleware('auth')->group(function () {
         ->name('comments.destroy');
 
     Route::prefix('admin')->middleware('role:admin|manager|seller')->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/', [DashboardController::class, 'index'])
+            ->middleware('role:admin|manager')
+            ->name('admin.dashboard');
 
         Route::resource('categories', AdminCategoryController::class)
-            ->middleware('can:manage-categories')
+            ->middleware('can:manage,App\Models\Category')
             ->names('admin.categories')->except(['show']);
 
         Route::resource('products', AdminProductController::class)

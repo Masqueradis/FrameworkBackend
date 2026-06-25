@@ -7,6 +7,9 @@ namespace App\Services;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use JsonException;
 use PragmaRX\Google2FA\Google2FA;
 
 class TwoFactorAuthService
@@ -16,7 +19,7 @@ class TwoFactorAuthService
     public function __construct(
         private readonly UserRepository $userRepository,
     ) {
-        $this->google2fa = new Google2FA();
+        $this->google2fa = new Google2FA;
     }
 
     public function generateSecret(): string
@@ -38,13 +41,26 @@ class TwoFactorAuthService
         return $this->google2fa->verifyKey($secret, $otp);
     }
 
-    public function enable2fa(User $user, string $secret, string $otp): bool
+    /**
+     * @return array<int, string>|false
+     *
+     * @throws JsonException
+     */
+    public function enable2fa(User $user, string $secret, string $otp): array|false
     {
-        $isValid = $this->verify($secret, $otp);
+        if ($this->verify($secret, $otp)) {
+            $plainCodes = [];
+            $hashedCodes = [];
 
-        if ($isValid) {
-            $this->userRepository->update2faSecret($user->id, $secret);
-            return true;
+            for ($i = 0; $i < 8; $i++) {
+                $code = Str::random(10);
+                $plainCodes[] = $code;
+                $hashedCodes[] = Hash::make($code);
+            }
+
+            $this->userRepository->update2faSecret($user->id, $secret, json_encode($hashedCodes, JSON_THROW_ON_ERROR));
+
+            return $plainCodes;
         }
 
         return false;
@@ -53,18 +69,47 @@ class TwoFactorAuthService
     public function disable2fa(User $user): void
     {
         $this->userRepository->update2faSecret($user->id, null);
+        $user->update(['google2fa_last_window' => null]);
     }
 
     public function verifyLogin(int $userId, string $otp): bool
     {
         $user = User::find($userId);
 
-        if (!$user || !$user->google2fa_secret) {
+        if (! $user || ! $user->google2fa_secret) {
             return false;
         }
 
-        if ($this->verify($user->google2fa_secret, $otp)) {
+        if (strlen($otp) === 10 && $user->getAttribute('2fa_two_factor_recovery_codes')) {
+            $savedCodes = json_decode($user->getAttribute('2fa_two_factor_recovery_codes'), true) ?? [];
+
+            foreach ($savedCodes as $index => $hashedCode) {
+                if (Hash::check($otp, $hashedCode)) {
+
+                    unset($savedCodes[$index]);
+
+                    $user->update([
+                        '2fa_two_factor_recovery_codes' => json_encode(array_values($savedCodes)),
+                    ]);
+
+                    Auth::login($user);
+
+                    return true;
+                }
+            }
+        }
+
+        $timestamp = $this->google2fa->verifyKeyNewer(
+            $user->google2fa_secret,
+            $otp,
+            $user->google2fa_last_window,
+        );
+
+        if ($timestamp !== false) {
+            $user->update(['google2fa_last_window' => $timestamp]);
+
             Auth::login($user);
+
             return true;
         }
 

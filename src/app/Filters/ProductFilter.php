@@ -4,19 +4,23 @@ declare(strict_types=1);
 
 namespace App\Filters;
 
+use App\Enums\ProductAttribute;
 use App\Models\Product;
 use App\ValueObjects\Id\CategoryId;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends QueryFilter<Product>
  */
 class ProductFilter extends QueryFilter
 {
-    /**
-     * @param int|string $id
-     */
+    protected array $allowedFilters = [
+        'category_id',
+        'min_price',
+        'max_price',
+        'search',
+        'attributes',
+    ];
+
     public function categoryId(int|string $id): void
     {
         $categoryIdVO = new CategoryId((int) $id);
@@ -36,21 +40,18 @@ class ProductFilter extends QueryFilter
 
     public function search(string $search): void
     {
-        $term = '%' . $search . '%';
-
-        $this->builder->where(function ($query) use ($term) {
-            $query->where('name', 'like', $term)
-                ->orWhere('description', 'like', $term);
-        });
+        $this->builder->whereFullText(['name', 'description'], $search);
     }
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      */
     public function attributes(array $attributes): void
     {
         foreach ($attributes as $attribute => $value) {
-            $this->builder->whereIn("attributes->{$attribute}", (array) $value);
+            if (ProductAttribute::tryFrom($attribute)) {
+                $this->builder->whereIn("attributes->{$attribute}", (array) $value);
+            }
         }
     }
 }

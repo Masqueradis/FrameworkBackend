@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types=1);
+declare(strict_types=1);
 
 namespace App\Services;
 
@@ -27,7 +27,6 @@ readonly class ProductService
     ) {}
 
     /**
-     * @param ProductIndexDTO $data
      * @return LengthAwarePaginator<int, Product>
      */
     public function getFilteredProducts(ProductIndexDTO $data): LengthAwarePaginator
@@ -42,7 +41,6 @@ readonly class ProductService
     }
 
     /**
-     * @param CategoryId|null $categoryId
      * @return array<string, mixed>
      */
     public function getFilteredData(?CategoryId $categoryId): array
@@ -62,8 +60,8 @@ readonly class ProductService
             'user_id' => auth()->id(),
             'category_id' => $data->categoryId->value,
             'name' => $data->name,
-            'slug' => Str::slug($data->name) . '-' . uniqid(),
-            'sku' => $data->sku ?? 'SKU-' . strtoupper(Str::random(8)),
+            'slug' => Str::slug($data->name).'-'.uniqid(),
+            'sku' => $data->sku ?? 'SKU-'.strtoupper(Str::random(8)),
             'description' => $data->description,
             'price' => $data->price,
             'stock' => $data->stock,
@@ -106,7 +104,6 @@ readonly class ProductService
     }
 
     /**
-     * @param int $perPage
      * @return LengthAwarePaginator<int, Product>
      */
     public function getPaginatedProductsForAdmin(int $perPage = 15): LengthAwarePaginator
@@ -131,10 +128,8 @@ readonly class ProductService
     }
 
     /**
-     * @param Product $product
-     * @param array<int, UploadedFile|null>|null $images
-     * @param int $startPosition
-     * @return void
+     * @param  array<int, UploadedFile|null>|null  $images
+     *
      * @throws Exception
      */
     private function handleImages(Product $product, ?array $images, int $startPosition = 0): void

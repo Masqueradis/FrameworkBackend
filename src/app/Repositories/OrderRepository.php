@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Repositories\Contracts\OrderRepositoryInterface;
-use App\ValueObjects\Cart\Money;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +44,7 @@ class OrderRepository implements OrderRepositoryInterface
             foreach ($cartItems as $item) {
                 $product = $products->get($item->product_id);
 
-                if (!$product || $product->stock < $item->quantity) {
+                if (! $product || $product->stock < $item->quantity) {
                     throw ValidationException::withMessages([
                         'quantity' => "Not enough stock for {$item->product?->name}.",
                     ]);
@@ -83,7 +81,7 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function chunkOrdersByDateRange(string $dateFrom, string $dateTo, int $chunkSize, callable $callback): void
     {
-        Order::whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+        Order::whereBetween('created_at', [$dateFrom.' 00:00:00', $dateTo.' 23:59:59'])
             ->chunk($chunkSize, $callback);
     }
 

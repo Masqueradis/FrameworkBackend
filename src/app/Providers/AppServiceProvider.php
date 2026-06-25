@@ -13,9 +13,10 @@ use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Repositories\Contracts\ReportRepositoryInterface;
 use App\Repositories\OrderRepository;
 use App\Repositories\ReportRepository;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,12 +53,12 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFive();
 
+        Passport::tokensExpireIn(now()->addDays(15));
+        Passport::refreshTokensExpireIn(now()->addDays(30));
+        Passport::personalAccessTokensExpireIn(now()->addMonths(6));
+
         Gate::define('access-panel', function (User $user) {
             return $user->hasRole(['admin', 'seller', 'manager']);
-        });
-
-        Gate::define('manage-categories', function (User $user) {
-            return $user->hasRole(['admin', 'manager']);
         });
 
         Gate::define('manage-users', function (User $user) {

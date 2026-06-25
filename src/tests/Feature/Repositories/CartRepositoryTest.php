@@ -12,9 +12,8 @@ use App\Repositories\Contracts\CartRepositoryInterface;
 use App\ValueObjects\Cart\Money;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class CartRepositoryTest extends TestCase
 {
@@ -29,7 +28,7 @@ class CartRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testFindsOrCreateCartForGuestBySessionId(): void
+    public function test_finds_or_create_cart_for_guest_by_session_id(): void
     {
         Cart::query()->delete();
         $sessionId = 'test-session-123';
@@ -44,7 +43,7 @@ class CartRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testFindsOrCreateCartForAuthUser(): void
+    public function test_finds_or_create_cart_for_auth_user(): void
     {
         $user = User::factory()->create();
 
@@ -57,7 +56,7 @@ class CartRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testAddsItemToCart(): void
+    public function test_adds_item_to_cart(): void
     {
         $cart = Cart::create(['session_id' => 'test-session-123']);
         $product = Product::factory()->create();
@@ -81,7 +80,7 @@ class CartRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testCartBelongsToUser(): void
+    public function test_cart_belongs_to_user(): void
     {
         $user = User::factory()->create();
         $cart = Cart::create(['user_id' => $user->id, 'session_id' => 'test-session-123']);
@@ -93,7 +92,7 @@ class CartRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testCartItemBelongsToUser(): void
+    public function test_cart_item_belongs_to_user(): void
     {
         $cart = Cart::create(['session_id' => 'test-session-123']);
         $product = Product::factory()->create(['price' => 500]);

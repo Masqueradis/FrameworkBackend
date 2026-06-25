@@ -10,15 +10,16 @@ use App\Models\Product;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class CommentModerationControllerTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $admin;
+
     private Comment $comment;
 
     protected function setUp(): void
@@ -41,7 +42,7 @@ class CommentModerationControllerTest extends TestCase
     }
 
     #[Test]
-    public function testNonAdminCannotModerateComments(): void
+    public function test_non_admin_cannot_moderate_comments(): void
     {
         $user = User::factory()->create();
 
@@ -51,7 +52,7 @@ class CommentModerationControllerTest extends TestCase
     }
 
     #[Test]
-    public function testAdminCanApproveComment(): void
+    public function test_admin_can_approve_comment(): void
     {
         $response = $this->actingAs($this->admin)->patch(route('admin.comments.approve', ['comment' => $this->comment->id]));
 
@@ -61,7 +62,7 @@ class CommentModerationControllerTest extends TestCase
     }
 
     #[Test]
-    public function testAdminCanRejectComment(): void
+    public function test_admin_can_reject_comment(): void
     {
         $response = $this->actingAs($this->admin)->patch(route('admin.comments.reject', ['comment' => $this->comment->id]));
 
@@ -71,7 +72,7 @@ class CommentModerationControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDisplaysView(): void
+    public function test_displays_view(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();
@@ -91,7 +92,7 @@ class CommentModerationControllerTest extends TestCase
     }
 
     #[Test]
-    public function testAdminCanDeleteAnyComment(): void
+    public function test_admin_can_delete_any_comment(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();

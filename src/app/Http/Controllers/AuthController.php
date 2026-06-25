@@ -33,6 +33,7 @@ class AuthController extends ApiController
     {
         return view('auth.register');
     }
+
     #[OA\Post(
         path: '/api/register',
         description: 'Request email and password, return user-object and token',
@@ -155,6 +156,7 @@ class AuthController extends ApiController
             if (request()->expectsJson()) {
                 return $this->respondError($e->getMessage(), Response::HTTP_BAD_REQUEST);
             }
+
             return redirect()->route('register')
                 ->withErrors(['email' => 'The link is expired or invalid. Please register again.']);
         }
@@ -216,31 +218,34 @@ class AuthController extends ApiController
     )]
     public function login(LoginUserDTO $request): JsonResponse|RedirectResponse
     {
-        $resultData = $this->authService->login($request);
+        $user = $this->authService->login($request);
 
-        if ($resultData->user->google2fa_secret) {
+        if ($user->google2fa_secret) {
             if (request()->expectsJson()) {
                 return $this->respondSuccess(
-                    data: ['require_2fa' => true, 'user_id' => $resultData->user->id],
-                    message: 'Two factor authentication was successful.',
+                    data: ['require_2fa' => true, 'user_id' => $user->id],
+                    message: 'Two factor authentication required.',
                 );
             }
 
-            request()->session()->put('2fa:user_id', $resultData->user->id);
+            request()->session()->put('2fa:user_id', $user->id);
+
             return redirect()->route('login.2fa');
         }
+
+        $token = $user->createToken('ApiAccess')->accessToken;
 
         if (request()->expectsJson()) {
             return $this->respondSuccess(
                 data: [
-                    'user' => new UserResource($resultData->user),
-                    'token' => $resultData->accessToken,
+                    'user' => new UserResource($user),
+                    'token' => $token,
                 ],
                 message: 'Login successfully.',
             );
         }
 
-        Auth::login($resultData->user);
+        Auth::login($user);
         request()->session()->regenerate();
 
         return redirect()->intended('/profile');
@@ -352,8 +357,8 @@ class AuthController extends ApiController
             ),
         ]
     )]
-    public function user(Request $request): JsonResponse|RedirectResponse
+    public function user(Request $request): UserResource
     {
-        return response()->json($request->user());
+        return new UserResource($request->user());
     }
 }

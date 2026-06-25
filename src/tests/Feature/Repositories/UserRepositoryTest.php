@@ -23,17 +23,17 @@ class UserRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new UserRepository();
+        $this->repository = new UserRepository;
 
         Role::create(['name' => UserRole::Admin->value, 'guard_name' => 'web']);
         Role::create(['name' => UserRole::Seller->value, 'guard_name' => 'web']);
     }
 
     #[Test]
-    public function testFindsUserById(): void
+    public function test_finds_user_by_id(): void
     {
         $user = User::factory()->create();
-        $repository = new UserRepository();
+        $repository = new UserRepository;
 
         $foundUser = $repository->findById(new UserId($user->id));
 
@@ -42,9 +42,9 @@ class UserRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testReturnsNullIfUserNotFound(): void
+    public function test_returns_null_if_user_not_found(): void
     {
-        $repository = new UserRepository();
+        $repository = new UserRepository;
 
         $foundUser = $repository->findById(new UserId(1));
 
@@ -52,7 +52,7 @@ class UserRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testCanFindUserByRoleWithSpatie(): void
+    public function test_can_find_user_by_role_with_spatie(): void
     {
         $admin = User::factory()->create();
         $admin->assignRole(UserRole::Admin->value);
@@ -68,7 +68,7 @@ class UserRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testCanUpdateUserStatus(): void
+    public function test_can_update_user_status(): void
     {
         $user = User::factory()->create(['status' => UserStatus::Active]);
 
@@ -78,7 +78,7 @@ class UserRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testCanSave2faSecret(): void
+    public function test_can_save2fa_secret(): void
     {
         $user = User::factory()->create(['google2fa_secret' => null]);
         $secret = 'SECRET';

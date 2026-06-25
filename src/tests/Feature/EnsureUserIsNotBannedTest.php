@@ -6,10 +6,9 @@ use App\Enums\UserStatus;
 use App\Http\Middleware\EnsureUserIsNotBanned;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Route;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class EnsureUserIsNotBannedTest extends TestCase
 {
@@ -25,7 +24,7 @@ class EnsureUserIsNotBannedTest extends TestCase
     }
 
     #[Test]
-    public function testActiveUserCanAccessRoute(): void
+    public function test_active_user_can_access_route(): void
     {
         $user = User::factory()->create(['status' => UserStatus::Active->value]);
 
@@ -35,7 +34,7 @@ class EnsureUserIsNotBannedTest extends TestCase
     }
 
     #[Test]
-    public function testBannedUserGets403WithCustomMessage(): void
+    public function test_banned_user_gets403_with_custom_message(): void
     {
         $user = User::factory()->create(['status' => UserStatus::Banned->value]);
 
@@ -46,7 +45,7 @@ class EnsureUserIsNotBannedTest extends TestCase
     }
 
     #[Test]
-    public function testBannedUserRedirectsBackWithAlertOnWebRequest(): void
+    public function test_banned_user_redirects_back_with_alert_on_web_request(): void
     {
         $user = User::factory()->create(['status' => UserStatus::Banned]);
 

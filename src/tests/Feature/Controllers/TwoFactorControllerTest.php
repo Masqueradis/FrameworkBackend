@@ -6,17 +6,31 @@ namespace Tests\Feature\Controllers;
 
 use App\Http\Controllers\TwoFactorController;
 use App\Models\User;
+use App\Services\TwoFactorAuthService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PragmaRX\Google2FA\Google2FA;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use PragmaRX\Google2FA\Google2FA;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class TwoFactorControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->artisan('passport:client', [
+            '--personal' => true,
+            '--name' => 'Test Client',
+            '--provider' => 'users',
+        ]);
+    }
+
     #[Test]
-    public function testGeneratePutsSecretAndQrInSession(): void
+    public function test_generate_puts_secret_and_qr_in_session(): void
     {
         $user = User::factory()->create();
 
@@ -30,7 +44,7 @@ class TwoFactorControllerTest extends TestCase
     }
 
     #[Test]
-    public function testEnableRedirectsBackWithErrorsIfSessionExpired(): void
+    public function test_enable_redirects_back_with_errors_if_session_expired(): void
     {
         $user = User::factory()->create();
 
@@ -45,10 +59,10 @@ class TwoFactorControllerTest extends TestCase
     }
 
     #[Test]
-    public function testEnableActivates2FaWithValidOtp(): void
+    public function test_enable_activates2_fa_with_valid_otp(): void
     {
         $user = User::factory()->create();
-        $google2fa = new Google2FA();
+        $google2fa = new Google2FA;
         $secret = $google2fa->generateSecretKey();
         $otp = $google2fa->getCurrentOtp($secret);
 
@@ -67,7 +81,7 @@ class TwoFactorControllerTest extends TestCase
     }
 
     #[Test]
-    public function testEnableFailsWithInvalidOtp(): void
+    public function test_enable_fails_with_invalid_otp(): void
     {
         $user = User::factory()->create();
         $secret = new Google2FA()->generateSecretKey();
@@ -85,7 +99,7 @@ class TwoFactorControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDisableRemoves2fa(): void
+    public function test_disable_removes2fa(): void
     {
         $user = User::factory()->create(['google2fa_secret' => 'SECRET1234567890']);
 
@@ -99,7 +113,7 @@ class TwoFactorControllerTest extends TestCase
     }
 
     #[Test]
-    public function testShowVerifyFormRedirectsToLoginIfNoSession(): void
+    public function test_show_verify_form_redirects_to_login_if_no_session(): void
     {
         $response = $this->get(action([TwoFactorController::class, 'showVerifyForm']));
 
@@ -107,7 +121,7 @@ class TwoFactorControllerTest extends TestCase
     }
 
     #[Test]
-    public function testShowVerifyFormDisplaysViewIfSessionExists(): void
+    public function test_show_verify_form_displays_view_if_session_exists(): void
     {
         $response = $this->withSession(['2fa:user_id' => 1])
             ->get(action([TwoFactorController::class, 'showVerifyForm']));
@@ -117,7 +131,7 @@ class TwoFactorControllerTest extends TestCase
     }
 
     #[Test]
-    public function testVerifyLoginRedirectsToLoginIfNoSession(): void
+    public function test_verify_login_redirects_to_login_if_no_session(): void
     {
         $response = $this->post(action([TwoFactorController::class, 'verifyLogin']), [
             'otp' => '123456',
@@ -127,9 +141,9 @@ class TwoFactorControllerTest extends TestCase
     }
 
     #[Test]
-    public function testVerifyLoginAuthenticatesWithValidOtp(): void
+    public function test_verify_login_authenticates_with_valid_otp(): void
     {
-        $google2fa = new Google2FA();
+        $google2fa = new Google2FA;
         $secret = $google2fa->generateSecretKey();
         $user = User::factory()->create(['google2fa_secret' => $secret]);
         $otp = $google2fa->getCurrentOtp($secret);
@@ -145,7 +159,7 @@ class TwoFactorControllerTest extends TestCase
     }
 
     #[Test]
-    public function testVerifyLoginFailsWithInvalidOtp(): void
+    public function test_verify_login_fails_with_invalid_otp(): void
     {
         $secret = new Google2FA()->generateSecretKey();
         $user = User::factory()->create(['google2fa_secret' => $secret]);
@@ -159,5 +173,71 @@ class TwoFactorControllerTest extends TestCase
         $response->assertRedirect('/2fa');
         $response->assertSessionHasErrors(['otp' => 'Invalid verification code. Please try again.']);
         $this->assertGuest();
+    }
+
+    #[Test]
+    public function test_verify_login_api_fails_without_user_id(): void
+    {
+        $response = $this->postJson(action([TwoFactorController::class, 'verifyLogin']), [
+            'otp' => '123456',
+        ]);
+
+        $response->assertStatus(Response::HTTP_BAD_REQUEST);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'User ID is required.',
+        ]);
+    }
+
+    #[Test]
+    public function test_verify_login_api_succeeds_with_valid_otp(): void
+    {
+        $user = User::factory()->create();
+
+        $this->mock(TwoFactorAuthService::class, function (MockInterface $mock) use ($user) {
+            $mock->shouldReceive('verifyLogin')
+                ->once()
+                ->with($user->id, '123456')
+                ->andReturn(true);
+        });
+
+        $response = $this->postJson(action([TwoFactorController::class, 'verifyLogin']), [
+            'user_id' => $user->id,
+            'otp' => '123456',
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonStructure([
+            'success',
+            'message',
+            'data' => [
+                'user' => ['id', 'name', 'email'],
+                'token',
+            ],
+        ]);
+    }
+
+    #[Test]
+    public function test_verify_login_api_fails_with_invalid_otp(): void
+    {
+        $user = User::factory()->create();
+
+        $this->mock(TwoFactorAuthService::class, function (MockInterface $mock) use ($user) {
+            $mock->shouldReceive('verifyLogin')
+                ->once()
+                ->with($user->id, 'wrong_otp')
+                ->andReturn(false);
+        });
+
+        $response = $this->postJson(action([TwoFactorController::class, 'verifyLogin']), [
+            'user_id' => $user->id,
+            'otp' => 'wrong_otp',
+        ]);
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'Invalid verification code.',
+        ]);
     }
 }

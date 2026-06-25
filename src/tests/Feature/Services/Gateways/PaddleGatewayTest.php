@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace Tests\Feature\Services\Gateways;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentProvider;
+use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Gateways\PaddleGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class PaddleGatewayTest extends TestCase
 {
@@ -33,7 +34,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testCreatesCheckoutUrlSuccessfully(): void
+    public function test_creates_checkout_url_successfully(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -66,7 +67,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionIfPaddleApiFails(): void
+    public function test_throws_exception_if_paddle_api_fails(): void
     {
         $user = User::factory()->create();
         Http::fake([
@@ -88,7 +89,7 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testVerifiesValidWebhook(): void
+    public function test_verifies_valid_webhook(): void
     {
         $payload = json_encode([
             'event_type' => 'transaction.completed',
@@ -99,34 +100,27 @@ class PaddleGatewayTest extends TestCase
         ]);
 
         $ts = time();
-        $h1 = hash_hmac('sha256', $ts . ':' . $payload, 'test_secret');
+        $h1 = hash_hmac('sha256', $ts.':'.$payload, 'test_secret');
         $signatureHeader = "ts={$ts};h1={$h1}";
 
-        $request = Request::create('/webhook/paddle', 'POST', [], [], [], [], $payload);
-        $request->headers->set('Paddle-Signature', $signatureHeader);
-        $request->headers->set('Content-Type', 'application/json');
-
-        $dto = $this->gateway->verifyWebhook($request);
+        $dto = $this->gateway->verifyWebhook($payload, $signatureHeader);
 
         $this->assertEquals(15, $dto->orderId);
         $this->assertEquals('txn_999', $dto->transactionId);
-        $this->assertEquals('paddle', $dto->provider);
+        $this->assertEquals(PaymentProvider::Paddle, $dto->provider);
         $this->assertTrue($dto->isSuccess());
     }
 
     #[Test]
-    public function testThrowsExceptionOnInvalidSignature(): void
+    public function test_throws_exception_on_invalid_signature(): void
     {
-        $request = Request::create('/webhook/paddle', 'POST');
-        $request->headers->set('Paddle-Signature', 'ts=123;h1=invalid_hash');
-
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Invalid Paddle signature');
-        $this->gateway->verifyWebhook($request);
+        $this->gateway->verifyWebhook('', 'ts=123;h1=invalid_hash');
     }
 
     #[Test]
-    public function testUsesProductionUrlWhenEnvIsProduction(): void
+    public function test_uses_production_url_when_env_is_production(): void
     {
         Config::set('services.paddle.env', 'production');
         $gateway = $this->app->make(PaddleGateway::class);
@@ -134,28 +128,115 @@ class PaddleGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionOnMissingSignature(): void
+    public function test_throws_exception_on_missing_signature(): void
     {
-        $request = Request::create('/webhook/paddle', 'POST');
-
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Invalid Paddle signature');
-        $this->gateway->verifyWebhook($request);
+
+        $this->gateway->verifyWebhook('', '');
     }
 
     #[Test]
-    public function testThrowsExceptionOnIgnoredEventType(): void
+    public function test_throws_exception_on_ignored_event_type(): void
     {
-        $payload = json_encode(['event_type' => 'subscription.created', 'data' => []]);
-        $ts = time();
-        $h1 = hash_hmac('sha256', $ts . ':' . $payload, 'test_secret');
+        $payload = json_encode([
+            'event_type' => 'subscription.created',
+            'data' => [
+                'custom_data' => [
+                    'order_id' => 1,
+                ],
+            ],
+        ]);
 
-        $request = Request::create('/webhook/paddle', 'POST', [], [], [], [], $payload);
-        $request->headers->set('Paddle-Signature', "ts={$ts};h1={$h1}");
-        $request->headers->set('Content-Type', 'application/json');
+        $ts = time();
+        $h1 = hash_hmac('sha256', $ts.':'.$payload, 'test_secret');
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Ignored event type');
-        $this->gateway->verifyWebhook($request);
+
+        $this->gateway->verifyWebhook($payload, "ts={$ts};h1={$h1}");
+    }
+
+    #[Test]
+    public function test_throws_exception_on_malformed_signature(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Malformed Paddle signature');
+        $this->gateway->verifyWebhook('{}', 'invalid_signature_without_semicolon');
+    }
+
+    #[Test]
+    public function test_verifies_failed_webhook(): void
+    {
+        $payload = json_encode([
+            'event_type' => 'transaction.canceled',
+            'data' => [
+                'id' => 'txn_failed_999',
+                'custom_data' => ['order_id' => 15],
+            ],
+        ]);
+
+        $ts = time();
+        $h1 = hash_hmac('sha256', $ts.':'.$payload, config('services.paddle.webhook_secret'));
+
+        $dto = $this->gateway->verifyWebhook($payload, "ts={$ts};h1={$h1}");
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    #[Test]
+    public function test_throws_exception_for_zombie_payment(): void
+    {
+        $order = Order::factory()->create([
+            'status' => OrderStatus::Cancelled,
+        ]);
+
+        $payload = json_encode([
+            'event_type' => 'transaction.completed',
+            'data' => [
+                'id' => 'txn_zombie_999',
+                'custom_data' => ['order_id' => $order->id],
+            ],
+        ]);
+
+        $ts = time();
+        $h1 = hash_hmac('sha256', $ts.':'.$payload, config('services.paddle.webhook_secret'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Payment received for cancelled order. Flagged for refund.');
+
+        $this->gateway->verifyWebhook($payload, "ts={$ts};h1={$h1}");
+    }
+
+    public function test_throws_exception_on_malformed_paddle_signature(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Malformed Paddle signature');
+
+        (new PaddleGateway)->verifyWebhook('{"data": {}}', 'ts=12345');
+    }
+
+    public function test_handles_canceled_paddle_transaction(): void
+    {
+        $payload = json_encode([
+            'event_type' => 'transaction.canceled',
+            'data' => ['id' => 'txn_123', 'custom_data' => ['order_id' => '1']],
+        ]);
+
+        $signature = $this->generatePaddleSignature($payload);
+        $dto = (new PaddleGateway)->verifyWebhook($payload, $signature);
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    protected function generatePaddleSignature(string $payload): string
+    {
+        $timestamp = time();
+        $secret = config('services.paddle.webhook_secret');
+
+        $signedPayload = "{$timestamp}:{$payload}";
+        $signature = hash_hmac('sha256', $signedPayload, $secret);
+
+        return "ts={$timestamp};h1={$signature}";
     }
 }

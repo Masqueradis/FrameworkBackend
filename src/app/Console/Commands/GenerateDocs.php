@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use OpenApi\Generator;
 
 class GenerateDocs extends Command
 {
@@ -32,10 +31,12 @@ class GenerateDocs extends Command
 
         if ($exitCode === 0) {
             $this->info('Docs generated successfully');
+
             return Command::SUCCESS;
         }
 
         $this->error('Something went wrong');
+
         return Command::FAILURE;
     }
 }

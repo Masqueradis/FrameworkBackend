@@ -27,7 +27,7 @@ class CommentRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testCreateANewComment(): void
+    public function test_create_a_new_comment(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();
@@ -48,7 +48,7 @@ class CommentRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testGetOnlyApprovedCommentsForProduct(): void
+    public function test_get_only_approved_comments_for_product(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();
@@ -85,11 +85,11 @@ class CommentRepositoryTest extends TestCase
         $approvedComments = $this->repository->getApprovedForProduct($product->id);
 
         $this->assertCount(2, $approvedComments);
-        $this->assertTrue($approvedComments->every(fn($comment) => $comment->status->isApproved()));
+        $this->assertTrue($approvedComments->every(fn ($comment) => $comment->status->isApproved()));
     }
 
     #[Test]
-    public function testGetAllPendingCommentsForModeration(): void
+    public function test_get_all_pending_comments_for_moderation(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();
@@ -112,11 +112,11 @@ class CommentRepositoryTest extends TestCase
         $pendingComment = $this->repository->getPendingCommentsForModeration();
 
         $this->assertCount(1, $pendingComment);
-        $this->assertTrue($pendingComment->every(fn($comment) => $comment->status->isPending()));
+        $this->assertTrue($pendingComment->every(fn ($comment) => $comment->status->isPending()));
     }
 
     #[Test]
-    public function testCanUpdateAnExistingComment(): void
+    public function test_can_update_an_existing_comment(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();
@@ -146,7 +146,7 @@ class CommentRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function testGetByUserIdReturnsCommentsWithRelations(): void
+    public function test_get_by_user_id_returns_comments_with_relations(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();
@@ -157,7 +157,7 @@ class CommentRepositoryTest extends TestCase
             'status' => CommentStatus::Approved->value,
         ]);
 
-        $repository = new CommentRepository();
+        $repository = new CommentRepository;
         $comments = $repository->getByUserId($user->id);
 
         $this->assertCount(1, $comments);

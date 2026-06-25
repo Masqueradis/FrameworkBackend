@@ -5,20 +5,18 @@ declare(strict_types=1);
 namespace Tests\Feature\Services\Gateways;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Gateways\StripeGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Mockery;
-use Stripe\ApiRequestor;
-use Stripe\Checkout\Session;
-use Stripe\HttpClient\ClientInterface;
-use Stripe\Webhook;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Stripe\ApiRequestor;
+use Stripe\HttpClient\ClientInterface;
+use Tests\TestCase;
 
 class StripeGatewayTest extends TestCase
 {
@@ -34,7 +32,7 @@ class StripeGatewayTest extends TestCase
         $this->gateway = $this->app->make(StripeGateway::class);
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         Mockery::close();
         ApiRequestor::setHttpClient(null);
@@ -42,7 +40,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testBuildsLineItemsCorrectly(): void
+    public function test_builds_line_items_correctly(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create(['name' => 'Test Product', 'price' => 1500]);
@@ -71,18 +69,19 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testThrowsExceptionOnInvalidWebhookSignature(): void
+    public function test_throws_exception_on_invalid_webhook_signature(): void
     {
-        $request = Request::create('/webhooks/stripe', 'POST', [], [], [], [], '{"type":"checkout.session.completed"}');
-        $request->headers->set('Stripe-Signature', 'invalid_signature');
+        $payload = '{"type":"checkout.session.completed"}';
+        $signature = 'invalid_signature';
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Invalid Stripe signature');
-        $this->gateway->verifyWebhook($request);
+
+        $this->gateway->verifyWebhook($payload, $signature);
     }
 
     #[Test]
-    public function testCreatesCheckoutUrl(): void
+    public function test_creates_checkout_url(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -112,7 +111,7 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testVerifiesValidWebhook(): void
+    public function test_verifies_valid_webhook(): void
     {
         $payload = json_encode([
             'type' => 'checkout.session.completed',
@@ -120,14 +119,15 @@ class StripeGatewayTest extends TestCase
                 'object' => [
                     'metadata' => ['order_id' => '10'],
                     'payment_intent' => 'pi_123',
+                    'payment_status' => 'paid',
+                    'amount_total' => 4500,
                 ],
             ],
         ]);
 
-        $request = Request::create('/webhooks/stripe', 'POST', [], [], [], [], $payload);
-        $request->headers->set('Stripe-Signature', $this->generateStripeSignature($payload));
+        $signature = $this->generateStripeSignature($payload);
 
-        $dto = $this->gateway->verifyWebhook($request);
+        $dto = $this->gateway->verifyWebhook($payload, $signature);
 
         $this->assertEquals(10, $dto->orderId);
         $this->assertEquals('pi_123', $dto->transactionId);
@@ -135,19 +135,19 @@ class StripeGatewayTest extends TestCase
     }
 
     #[Test]
-    public function testIgnoresOtherWebhookEvents(): void
+    public function test_ignores_other_webhook_events(): void
     {
         $payload = json_encode([
             'type' => 'payment_intent.succeeded',
             'data' => ['object' => []],
         ]);
 
-        $request = Request::create('/webhooks/stripe', 'POST', [], [], [], [], $payload);
-        $request->headers->set('Stripe-Signature', $this->generateStripeSignature($payload));
+        $signature = $this->generateStripeSignature($payload);
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Ignored event type');
-        $this->gateway->verifyWebhook($request);
+
+        $this->gateway->verifyWebhook($payload, $signature);
     }
 
     private function generateStripeSignature(string $payload): string
@@ -159,5 +159,125 @@ class StripeGatewayTest extends TestCase
         $signature = hash_hmac('sha256', $signedPayload, $secret);
 
         return "t={$timestamp},v1={$signature}";
+    }
+
+    #[Test]
+    public function test_throws_exception_if_payment_not_completed(): void
+    {
+        $payload = json_encode([
+            'type' => 'checkout.session.completed',
+            'data' => ['object' => ['metadata' => ['order_id' => '10'], 'payment_status' => 'unpaid']],
+        ]);
+        $signature = $this->generateStripeSignature($payload);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Payment not completed yet');
+        $this->gateway->verifyWebhook($payload, $signature);
+    }
+
+    #[Test]
+    public function test_verifies_failed_webhook(): void
+    {
+        $payload = json_encode([
+            'type' => 'checkout.session.expired',
+            'data' => ['object' => ['metadata' => ['order_id' => '10'], 'payment_intent' => 'pi_failed']],
+        ]);
+        $signature = $this->generateStripeSignature($payload);
+
+        $dto = $this->gateway->verifyWebhook($payload, $signature);
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    #[Test]
+    public function test_fails_if_amount_mismatch(): void
+    {
+        $order = Order::factory()->create(['total_amount_cents' => 5000]);
+
+        $payload = json_encode([
+            'type' => 'checkout.session.completed',
+            'data' => [
+                'object' => [
+                    'metadata' => ['order_id' => (string) $order->id],
+                    'payment_status' => 'paid',
+                    'amount_total' => 1000,
+                    'id' => 'cs_123',
+                ],
+            ],
+        ]);
+        $signature = $this->generateStripeSignature($payload);
+
+        $dto = $this->gateway->verifyWebhook($payload, $signature);
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    public function test_throws_exception_on_invalid_stripe_signature(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Invalid Stripe signature');
+
+        $gateway = new StripeGateway;
+        $gateway->verifyWebhook('bad_payload', 'bad_signature');
+    }
+
+    public function test_throws_exception_if_payment_status_not_paid(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Payment not completed yet');
+
+        $payload = json_encode([
+            'type' => 'checkout.session.completed',
+            'data' => ['object' => ['payment_status' => 'unpaid', 'metadata' => ['order_id' => '1']]],
+        ]);
+
+        $signature = $this->generateStripeSignature($payload);
+        (new StripeGateway)->verifyWebhook($payload, $signature);
+    }
+
+    public function test_handles_expired_stripe_session(): void
+    {
+        $payload = json_encode([
+            'type' => 'checkout.session.expired',
+            'data' => [
+                'object' => [
+                    'id' => 'cs_expired_123',
+                    'metadata' => ['order_id' => '1'],
+                ],
+            ],
+        ]);
+
+        $signature = $this->generateStripeSignature($payload);
+        $dto = (new StripeGateway)->verifyWebhook($payload, $signature);
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    #[Test]
+    public function test_fails_if_amount_mismatch_with_raw_integer_fallback(): void
+    {
+        $order = Order::factory()->create(['total_amount_cents' => 5000]);
+
+        Order::retrieved(function (Order $retrievedOrder) use ($order) {
+            if ($retrievedOrder->id === $order->id) {
+                $retrievedOrder->mergeCasts(['total_amount_cents' => 'integer']);
+            }
+        });
+
+        $payload = json_encode([
+            'type' => 'checkout.session.completed',
+            'data' => [
+                'object' => [
+                    'metadata' => ['order_id' => (string) $order->id],
+                    'payment_status' => 'paid',
+                    'amount_total' => 1000,
+                    'id' => 'cs_124',
+                ],
+            ],
+        ]);
+        $signature = $this->generateStripeSignature($payload);
+
+        $dto = $this->gateway->verifyWebhook($payload, $signature);
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
     }
 }

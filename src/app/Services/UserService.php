@@ -9,7 +9,6 @@ use App\Enums\UserStatus;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class UserService
@@ -24,13 +23,13 @@ class UserService
         $targetRoleValue = $role->value;
 
         $allowedRoles = [
-            'admin'   => ['admin', 'manager', 'seller', 'customer'],
+            'admin' => ['admin', 'manager', 'seller', 'customer'],
             'manager' => ['seller', 'customer'],
         ];
 
-        if (!in_array($targetRoleValue, $allowedRoles[$performerRole] ?? [])
+        if (! in_array($targetRoleValue, $allowedRoles[$performerRole] ?? [])
             || ($targetUser->hasRole('admin') && $performerRole !== 'admin')) {
-            throw new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException('Access denied.');
+            throw new AccessDeniedHttpException('Access denied.');
         }
 
         $targetUser->syncRoles([$targetRoleValue]);
@@ -47,7 +46,6 @@ class UserService
     }
 
     /**
-     * @param int $perPage
      * @return LengthAwarePaginator<int, User>
      */
     public function getPaginatedUsers(int $perPage = 15): LengthAwarePaginator

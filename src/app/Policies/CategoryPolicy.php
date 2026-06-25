@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Category;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class CategoryPolicy
 {
@@ -24,12 +23,17 @@ class CategoryPolicy
         return true;
     }
 
+    public function manage(User $user): bool
+    {
+        return $user->hasPermissionTo('manage-categories', 'web');
+    }
+
     /**
      * Determine whether the user can create models.
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('manage categories', 'web');
+        return $user->hasPermissionTo('manage-categories', 'web');
     }
 
     /**
@@ -37,7 +41,7 @@ class CategoryPolicy
      */
     public function update(User $user, Category $category): bool
     {
-        return $user->hasPermissionTo('manage categories', 'web');
+        return $user->hasPermissionTo('manage-categories', 'web');
     }
 
     /**
@@ -45,7 +49,7 @@ class CategoryPolicy
      */
     public function delete(User $user, Category $category): bool
     {
-        return $user->hasPermissionTo('manage categories', 'web');
+        return $user->hasPermissionTo('manage-categories', 'web');
     }
 
     /**

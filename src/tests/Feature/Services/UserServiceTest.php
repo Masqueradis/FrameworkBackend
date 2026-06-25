@@ -11,9 +11,9 @@ use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
+use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class UserServiceTest extends TestCase
 {
@@ -32,7 +32,7 @@ class UserServiceTest extends TestCase
     }
 
     #[Test]
-    public function testCanAssignNewRoleToUser(): void
+    public function test_can_assign_new_role_to_user(): void
     {
         Role::firstOrCreate(['name' => UserRole::Admin->value, 'guard_name' => 'web']);
 
@@ -49,7 +49,7 @@ class UserServiceTest extends TestCase
     }
 
     #[Test]
-    public function testCanBanUser(): void
+    public function test_can_ban_user(): void
     {
         $user = User::factory()->create(['status' => UserStatus::Active->value]);
 
@@ -59,7 +59,7 @@ class UserServiceTest extends TestCase
     }
 
     #[Test]
-    public function testAssignRoleThrowsExceptionForUnauthorizedPerformer(): void
+    public function test_assign_role_throws_exception_for_unauthorized_performer(): void
     {
         $seller = User::factory()->create();
         $seller->assignRole(UserRole::Seller->value);
@@ -73,7 +73,7 @@ class UserServiceTest extends TestCase
     }
 
     #[Test]
-    public function testCanUnbanUser(): void
+    public function test_can_unban_user(): void
     {
         $user = User::factory()->create(['status' => UserStatus::Banned->value]);
 
@@ -83,7 +83,7 @@ class UserServiceTest extends TestCase
     }
 
     #[Test]
-    public function testCanGetPaginatedUsers(): void
+    public function test_can_get_paginated_users(): void
     {
         User::factory()->count(10)->create();
 

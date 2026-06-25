@@ -7,19 +7,19 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class UploadImageTest extends TestCase
 {
     use RefreshDatabase;
+
     #[Test]
-    public function testCanUploadImage(): void
+    public function test_can_upload_image(): void
     {
         Storage::fake('minio');
 
@@ -48,7 +48,7 @@ class UploadImageTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
 
-        Storage::disk('minio')->assertExists('products/' . $file->hashName());
+        Storage::disk('minio')->assertExists('products/'.$file->hashName());
 
         $this->assertDatabaseHas('product_images', [
             'product_id' => $product->id,
@@ -57,7 +57,7 @@ class UploadImageTest extends TestCase
     }
 
     #[Test]
-    public function testCannotUploadPDFAsImage(): void
+    public function test_cannot_upload_pdf_as_image(): void
     {
         Storage::fake('minio');
 
@@ -85,7 +85,7 @@ class UploadImageTest extends TestCase
     }
 
     #[Test]
-    public function testProductImageBelongsToProduct(): void
+    public function test_product_image_belongs_to_product(): void
     {
         $product = Product::factory()->create();
         $image = ProductImage::factory()->create([

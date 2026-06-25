@@ -6,23 +6,25 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Permission\Traits\HasRoles;
+use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
-use Database\Factories\UserFactory;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable
 {
+    use HasApiTokens;
+
     /** @use HasFactory<UserFactory> */
     use HasFactory;
-    use Notifiable;
-    use HasApiTokens;
+
     use HasRoles;
+    use Notifiable;
 
     protected string $guard_name = 'web';
 
@@ -35,10 +37,10 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
         'name',
         'email',
         'password',
-        'email_verified_at',
         'avatar_path',
-        'status',
         'google2fa_secret',
+        'google2fa_last_window',
+        '2fa_two_factor_recovery_codes',
     ];
 
     /**
@@ -49,6 +51,8 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'google2fa_secret',
+        '2fa_two_factor_recovery_codes',
     ];
 
     /**
@@ -62,6 +66,8 @@ class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'status' => UserStatus::class,
+            'google2fa_secret' => 'encrypted',
+            'google2fa_last_window' => 'integer',
         ];
     }
 

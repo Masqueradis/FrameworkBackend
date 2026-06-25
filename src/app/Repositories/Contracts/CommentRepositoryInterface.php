@@ -13,39 +13,38 @@ use Illuminate\Pagination\LengthAwarePaginator;
 interface CommentRepositoryInterface
 {
     /**
-     * @param array<string, mixed> $data
-     * @return ?Comment
+     * @param  array<string, mixed>  $data
      */
     public function create(array $data): ?Comment;
 
     /**
-     * @param Comment $comment
-     * @param array<string, mixed> $data
-     * @return bool
+     * @param  array<string, mixed>  $data
      */
     public function update(Comment $comment, array $data): bool;
+
     public function delete(Comment $comment): ?bool;
+
     public function findByUserAndProduct(int $userId, int $productId): ?Comment;
+
     public function updateStatus(Comment $comment, CommentStatus $status): bool;
+
     /**
-     * @param int $productId
      * @return Collection<int, Comment>
      */
     public function getApprovedForProduct(int $productId): Collection;
+
     /**
      * @return Collection<int, Comment>
      */
     public function getPendingCommentsForModeration(): Collection;
 
     /**
-     * @param int $perPage
      * @return LengthAwarePaginator<int, Product>
      */
     public function getPendingProductsForModeration(int $perPage = 15): LengthAwarePaginator;
 
     /**
-     * @param int $userId
-     * @param array<int, string> $relations
+     * @param  array<int, string>  $relations
      * @return Collection<int, Comment>
      */
     public function getByUserId(int $userId, array $relations = ['product']): Collection;

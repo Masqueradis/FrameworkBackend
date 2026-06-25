@@ -14,18 +14,23 @@ class SendOrderConfirmationEmail implements ShouldQueue
     use InteractsWithQueue;
 
     public string $connection = 'rabbitmq';
+
     public string $queue = 'emails_queue';
 
     public function handle(OrderCreated $event): void
     {
-        $order = $event->order;
+        $freshOrder = $event->order->fresh();
 
-        /** @var OrderStatus $status */
-        $status = $event->order->status;
+        /** @var mixed $rawStatus */
+        $rawStatus = $freshOrder ? $freshOrder->status : $event->order->status;
 
-        if ($status === OrderStatus::Pending) {
+        $status = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
+
+        if ($status === OrderStatus::Cancelled->value || $status === OrderStatus::Pending->value) {
             return;
         }
+
+        $order = $freshOrder ?? $event->order;
 
         Mail::to($order->customer_email)->send(new OrderConfirmationMail($order));
     }

@@ -40,7 +40,7 @@ class ProductSaveDTO extends Data
     ) {}
 
     /**
-     * @param mixed ...$args
+     * @param  mixed  ...$args
      * @return array<string, string>
      */
     public static function messages(...$args): array
@@ -51,7 +51,7 @@ class ProductSaveDTO extends Data
     }
 
     /**
-     * @param array<string, mixed> $properties
+     * @param  array<string, mixed>  $properties
      * @return array<string, mixed>
      */
     public static function prepareForPipeline(array $properties): array
@@ -62,7 +62,7 @@ class ProductSaveDTO extends Data
 
         if (is_array($keys) && is_array($values)) {
             foreach ($keys as $index => $key) {
-                if (!empty($key)) {
+                if (! empty($key)) {
                     $attributes[$key] = $values[$index] ?? '';
                 }
             }
@@ -72,7 +72,7 @@ class ProductSaveDTO extends Data
 
         unset($properties['attribute_keys'], $properties['attribute_values']);
 
-        if (!isset($properties['available'])) {
+        if (! isset($properties['available'])) {
             $properties['available'] = false;
         }
 

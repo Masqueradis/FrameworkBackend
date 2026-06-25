@@ -10,7 +10,6 @@ use App\Models\Report;
 use App\Repositories\Contracts\ReportRepositoryInterface;
 use App\Services\ReportService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -29,13 +28,11 @@ class ReportController extends ApiController
         return view('admin.reports.index', compact('reports'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(RequestReportDTO $dto): RedirectResponse
     {
-        $dto = RequestReportDTO::from($request->all());
-
         $this->reportService->requestGeneration((int) auth()->id(), $dto);
 
-        return back()->with('success', 'Report send to generation queue.');
+        return back()->with('success', 'Report sent to generation queue.');
     }
 
     public function download(Report $report): StreamedResponse

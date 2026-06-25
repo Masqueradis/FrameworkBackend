@@ -40,11 +40,12 @@ class CategoryRepository
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function update(Category $category, array $data): Category
     {
         $category->update($data);
+
         return $category;
     }
 
@@ -54,7 +55,6 @@ class CategoryRepository
     }
 
     /**
-     * @param int $perPage
      * @return LengthAwarePaginator<int, Category>
      */
     public function getPaginatedWithParent(int $perPage = 15): LengthAwarePaginator
@@ -63,7 +63,6 @@ class CategoryRepository
     }
 
     /**
-     * @param CategoryId|null $excludeId
      * @return Collection<int, Category>
      */
     public function getForDropdown(?CategoryId $excludeId = null): Collection

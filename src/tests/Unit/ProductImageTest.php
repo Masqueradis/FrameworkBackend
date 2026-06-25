@@ -7,15 +7,15 @@ namespace Tests\Unit;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class ProductImageTest extends TestCase
 {
     use RefreshDatabase;
 
     #[Test]
-    public function testProductImageAttributesAndRelationships(): void
+    public function test_product_image_attributes_and_relationships(): void
     {
         $product = Product::factory()->create();
 

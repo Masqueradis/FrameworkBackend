@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use App\Enums\PaymentProvider;
 use App\Services\Gateways\GatewayFactory;
 use App\Services\Gateways\PaddleGateway;
 use App\Services\Gateways\StripeGateway;
@@ -13,25 +14,16 @@ use Tests\TestCase;
 class GatewayFactoryTest extends TestCase
 {
     #[Test]
-    public function isCreatesStripeGateway(): void
+    public function is_creates_stripe_gateway(): void
     {
-        $gateway = GatewayFactory::make('stripe');
+        $gateway = GatewayFactory::make(PaymentProvider::Stripe);
         $this->assertInstanceOf(StripeGateway::class, $gateway);
     }
 
     #[Test]
-    public function testCreatesPaddleGateway(): void
+    public function test_creates_paddle_gateway(): void
     {
-        $gateway = GatewayFactory::make('paddle');
+        $gateway = GatewayFactory::make(PaymentProvider::Paddle);
         $this->assertInstanceOf(PaddleGateway::class, $gateway);
-    }
-
-    #[Test]
-    public function testThrowsExceptionOnInvalidGateway(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unknown provider: unknown_crypto');
-
-        GatewayFactory::make('unknown_crypto');
     }
 }

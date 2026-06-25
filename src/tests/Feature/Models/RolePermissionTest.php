@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Models;
 
-use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class RolePermissionTest extends TestCase
 {
@@ -23,7 +22,7 @@ class RolePermissionTest extends TestCase
     }
 
     #[Test]
-    public function testRoleBelongsToManyUsers(): void
+    public function test_role_belongs_to_many_users(): void
     {
         $role = Role::factory()->create(['name' => 'admin', 'guard_name' => 'web']);
         $user = User::factory()->create();

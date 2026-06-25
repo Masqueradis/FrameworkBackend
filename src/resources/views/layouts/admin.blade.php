@@ -33,11 +33,13 @@
         </div>
         <hr class="text-secondary">
         <ul class="nav flex-column mb-auto">
+            @if(auth()->user()->hasRole('admin|manager'))
             <li class="nav-item">
                 <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     Dashboard
                 </a>
             </li>
+            @endif
             <li class="nav-item mt-3 mb-1 px-2 text-uppercase text-secondary" style="font-size: 0.75rem;">Catalog</li>
             <li class="nav-item">
                 <a href="{{ route('admin.products.index') }}"
@@ -45,15 +47,13 @@
                     Products
                 </a>
             </li>
-            @can('manage-categories')
+            @if(auth()->user()->hasRole('admin|manager'))
                 <li class="nav-item">
                     <a href="{{ route('admin.categories.index') }}"
                        class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                         Categories
                     </a>
                 </li>
-            @endcan
-            @if(auth()->user()->hasRole('admin|manager'))
                 <li class="nav-item mt-3 mb-1 px-2 text-uppercase text-secondary" style="font-size: 0.75rem;">Analytics</li>
                 <li class="nav-item">
                     <a href="{{ route('admin.reports.index') }}"

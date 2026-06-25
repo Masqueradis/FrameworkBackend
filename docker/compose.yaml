@@ -1,6 +1,8 @@
 services:
     app:
-        image: masqueradisu/laravel-php:latest
+        build:
+            context: .
+            dockerfile: php/Dockerfile
         platform: linux/amd64
         extra_hosts:
             - 'host.docker.internal:host-gateway'
@@ -90,13 +92,30 @@ services:
         ports:
             - "3000:3000"
         environment:
-            - GF_AUTH_ANONYMOUS_ENABLED=true
-            - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+            - GF_AUTH_ANONYMOUS_ENABLED=false
         networks:
             - sail
         depends_on:
             - loki
         container_name: ${APP_NAME}_grafana
+
+    prometheus:
+        image: prom/prometheus:latest
+        restart: unless-stopped
+        volumes:
+            - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+            - prometheus_data:/prometheus
+        command:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--storage.tsdb.path=/prometheus'
+            - '--web.console.libraries=/etc/prometheus/console_libraries'
+            - '--web.console.templates=/etc/prometheus/consoles'
+            - '--web.enable-lifecycle'
+        expose:
+            - 9090
+        networks:
+            - sail
+        container_name: ${APP_NAME}_prometheus
 
     minio:
         image: 'minio/minio:latest'
@@ -189,3 +208,4 @@ volumes:
         driver: local
     sail-minio:
         driver: local
+    prometheus_data: {}

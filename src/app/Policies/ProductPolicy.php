@@ -6,7 +6,6 @@ namespace App\Policies;
 
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ProductPolicy
 {
@@ -15,8 +14,10 @@ class ProductPolicy
         if ($user->hasRole('admin')) {
             return true;
         }
+
         return null;
     }
+
     /**
      * Determine whether the user can view any models.
      */

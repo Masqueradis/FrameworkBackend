@@ -19,7 +19,7 @@ class CommentControllerTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function testGuestCannotAddComment(): void
+    public function test_guest_cannot_add_comment(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();
@@ -33,7 +33,7 @@ class CommentControllerTest extends TestCase
     }
 
     #[Test]
-    public function testAuthenticatedUserCanAddComment(): void
+    public function test_authenticated_user_can_add_comment(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();
@@ -56,7 +56,7 @@ class CommentControllerTest extends TestCase
     }
 
     #[Test]
-    public function testStripsHtmlTagsFromContent(): void
+    public function test_strips_html_tags_from_content(): void
     {
         $payload = [
             'content' => '<h1>Awesome</h1> <script>alert("XSS")</script> product!',
@@ -69,7 +69,7 @@ class CommentControllerTest extends TestCase
     }
 
     #[Test]
-    public function testReturnsPayloadAsIsIfContentMissing(): void
+    public function test_returns_payload_as_is_if_content_missing(): void
     {
         $payload = [
             'status' => CommentStatus::Pending->value,
@@ -83,7 +83,7 @@ class CommentControllerTest extends TestCase
     }
 
     #[Test]
-    public function testUserCanDeleteOwnComment(): void
+    public function test_user_can_delete_own_comment(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create();
@@ -104,7 +104,7 @@ class CommentControllerTest extends TestCase
     }
 
     #[Test]
-    public function testUserCannotDeleteOthersComment(): void
+    public function test_user_cannot_delete_others_comment(): void
     {
         $owner = User::factory()->create();
         $badguy = User::factory()->create();

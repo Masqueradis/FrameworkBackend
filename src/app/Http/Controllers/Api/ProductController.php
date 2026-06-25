@@ -42,43 +42,51 @@ class ProductController extends ApiController
                         new OA\Property(property: 'message', type: 'string', example: 'Products retrieved successfully'),
                         new OA\Property(
                             property: 'data',
-                            properties: [
-                                new OA\Property(
-                                    property: 'data',
-                                    type: 'array',
-                                    items: new OA\Items(
+                            type: 'array',
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: 'id', type: 'integer', example: 1),
+                                    new OA\Property(property: 'name', type: 'string', example: 'Video card RTX 4090'),
+                                    new OA\Property(property: 'slug', type: 'string', example: 'rtx-4090'),
+                                    new OA\Property(property: 'sku', type: 'string', example: 'SKU-1234-ABCD'),
+                                    new OA\Property(property: 'price', type: 'number', format: 'float', example: 4500.00),
+                                    new OA\Property(property: 'stock', type: 'integer', example: 5),
+                                    new OA\Property(
+                                        property: 'category',
                                         properties: [
-                                            new OA\Property(property: 'id', type: 'integer', example: 1),
-                                            new OA\Property(property: 'name', type: 'string', example: 'Video card RTX 4090'),
-                                            new OA\Property(property: 'slug', type: 'string', example: 'rtx-4090'),
-                                            new OA\Property(property: 'sku', type: 'string', example: 'SKU-1234-ABCD'),
-                                            new OA\Property(property: 'price', type: 'number', format: 'float', example: 4500.00),
-                                            new OA\Property(property: 'stock', type: 'integer', example: 5),
-                                            new OA\Property(
-                                                property: 'category',
-                                                properties: [
-                                                    new OA\Property(property: 'id', type: 'integer', example: 2),
-                                                    new OA\Property(property: 'name', type: 'string', example: 'Video cards'),
-                                                ],
-                                                type: 'object',
-                                                nullable: true
-                                            ),
+                                            new OA\Property(property: 'id', type: 'integer', example: 2),
+                                            new OA\Property(property: 'name', type: 'string', example: 'Video cards'),
                                         ],
-                                        type: 'object'
-                                    )
-                                ),
-                                new OA\Property(
-                                    property: 'meta',
-                                    properties: [
-                                        new OA\Property(property: 'current_page', type: 'integer', example: 1),
-                                        new OA\Property(property: 'last_page', type: 'integer', example: 4),
-                                        new OA\Property(property: 'per_page', type: 'integer', example: 15),
-                                        new OA\Property(property: 'total', type: 'integer', example: 50),
-                                    ],
-                                    type: 'object'
-                                ),
+                                        type: 'object',
+                                        nullable: true
+                                    ),
+                                ],
+                                type: 'object'
+                            )
+                        ),
+                        new OA\Property(
+                            property: 'meta',
+                            properties: [
+                                new OA\Property(property: 'current_page', type: 'integer', example: 1),
+                                new OA\Property(property: 'from', type: 'integer', example: 1),
+                                new OA\Property(property: 'last_page', type: 'integer', example: 4),
+                                new OA\Property(property: 'per_page', type: 'integer', example: 15),
+                                new OA\Property(property: 'to', type: 'integer', example: 15),
+                                new OA\Property(property: 'total', type: 'integer', example: 50),
                             ],
-                            type: 'object'
+                            type: 'object',
+                            nullable: true
+                        ),
+                        new OA\Property(
+                            property: 'links',
+                            properties: [
+                                new OA\Property(property: 'first', type: 'string', example: 'http://localhost/api/products?page=1'),
+                                new OA\Property(property: 'last', type: 'string', example: 'http://localhost/api/products?page=4'),
+                                new OA\Property(property: 'prev', type: 'string', example: null, nullable: true),
+                                new OA\Property(property: 'next', type: 'string', example: 'http://localhost/api/products?page=2', nullable: true),
+                            ],
+                            type: 'object',
+                            nullable: true
                         ),
                     ]
                 )
@@ -92,8 +100,9 @@ class ProductController extends ApiController
     public function index(ProductIndexDTO $request): JsonResponse
     {
         $products = $this->productService->getFilteredProducts($request);
-        return $this->respondSuccess(
-            data: ProductResource::collection($products)->response()->getData(true),
+
+        return $this->respondPaginated(
+            resourceCollection: ProductResource::collection($products),
             message: 'Products retrieved successfully'
         );
     }

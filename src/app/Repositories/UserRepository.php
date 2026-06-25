@@ -10,7 +10,6 @@ use App\Models\User;
 use App\ValueObjects\Id\UserId;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use phpDocumentor\Reflection\Utils;
 
 class UserRepository
 {
@@ -20,8 +19,7 @@ class UserRepository
     }
 
     /**
-     * @param array<string, mixed> $data
-     * @return User
+     * @param  array<string, mixed>  $data
      */
     public function create(array $data): User
     {
@@ -29,9 +27,7 @@ class UserRepository
     }
 
     /**
-     * @param User $user
-     * @param array<string, mixed> $data
-     * @return bool
+     * @param  array<string, mixed>  $data
      */
     public function update(User $user, array $data): bool
     {
@@ -56,7 +52,7 @@ class UserRepository
     }
 
     /**
-     * @param string|array<int, string> $role
+     * @param  string|array<int, string>  $role
      */
     public function assignRole(User $user, string|array $role): void
     {
@@ -64,7 +60,6 @@ class UserRepository
     }
 
     /**
-     * @param UserRole $role
      * @return Collection<int, User>
      */
     public function getByRole(UserRole $role): Collection
@@ -79,15 +74,17 @@ class UserRepository
         ]) > 0;
     }
 
-    public function update2faSecret(int $userId, ?string $secret): bool
+    public function update2faSecret(int $userId, ?string $secret, ?string $secretCode = null): bool
     {
-        return User::where('id', $userId)->update([
+        $user = User::find($userId);
+
+        return (bool) $user?->update([
             'google2fa_secret' => $secret,
-        ]) > 0;
+            '2fa_two_factor_recovery_codes' => $secretCode,
+        ]);
     }
 
     /**
-     * @param int $perPage
      * @return LengthAwarePaginator<int, User>
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator

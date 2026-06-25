@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Controllers;
 
 use App\Models\Category;
+use App\Models\Permission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -22,13 +23,19 @@ class AdminCategoryControllerTest extends TestCase
     {
         parent::setUp();
         $this->admin = User::factory()->create();
+        Permission::firstOrCreate(['name' => 'access-panel']);
+        Permission::firstOrCreate(['name' => 'manage-categories']);
         Role::firstOrCreate(['name' => 'admin']);
+
         $this->admin->assignRole('admin');
+        $this->admin->givePermissionTo('access-panel');
+        $this->admin->givePermissionTo('manage-categories');
         $this->category = Category::factory()->create();
+
     }
 
     #[Test]
-    public function testDisplaysCategoriesIndex(): void
+    public function test_displays_categories_index(): void
     {
         Category::factory()->count(3)->create();
 
@@ -40,7 +47,7 @@ class AdminCategoryControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDisplaysCategoriesCreate(): void
+    public function test_displays_categories_create(): void
     {
         $response = $this->actingAs($this->admin)->get(route('admin.categories.create'));
 
@@ -50,7 +57,7 @@ class AdminCategoryControllerTest extends TestCase
     }
 
     #[Test]
-    public function testStoresNewCategory(): void
+    public function test_stores_new_category(): void
     {
         $payload = [
             'name' => 'New Category',
@@ -67,7 +74,7 @@ class AdminCategoryControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDisplaysCategoriesEdit(): void
+    public function test_displays_categories_edit(): void
     {
         $category = Category::factory()->create();
 
@@ -80,7 +87,7 @@ class AdminCategoryControllerTest extends TestCase
     }
 
     #[Test]
-    public function testUpdatesCategory(): void
+    public function test_updates_category(): void
     {
         $category = Category::factory()->create(['name' => 'Old Category']);
 
@@ -98,7 +105,7 @@ class AdminCategoryControllerTest extends TestCase
         $this->assertDatabaseHas('categories', ['id' => $category->id, 'name' => 'New Category']);
     }
 
-    public function testDeletesCategory(): void
+    public function test_deletes_category(): void
     {
         $category = Category::factory()->create();
 

@@ -9,17 +9,16 @@ use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class CartControllerTest extends TestCase
 {
     use RefreshDatabase;
 
     #[Test]
-    public function testAddsItemToCartAndRedirectsBack(): void
+    public function test_adds_item_to_cart_and_redirects_back(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -41,7 +40,7 @@ class CartControllerTest extends TestCase
     }
 
     #[Test]
-    public function testFailsToAddItemIfStockIsNotEnough(): void
+    public function test_fails_to_add_item_if_stock_is_not_enough(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -58,7 +57,7 @@ class CartControllerTest extends TestCase
     }
 
     #[Test]
-    public function testRemovesItemFromCart(): void
+    public function test_removes_item_from_cart(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -83,7 +82,7 @@ class CartControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDisplaysCart(): void
+    public function test_displays_cart(): void
     {
         $user = User::factory()->create();
         $response = $this->actingAs($user)

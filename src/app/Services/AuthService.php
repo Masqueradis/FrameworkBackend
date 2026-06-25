@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\Passport\Token;
 
 readonly class AuthService
 {
@@ -23,15 +24,15 @@ readonly class AuthService
 
     public function register(RegisterUserDTO $data): void
     {
-        $oldToken = Cache::get('pending_email_' . $data->email);
+        $oldToken = Cache::get('pending_email_'.$data->email);
         if ($oldToken) {
-            Cache::forget('pending_email_' . $oldToken);
+            Cache::forget('pending_email_'.$oldToken);
         }
 
         $token = Str::random(60);
 
-        Cache::put('pending_email_' . $data->email, $token, now()->addMinutes(30));
-        Cache::put('pending_email_' . $token, [
+        Cache::put('pending_email_'.$data->email, $token, now()->addMinutes(30));
+        Cache::put('pending_email_'.$token, [
             'name' => $data->name,
             'email' => $data->email,
             'password' => Hash::make($data->password),
@@ -47,9 +48,9 @@ readonly class AuthService
 
     public function verifyRegistration(string $token): AuthResultDTO
     {
-        $userData = Cache::get('pending_email_' . $token);
+        $userData = Cache::get('pending_email_'.$token);
 
-        if (!$userData) {
+        if (! $userData) {
             throw ValidationException::withMessages([
                 'token' => ['Link invalid or expired.'],
             ]);
@@ -62,34 +63,33 @@ readonly class AuthService
             'email_verified_at' => now(),
         ]);
 
-        $this-> userRepository->assignRole($user, 'customer');
+        $this->userRepository->assignRole($user, 'customer');
 
-        Cache::forget('pending_email_' . $token);
-        Cache::forget('pending_email_' . $userData['email']);
+        Cache::forget('pending_email_'.$token);
+        Cache::forget('pending_email_'.$userData['email']);
 
         $apiToken = $user->createToken('ApiAccess')->accessToken;
 
         return new AuthResultDTO($user, $apiToken);
     }
 
-    public function login(LoginUserDTO $data): AuthResultDTO
+    public function login(LoginUserDTO $data): User
     {
         $user = $this->userRepository->findByEmail($data->email);
 
-        if (!$user || !Hash::check($data->password, $user->password)) {
+        if (! $user || ! Hash::check($data->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
-        $token = $user->createToken('ApiAccess')->accessToken;
 
-        return new AuthResultDTO($user, $token);
+        return $user;
     }
 
     public function logout(User $user): void
     {
         $token = $user->token();
-        if ($token instanceof \Laravel\Passport\Token) {
+        if ($token instanceof Token) {
             $token->revoke();
         }
     }

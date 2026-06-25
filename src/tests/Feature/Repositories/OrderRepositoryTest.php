@@ -2,24 +2,20 @@
 
 namespace Tests\Feature\Repositories;
 
-use App\DTO\Checkout\CheckoutDTO;
-use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpFoundation\Response;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class OrderRepositoryTest extends TestCase
 {
     use RefreshDatabase;
 
     #[Test]
-    public function testCreateOrderWithItemsSuccessfully(): void
+    public function test_create_order_with_items_successfully(): void
     {
         $repository = $this->app->make(OrderRepositoryInterface::class);
         $user = User::factory()->create();

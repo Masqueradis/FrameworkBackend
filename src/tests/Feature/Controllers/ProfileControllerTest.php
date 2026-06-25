@@ -7,15 +7,15 @@ namespace Tests\Feature\Controllers;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class ProfileControllerTest extends TestCase
 {
     use RefreshDatabase;
 
     #[Test]
-    public function testEditReturnsView(): void
+    public function test_edit_returns_view(): void
     {
         $user = User::factory()->create();
 
@@ -27,7 +27,7 @@ class ProfileControllerTest extends TestCase
     }
 
     #[Test]
-    public function testUpdateModifiesProfileAndRedirects(): void
+    public function test_update_modifies_profile_and_redirects(): void
     {
         $user = User::factory()->create();
 
@@ -44,7 +44,7 @@ class ProfileControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDestroyDeletesAccountAndRedirects(): void
+    public function test_destroy_deletes_account_and_redirects(): void
     {
         $user = User::factory()->create();
 
@@ -58,7 +58,7 @@ class ProfileControllerTest extends TestCase
     }
 
     #[Test]
-    public function testDestroyAvatarDeletesAvatarAndRedirects(): void
+    public function test_destroy_avatar_deletes_avatar_and_redirects(): void
     {
         Storage::fake('minio');
         $user = User::factory()->create(['avatar_path' => 'avatars/fake-avatar.jpg']);

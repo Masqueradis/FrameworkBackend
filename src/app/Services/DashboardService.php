@@ -18,19 +18,10 @@ class DashboardService
     ) {}
 
     /**
-     * @param User $user
      * @return array<string, int>
      */
     public function getStatsForDashboard(User $user): array
     {
-        if ($user->hasRole(['admin', 'manager'])) {
-            return [
-                'productsCount' => $this->productRepository->countAll(),
-                'categoriesCount' => $this->categoryRepository->countAll(),
-                'usersCount' => $this->userRepository->countAll(),
-            ];
-        }
-
         return [
             'productsCount' => $this->productRepository->countByUserId($user->id),
             'categoriesCount' => $this->categoryRepository->countAll(),

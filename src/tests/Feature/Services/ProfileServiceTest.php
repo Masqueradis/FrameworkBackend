@@ -11,8 +11,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class ProfileServiceTest extends TestCase
 {
@@ -27,7 +27,7 @@ class ProfileServiceTest extends TestCase
     }
 
     #[Test]
-    public function testCanUpdateNickname(): void
+    public function test_can_update_nickname(): void
     {
         $user = User::factory()->create(['name' => 'Old name']);
         $dto = new UpdateProfileDTO(name: 'New name', avatar: null);
@@ -38,7 +38,7 @@ class ProfileServiceTest extends TestCase
     }
 
     #[Test]
-    public function testCanUploadAvatarAndDeleteOldOne(): void
+    public function test_can_upload_avatar_and_delete_old_one(): void
     {
         Storage::fake('minio');
 
@@ -58,7 +58,7 @@ class ProfileServiceTest extends TestCase
     }
 
     #[Test]
-    public function testCanHardDeleteAccountAndAvatar(): void
+    public function test_can_hard_delete_account_and_avatar(): void
     {
         Storage::fake('minio');
         $user = User::factory()->create(['avatar_path' => 'avatars/to_delete.jpg']);
@@ -72,7 +72,7 @@ class ProfileServiceTest extends TestCase
     }
 
     #[Test]
-    public function testResolveAvatarPathThrowsExceptionOnInvalidFile(): void
+    public function test_resolve_avatar_path_throws_exception_on_invalid_file(): void
     {
         $user = User::factory()->create();
 
@@ -89,7 +89,7 @@ class ProfileServiceTest extends TestCase
     }
 
     #[Test]
-    public function testResolveAvatarPathThrowsExceptionIfStorageFails(): void
+    public function test_resolve_avatar_path_throws_exception_if_storage_fails(): void
     {
         $user = User::factory()->create();
 
@@ -106,7 +106,7 @@ class ProfileServiceTest extends TestCase
     }
 
     #[Test]
-    public function testDeleteAvatarExitsEarlyIfNoAvatar(): void
+    public function test_delete_avatar_exits_early_if_no_avatar(): void
     {
         $user = User::factory()->create(['avatar_path' => null]);
 

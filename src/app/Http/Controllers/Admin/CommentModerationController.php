@@ -6,9 +6,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\ApiController;
 use App\Models\Comment;
-use App\Models\Product;
-use App\Repositories\CommentRepository;
-use App\Repositories\Contracts\CommentRepositoryInterface;
 use App\Services\CommentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;

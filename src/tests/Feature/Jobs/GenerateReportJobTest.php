@@ -15,8 +15,8 @@ use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Repositories\ProductRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class GenerateReportJobTest extends TestCase
 {
@@ -26,7 +26,7 @@ class GenerateReportJobTest extends TestCase
      * @throws \Throwable
      */
     #[Test]
-    public function testGeneratesSalesCsvAndUploadsToMinio(): void
+    public function test_generates_sales_csv_and_uploads_to_minio(): void
     {
         Storage::fake('minio');
 
@@ -67,7 +67,7 @@ class GenerateReportJobTest extends TestCase
     }
 
     #[Test]
-    public function testUpdatesStatusToFailedOnException(): void
+    public function test_updates_status_to_failed_on_exception(): void
     {
         $admin = User::factory()->create();
         $report = Report::create([
@@ -88,7 +88,7 @@ class GenerateReportJobTest extends TestCase
     }
 
     #[Test]
-    public function testGeneratesInventoryCsvAndUploadsToMinio(): void
+    public function test_generates_inventory_csv_and_uploads_to_minio(): void
     {
         $admin = User::factory()->create();
         Storage::fake('minio');

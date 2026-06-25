@@ -19,7 +19,7 @@ class CommentDTO extends Data
     ) {}
 
     /**
-     * @param array<string, mixed> $payload
+     * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
     public static function prepareForValidation(array $payload): array

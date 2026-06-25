@@ -13,7 +13,7 @@
             </div>
         </div>
 
-        @can('manage-categories')
+        @if (auth()->user()->hasPermissionTo('manage-categories'))
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 bg-success text-white h-100">
                     <div class="card-body d-flex flex-column justify-content-center align-items-center py-4">
@@ -31,7 +31,7 @@
                     </div>
                 </div>
             </div>
-        @endcan
+        @endif
     </div>
 
     <div class="card shadow-sm border-0">

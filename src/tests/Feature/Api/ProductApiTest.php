@@ -21,10 +21,12 @@ class ProductApiTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private User $customer;
+
     private Category $category;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -48,11 +50,10 @@ class ProductApiTest extends TestCase
 
         $this->category = Category::factory()->create();
 
-
     }
 
     #[Test]
-    public function testCanGetPaginatedProducts(): void
+    public function test_can_get_paginated_products(): void
     {
         $category = Category::factory()->create();
         Product::factory()->count(20)->create([
@@ -67,22 +68,20 @@ class ProductApiTest extends TestCase
                 'success',
                 'message',
                 'data' => [
-                    'data' => [
-                        '*' => [
-                            'id',
-                            'name',
-                            'price',
-                            'category' => ['id', 'name'],
-                        ],
+                    '*' => [
+                        'id',
+                        'name',
+                        'price',
+                        'category' => ['id', 'name'],
                     ],
-                    'meta' => ['current_page', 'last_page', 'total'],
                 ],
+                'meta' => ['current_page', 'last_page', 'total'],
             ]);
-        $this->assertCount(9, $response->json('data.data'));
+        $this->assertCount(9, $response->json('data'));
     }
 
     #[Test]
-    public function testCanFilterProductsByPrice(): void
+    public function test_can_filter_products_by_price(): void
     {
         $category = Category::factory()->create();
 
@@ -92,12 +91,12 @@ class ProductApiTest extends TestCase
         $response = $this->actingAs($this->admin, 'api')->getJson('/api/v1/products?min_price=1000');
         $response->assertStatus(Response::HTTP_OK);
 
-        $this->assertCount(1, $response->json('data.data'));
-        $this->assertEquals(5000, $response->json('data.data.0.price'));
+        $this->assertCount(1, $response->json('data'));
+        $this->assertEquals(5000, $response->json('data.0.price'));
     }
 
     #[Test]
-    public function testAdminCanCreateProduct(): void
+    public function test_admin_can_create_product(): void
     {
         $payload = [
             'name' => 'RTX4090',
@@ -120,7 +119,7 @@ class ProductApiTest extends TestCase
     }
 
     #[Test]
-    public function testCustomerCannotCreateProduct(): void
+    public function test_customer_cannot_create_product(): void
     {
         $payload = [
             'name' => 'RTX4090',
@@ -137,7 +136,7 @@ class ProductApiTest extends TestCase
     }
 
     #[Test]
-    public function testValidationFailsOnInvalidData(): void
+    public function test_validation_fails_on_invalid_data(): void
     {
         $payload = [
             'name' => '',
@@ -155,7 +154,7 @@ class ProductApiTest extends TestCase
     }
 
     #[Test]
-    public function testAdminCanUpdateProduct(): void
+    public function test_admin_can_update_product(): void
     {
         $product = Product::factory()->create([
             'category_id' => $this->category->id,
@@ -183,7 +182,7 @@ class ProductApiTest extends TestCase
     }
 
     #[Test]
-    public function testAdminCanDeleteProduct(): void
+    public function test_admin_can_delete_product(): void
     {
         $product = Product::factory()->create([
             'category_id' => $this->category->id,
@@ -200,7 +199,7 @@ class ProductApiTest extends TestCase
     }
 
     #[Test]
-    public function testCanGetSpecificProduct(): void
+    public function test_can_get_specific_product(): void
     {
         $product = Product::factory()->create([
             'category_id' => $this->category->id,
@@ -215,7 +214,7 @@ class ProductApiTest extends TestCase
     }
 
     #[Test]
-    public function testProductResponseContainsImageWithFullUrl(): void
+    public function test_product_response_contains_image_with_full_url(): void
     {
         $product = Product::factory()->create();
 
@@ -249,7 +248,7 @@ class ProductApiTest extends TestCase
     }
 
     #[Test]
-    public function testPreparesAttributesAndAvailableFlagInDto(): void
+    public function test_prepares_attributes_and_available_flag_in_dto(): void
     {
         $payload = [
             'category_id' => 1,
@@ -271,7 +270,7 @@ class ProductApiTest extends TestCase
     }
 
     #[Test]
-    public function testCanViewPublicProductPage(): void
+    public function test_can_view_public_product_page(): void
     {
         $product = Product::factory()->create(['available' => true]);
         $response = $this->get(route('web.products.show', $product));
