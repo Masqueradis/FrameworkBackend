@@ -242,9 +242,9 @@ class PaddleGatewayTest extends TestCase
                 'id' => 'txn_mismatch_123',
                 'custom_data' => ['order_id' => (string) $order->id],
                 'details' => [
-                    'totals' => ['total' => 1000] // ❌ Mismatched amount!
-                ]
-            ]
+                    'totals' => ['total' => 1000], // ❌ Mismatched amount!
+                ],
+            ],
         ]);
 
         $signature = $this->generatePaddleSignature($payload);
@@ -270,9 +270,9 @@ class PaddleGatewayTest extends TestCase
                 'id' => 'txn_mismatch_124',
                 'custom_data' => ['order_id' => (string) $order->id],
                 'details' => [
-                    'totals' => ['total' => 1000]
-                ]
-            ]
+                    'totals' => ['total' => 1000],
+                ],
+            ],
         ]);
 
         $signature = $this->generatePaddleSignature($payload);
@@ -291,5 +291,4 @@ class PaddleGatewayTest extends TestCase
 
         return "ts={$timestamp};h1={$signature}";
     }
-
 }

@@ -202,7 +202,7 @@ class CheckoutController extends ApiController
         } catch (\ValueError $e) {
             return redirect()->back()->with('error_alert', 'Invalid payment provider selected.');
         } catch (\Throwable $exception) {
-            Log::error('Gateway retry failed: ' . $exception->getMessage(), [
+            Log::error('Gateway retry failed: '.$exception->getMessage(), [
                 'order_id' => $order->id,
             ]);
 

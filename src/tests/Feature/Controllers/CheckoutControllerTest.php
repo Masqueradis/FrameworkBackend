@@ -359,7 +359,7 @@ class CheckoutControllerTest extends TestCase
 
         $response = $this->post(route('checkout.retry', [
             'order' => $order->id,
-            'provider' => 'not_a_real_provider'
+            'provider' => 'not_a_real_provider',
         ]));
 
         $response->assertRedirect();
