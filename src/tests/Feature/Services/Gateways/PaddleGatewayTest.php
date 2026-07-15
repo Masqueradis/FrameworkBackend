@@ -208,6 +208,7 @@ class PaddleGatewayTest extends TestCase
         $this->gateway->verifyWebhook($payload, "ts={$ts};h1={$h1}");
     }
 
+    #[Test]
     public function test_throws_exception_on_malformed_paddle_signature(): void
     {
         $this->expectException(\Exception::class);
@@ -216,6 +217,7 @@ class PaddleGatewayTest extends TestCase
         (new PaddleGateway)->verifyWebhook('{"data": {}}', 'ts=12345');
     }
 
+    #[Test]
     public function test_handles_canceled_paddle_transaction(): void
     {
         $payload = json_encode([
@@ -225,6 +227,56 @@ class PaddleGatewayTest extends TestCase
 
         $signature = $this->generatePaddleSignature($payload);
         $dto = (new PaddleGateway)->verifyWebhook($payload, $signature);
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    #[Test]
+    public function test_fails_if_amount_mismatch(): void
+    {
+        $order = Order::factory()->create(['total_amount_cents' => 5000]);
+
+        $payload = json_encode([
+            'event_type' => 'transaction.completed',
+            'data' => [
+                'id' => 'txn_mismatch_123',
+                'custom_data' => ['order_id' => (string) $order->id],
+                'details' => [
+                    'totals' => ['total' => 1000] // ❌ Mismatched amount!
+                ]
+            ]
+        ]);
+
+        $signature = $this->generatePaddleSignature($payload);
+        $dto = $this->gateway->verifyWebhook($payload, $signature);
+
+        $this->assertEquals(PaymentStatus::Failed, $dto->status);
+    }
+
+    #[Test]
+    public function test_fails_if_amount_mismatch_with_raw_integer_fallback(): void
+    {
+        $order = Order::factory()->create(['total_amount_cents' => 5000]);
+
+        Order::retrieved(function (Order $retrievedOrder) use ($order) {
+            if ($retrievedOrder->id === $order->id) {
+                $retrievedOrder->mergeCasts(['total_amount_cents' => 'integer']);
+            }
+        });
+
+        $payload = json_encode([
+            'event_type' => 'transaction.completed',
+            'data' => [
+                'id' => 'txn_mismatch_124',
+                'custom_data' => ['order_id' => (string) $order->id],
+                'details' => [
+                    'totals' => ['total' => 1000]
+                ]
+            ]
+        ]);
+
+        $signature = $this->generatePaddleSignature($payload);
+        $dto = $this->gateway->verifyWebhook($payload, $signature);
 
         $this->assertEquals(PaymentStatus::Failed, $dto->status);
     }
@@ -239,4 +291,5 @@ class PaddleGatewayTest extends TestCase
 
         return "ts={$timestamp};h1={$signature}";
     }
+
 }

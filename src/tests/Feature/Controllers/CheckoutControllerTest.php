@@ -299,7 +299,7 @@ class CheckoutControllerTest extends TestCase
             ->post(route('checkout.retry', $order), ['provider' => 'stripe']);
 
         $response->assertRedirect('/profile');
-        $response->assertSessionHas('error_alert', 'Gateway error: Stripe API Connection dropped');
+        $response->assertSessionHas('error_alert', 'The payment service is currently unavailable. Please try again later.');
     }
 
     #[Test]
@@ -345,5 +345,24 @@ class CheckoutControllerTest extends TestCase
         $response = $controller->cancel($order, $orderRepo);
 
         $this->assertTrue($response->isRedirect());
+    }
+
+    public function test_retry_redirects_back_with_error_on_invalid_provider(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $order = Order::factory()->create([
+            'user_id' => $user->id,
+            'status' => OrderStatus::Pending,
+        ]);
+
+        $response = $this->post(route('checkout.retry', [
+            'order' => $order->id,
+            'provider' => 'not_a_real_provider'
+        ]));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error_alert', 'Invalid payment provider selected.');
     }
 }

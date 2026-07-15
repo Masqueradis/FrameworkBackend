@@ -93,11 +93,7 @@ services:
             - "3000:3000"
         environment:
             - GF_AUTH_ANONYMOUS_ENABLED=false
-        networks:
-            - sail
-        depends_on:
-            - loki
-        container_name: ${APP_NAME}_grafana
+            - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-SuperSecretAdminPass123!}
 
     prometheus:
         image: prom/prometheus:latest
@@ -184,7 +180,9 @@ services:
             - sail
 
     queue-worker:
-        image: masqueradisu/laravel-php:latest
+        build:
+            context: .
+            dockerfile: php/Dockerfile
         platform: linux/amd64
         volumes:
             - '../src:/var/www/html'

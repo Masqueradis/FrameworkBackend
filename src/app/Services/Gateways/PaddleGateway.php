@@ -82,14 +82,27 @@ class PaddleGateway implements GatewayStrategyInterface
         if ($status === PaymentStatus::Success) {
             $order = Order::find($orderId);
 
-            /** @var mixed $rawStatus */
-            $rawStatus = $order?->status;
-            $statusStr = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
+            if ($order) {
+                /** @var mixed $rawTotal */
+                $rawTotal = $order->total_amount_cents;
+                $orderTotalCents = $rawTotal instanceof Money
+                    ? $rawTotal->getCents()
+                    : (int) $rawTotal;
 
-            if ($order && $statusStr === OrderStatus::Cancelled->value) {
-                Log::critical("Order #{$orderId} was paid via Paddle after being cancelled. Please issue a refund.");
+                $paidAmount = (int) ($data['data']['details']['totals']['total'] ?? 0);
 
-                throw new Exception('Payment received for cancelled order. Flagged for refund.', Response::HTTP_OK);
+                if ($paidAmount > 0 && $paidAmount !== $orderTotalCents) {
+                    $status = PaymentStatus::Failed;
+                }
+
+                /** @var mixed $rawStatus */
+                $rawStatus = $order->status;
+                $statusStr = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
+
+                if ($status === PaymentStatus::Success && $statusStr === OrderStatus::Cancelled->value) {
+                    Log::critical("Order #{$orderId} was paid via Paddle after being cancelled. Please issue a refund.");
+                    throw new Exception('Payment received for cancelled order. Flagged for refund.', Response::HTTP_OK);
+                }
             }
         }
 

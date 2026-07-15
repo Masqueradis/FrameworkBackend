@@ -8,6 +8,7 @@ use App\DTO\Checkout\CheckoutDTO;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Events\OrderCreated;
+use App\Events\PaymentCompleted;
 use App\Exceptions\EmptyCartException;
 use App\Models\Cart;
 use App\Models\Order;
@@ -66,7 +67,7 @@ readonly class OrderService
                 return;
             }
 
-            $this->orderRepository->addPayment($order, [
+            $payment = $this->orderRepository->addPayment($order, [
                 'provider' => $provider,
                 'transaction_id' => $transactionId,
                 'amount_cents' => $order->total_amount_cents,
@@ -76,12 +77,16 @@ readonly class OrderService
             if ($isSuccess) {
                 $this->orderRepository->updateStatus($order, OrderStatus::Completed->value);
 
-                OrderCreated::dispatch($order);
+                PaymentCompleted::dispatch($payment);
 
                 return;
             }
 
-            if ($order->status !== OrderStatus::Cancelled->value) {
+            /** @var mixed $rawStatus */
+            $rawStatus = $order->status;
+            $statusStr = $rawStatus instanceof \BackedEnum ? $rawStatus->value : (string) $rawStatus;
+
+            if ($statusStr !== OrderStatus::Cancelled->value) {
                 $this->orderRepository->updateStatus($order, OrderStatus::Cancelled->value);
                 $this->orderRepository->restoreStock($order);
             }
