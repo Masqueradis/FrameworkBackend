@@ -60,8 +60,9 @@ readonly class AuthService
             'name' => $userData['name'],
             'email' => $userData['email'],
             'password' => $userData['password'],
-            'email_verified_at' => now(),
         ]);
+
+        $user->forceFill(['email_verified_at' => now()])->save();
 
         $this->userRepository->assignRole($user, 'customer');
 

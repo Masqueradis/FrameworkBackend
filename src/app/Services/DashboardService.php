@@ -22,10 +22,15 @@ class DashboardService
      */
     public function getStatsForDashboard(User $user): array
     {
-        return [
+        $stats = [
             'productsCount' => $this->productRepository->countByUserId($user->id),
-            'categoriesCount' => $this->categoryRepository->countAll(),
-            'usersCount' => $this->userRepository->countAll(),
         ];
+
+        if ($user->isAdmin()) {
+            $stats['categoriesCount'] = $this->categoryRepository->countAll();
+            $stats['usersCount'] = $this->userRepository->countAll();
+        }
+
+        return $stats;
     }
 }

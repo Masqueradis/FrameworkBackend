@@ -27,7 +27,7 @@ class EnumsTest extends TestCase
     public function test_payment_status_has_correct_values(): void
     {
         $this->assertEquals('pending', PaymentStatus::Pending->value);
-        $this->assertEquals('paid', PaymentStatus::Paid->value);
+        $this->assertEquals('success', PaymentStatus::Success->value);
         $this->assertEquals('failed', PaymentStatus::Failed->value);
     }
 

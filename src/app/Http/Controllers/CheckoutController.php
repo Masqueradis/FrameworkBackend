@@ -19,6 +19,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
@@ -198,8 +199,14 @@ class CheckoutController extends ApiController
 
             return redirect()->away($url);
 
-        } catch (\Exception $exception) {
-            return redirect()->back()->with('error_alert', 'Gateway error: '.$exception->getMessage());
+        } catch (\ValueError $e) {
+            return redirect()->back()->with('error_alert', 'Invalid payment provider selected.');
+        } catch (\Throwable $exception) {
+            Log::error('Gateway retry failed: '.$exception->getMessage(), [
+                'order_id' => $order->id,
+            ]);
+
+            return redirect()->back()->with('error_alert', 'The payment service is currently unavailable. Please try again later.');
         }
     }
 
